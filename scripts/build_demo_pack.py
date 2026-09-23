@@ -5,7 +5,9 @@
     python3 scripts/build_demo_pack.py --sim sim-output
 
 The page embeds the run's report, the mock CRM as it stands on the last day (synthetic affiliates only;
-emails and phone numbers are left out), one Obsidian daily note, and the partnership proposal.
+emails and phone numbers are left out), one Obsidian daily note, the cost projection (run
+scripts/cost_model.py first), the partnership proposal, the letter of intent, and the next steps from the
+call recap. It also writes the letter of intent as .docx for redlining (needs pandoc).
 """
 
 from __future__ import annotations
@@ -13,6 +15,8 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
+import subprocess
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -115,6 +119,38 @@ def proposal_body(path: Path) -> str:
     return html[start:html.rindex("</div>")].strip()
 
 
+def next_steps(recap: Path) -> list[str]:
+    text = recap.read_text()
+    section = text.split("## Next steps", 1)[1].split("\n## ", 1)[0]
+    return [re.sub(r"^\d+\.\s+", "", line).strip() for line in section.splitlines() if re.match(r"^\d+\.\s", line)]
+
+
+def loi_html(md: Path) -> str:
+    """The letter of intent as an HTML fragment, and a .docx beside it for redlining."""
+    meta = dict(re.findall(r"^(title|subtitle):\s*(.+)$", md.read_text().split("---", 2)[1], re.M))
+    if not shutil.which("pandoc"):
+        body = f"<pre class=\"card\">{md.read_text()}</pre>"
+    else:
+        body = subprocess.run(["pandoc", str(md), "-f", "markdown", "-t", "html5"], check=True,
+                              capture_output=True, text=True).stdout
+        subprocess.run(["pandoc", str(md), "-o", str(md.with_suffix(".docx"))], check=True)
+    return (f'<span class="draftbar">Draft for review</span><h1>{meta.get("title", "")}</h1>'
+            f'<p class="muted" style="margin-top:0">{meta.get("subtitle", "")}. A Word copy for redlining is '
+            f'in the repository as <code>docs/{md.with_suffix(".docx").name}</code>.</p>{body}')
+
+
+def check_figures(cost: dict[str, Any], proposal: Path, loi: Path) -> None:
+    """Fail the build if a cost figure quoted in the proposal or letter no longer matches the model."""
+    h = cost["headline"]
+    want = {proposal: [f"${h['reactivation_ai_usd']:,.2f}", f"${h['monthly_ai_usd']:,.2f}",
+                       f"${h['recommended_monthly_ai_cap_usd']:,}", f"${h['reactivation_sms_usd']:,.2f}",
+                       f"${h['monthly_sms_usd']:,.2f}"],
+            loi: [f"$[{h['recommended_monthly_ai_cap_usd']:,}]"]}
+    missing = [f"{path.name}: {v}" for path, vals in want.items() for v in vals if v not in path.read_text()]
+    if missing:
+        raise SystemExit("Cost figures out of date (rerun scripts/cost_model.py, then fix): " + ", ".join(missing))
+
+
 def build(sim_dir: Path, out: Path, template: Path, proposal: Path) -> dict[str, Any]:
     report = json.loads((sim_dir / "report.json").read_text())
     db = json.loads((sim_dir / "state" / "mock-ghl.json").read_text())
@@ -123,11 +159,17 @@ def build(sim_dir: Path, out: Path, template: Path, proposal: Path) -> dict[str,
     sample_day = daily[1] if len(daily) > 1 else (daily[0] if daily else None)
     vault_note = sample_day.read_text() if sample_day else ""
     vault_note = re.sub(r"\[\[Affiliates/[^|\]]+\|([^\]]+)\]\]", r"\1", vault_note)
+    docs = ROOT / "docs"
+    cost = json.loads((docs / "cost-projection.json").read_text())
+    loi = docs / "letter-of-intent-7ff.md"
+    check_figures(cost, proposal, loi)
     data = {"report": report, "crm": rows, "featured": featured(rows), "vault_day": sample_day.stem if sample_day else "",
-            "vault_note": vault_note[:3500], "custom_values": db.get("custom_values", {})}
+            "vault_note": vault_note[:3500], "custom_values": db.get("custom_values", {}), "cost": cost,
+            "next_steps": next_steps(docs / "call-recap-2026-09-23.md")}
     page = template.read_text()
     page = page.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
     page = page.replace("<!--__PROPOSAL__-->", proposal_body(proposal))
+    page = page.replace("<!--__LOI__-->", loi_html(loi))
     out.write_text(page)
     return {"out": str(out), "bytes": out.stat().st_size, "affiliates": len(rows),
             "events": sum(len(r["ev"]) for r in rows), "featured": data["featured"]}

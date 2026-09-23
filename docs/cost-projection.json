@@ -1,0 +1,904 @@
+{
+  "priced_on": "2026-09-23",
+  "waves": [
+    {
+      "wave": "Pilot",
+      "partners": 250,
+      "ai_usd": 0.18,
+      "sms_usd": 5.47,
+      "expected_replies": 30
+    },
+    {
+      "wave": "Wave 2",
+      "partners": 2500,
+      "ai_usd": 1.85,
+      "sms_usd": 54.7,
+      "expected_replies": 300
+    },
+    {
+      "wave": "Full base",
+      "partners": 10200,
+      "ai_usd": 7.53,
+      "sms_usd": 223.17,
+      "expected_replies": 1224
+    }
+  ],
+  "wave_gates": [
+    "Opt-outs stay under a ceiling agreed before the pilot (we suggest 3% of texts sent)",
+    "No carrier filtering or spam flags on the number",
+    "7FF has read a sample of the conversations and is happy with the tone",
+    "Deals from replies are reaching the funding team and being counted by tier",
+    "AI spend is tracking the projection, well under the cap"
+  ],
+  "wave_notes": [
+    "Jev reads all 13,000 records once at import (about $0.49).",
+    "The texting number is registered for A2P 10DLC ($71.91 one time)."
+  ],
+  "spec": [
+    {
+      "part": "Hermes agent (the affiliate manager)",
+      "status": "Built",
+      "does": "Runs the daily loop, triages replies, talks with the manager in Slack, and puts every send on an approval card."
+    },
+    {
+      "part": "Affiliate engine and GoHighLevel connector",
+      "status": "Built",
+      "does": "Cadence rules, lifecycle tags, notes, tasks, approvals, opt-out handling, and a guard that keeps every text to one segment."
+    },
+    {
+      "part": "Simulation and reporting",
+      "status": "Built",
+      "does": "Runs the same code against a synthetic CRM, as in this pack's simulation tab."
+    },
+    {
+      "part": "GoHighLevel sub-account and texting number",
+      "status": "Set up",
+      "does": "Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out."
+    },
+    {
+      "part": "Models and a capped OpenRouter key",
+      "status": "Set up",
+      "does": "The agent moves to GPT-6 Luna Pro with GLM 5.3 Flash as fallback (it runs on Claude today) and is re-run on the simulation before the pilot. Every call goes through one key with a hard monthly limit; going over needs 7FF's approval."
+    },
+    {
+      "part": "Zoho to GoHighLevel partner import (read-only)",
+      "status": "To build",
+      "does": "Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are."
+    },
+    {
+      "part": "Jev ingestion, checking and classifying",
+      "status": "To build",
+      "does": "Cleans each partner record on the way in, checks every draft against the compliance rules, and labels every reply."
+    },
+    {
+      "part": "Message worker",
+      "status": "To build",
+      "does": "Drafts each kickoff and reply on GPT-6 Luna Pro, falling back to GLM 5.3 Flash. Runs outside the agent so each text pays only for its own short prompt; the kickoff runs in batch mode."
+    },
+    {
+      "part": "Consent gate",
+      "status": "To build",
+      "does": "Texts only partners with a mobile number and SMS consent on file. Everyone else gets email and the newsletter."
+    },
+    {
+      "part": "Deal attribution by tier",
+      "status": "To build",
+      "does": "Tags each re-engaged partner with their tier so every deal from the reactivation is counted against the right share. Needs 7FF's deal data."
+    }
+  ],
+  "flow": [
+    {
+      "step": "Import",
+      "what": "Partner records come over from Zoho, Jev cleans them, and each lands in GoHighLevel tagged with tier and status."
+    },
+    {
+      "step": "Gate",
+      "what": "Only partners with a mobile number and SMS consent get a text. STOP is final."
+    },
+    {
+      "step": "Draft",
+      "what": "The message worker writes one kickoff per partner from their record: name, tier, last deal, niche. Jev checks each draft."
+    },
+    {
+      "step": "Approve",
+      "what": "In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily cap."
+    },
+    {
+      "step": "Send",
+      "what": "GoHighLevel sends from the registered number, in daytime hours, under the daily cap."
+    },
+    {
+      "step": "Converse",
+      "what": "Jev labels each reply and the worker drafts the answer under the same approval rules. Deals, commission questions and anything sensitive go to a person as a task."
+    },
+    {
+      "step": "Report",
+      "what": "A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the cap."
+    }
+  ],
+  "models": {
+    "luna": {
+      "label": "GPT-6 Luna Pro",
+      "maker": "OpenAI",
+      "route": "openrouter: openai/gpt-6-luna-pro",
+      "in": 0.1,
+      "out": 0.5,
+      "cache_read": 0.01,
+      "batch_in": 0.05,
+      "batch_out": 0.25,
+      "long_prompt_over": 272000,
+      "long_in": 0.2,
+      "long_out": 0.75,
+      "note": "Reasoning ('pro' mode) is billed as output tokens."
+    },
+    "glm": {
+      "label": "GLM 5.3 Flash",
+      "maker": "Z.ai (open weights)",
+      "route": "openrouter: z-ai/glm-5.3-flash",
+      "in": 0.15,
+      "out": 0.5,
+      "cache_read": 0.05,
+      "note": "Fallback when Luna Pro errors or is slow."
+    },
+    "jev": {
+      "label": "Jev 1.13",
+      "maker": "TypeSafe",
+      "route": "api.typesafe.ai/v1/systemone (jev-1.13.0)",
+      "in": 0.042,
+      "out": 0.0,
+      "note": "Input tokens only; output is free. 1,200 requests/min."
+    }
+  },
+  "sms": {
+    "base_per_segment": 0.00747,
+    "carrier_out": {
+      "low": 0.003,
+      "base": 0.0045,
+      "high": 0.005
+    },
+    "carrier_in": {
+      "low": 0.0,
+      "base": 0.003,
+      "high": 0.003
+    },
+    "a2p_one_time": 71.90625,
+    "a2p_monthly": 10.0,
+    "sources": [
+      "https://help.gohighlevel.com/support/solutions/articles/48001223556-phone-system-pricing-billing-guide",
+      "https://help.gohighlevel.com/support/solutions/articles/155000005200-a2p-10dlc-messaging-fees-registration-monthly-and-carrier-costs"
+    ]
+  },
+  "measured": {
+    "hermes_daily_loop_session": {
+      "tokens_processed": 539187,
+      "output_tokens": 5530,
+      "tool_calls": 18,
+      "where": "droplet, `hermes insights`, 2026-09-23"
+    },
+    "hermes_fixed_prompt_bytes": 63212,
+    "jev_classification_call": {
+      "input_tokens": 548,
+      "cost_usd": 2.3e-05,
+      "where": "jev-agent-kit evidence/jev-pilot-validation.json"
+    }
+  },
+  "population": {
+    "partners_total": 13000,
+    "partners_active": 50,
+    "reactivation_audience": 12950
+  },
+  "shared": {
+    "reply_share": 0.85,
+    "touches_per_month": 2,
+    "fallback_share": 0.05,
+    "days_per_month": 30
+  },
+  "scenarios": {
+    "low": {
+      "assumptions": {
+        "reply_share": 0.85,
+        "touches_per_month": 2,
+        "fallback_share": 0.05,
+        "days_per_month": 30,
+        "ingest_in": 600,
+        "draft_in": 900,
+        "draft_out": 200,
+        "qa_in": 500,
+        "classify_in": 700,
+        "reply_in": 1600,
+        "reply_out": 250,
+        "session_in": 300000,
+        "session_out": 4000,
+        "sessions_per_day": 6,
+        "reply_rate": 0.05,
+        "inbound_per_responder": 2,
+        "ongoing_reply_rate": 0.03,
+        "ongoing_inbound": 2,
+        "seg_out": 1,
+        "seg_in": 1,
+        "sms_out_per_segment": 0.01047,
+        "sms_in_per_segment": 0.00747
+      },
+      "reactivation": {
+        "kickoffs": 12950,
+        "responders": 648,
+        "inbound": 1295,
+        "replies": 1101,
+        "ai_lines": [
+          {
+            "item": "Jev: ingest and normalize every partner record",
+            "usd": 0.3276,
+            "volume": 13000
+          },
+          {
+            "item": "Luna Pro: draft one personal kickoff text each",
+            "usd": 2.4896,
+            "volume": 12950
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.2951,
+            "volume": 14051
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.0381,
+            "volume": 1295
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 0.3181,
+            "volume": 1101
+          }
+        ],
+        "ai_usd": 3.47,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (kickoffs + replies)",
+            "usd": 147.1114,
+            "volume": 14051
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 9.6737,
+            "volume": 1295
+          },
+          {
+            "item": "A2P 10DLC brand + campaign registration (one time)",
+            "usd": 71.9062,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 228.69,
+        "total_usd": 232.16,
+        "ai_per_1000_kickoffs_usd": 0.213,
+        "ai_per_conversation_usd": 0.00059,
+        "ai_per_reengaged_partner_usd": 0.0054
+      },
+      "monthly": {
+        "touches": 26000,
+        "inbound": 1560,
+        "replies": 1326,
+        "agent_sessions": 180,
+        "ai_lines": [
+          {
+            "item": "Luna Pro: personalized cadence touches (2 per partner)",
+            "usd": 4.9985,
+            "volume": 26000
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.5738,
+            "volume": 27326
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.0459,
+            "volume": 1560
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 0.3832,
+            "volume": 1326
+          },
+          {
+            "item": "Hermes agent: daily loop, reply triage, manager chat (uncached)",
+            "usd": 5.895,
+            "volume": 180
+          }
+        ],
+        "ai_usd": 11.9,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (touches + replies)",
+            "usd": 286.1032,
+            "volume": 27326
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 11.6532,
+            "volume": 1560
+          },
+          {
+            "item": "A2P 10DLC campaign fee",
+            "usd": 10.0,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 307.76,
+        "total_usd": 319.65
+      }
+    },
+    "base": {
+      "assumptions": {
+        "reply_share": 0.85,
+        "touches_per_month": 2,
+        "fallback_share": 0.05,
+        "days_per_month": 30,
+        "ingest_in": 900,
+        "draft_in": 1300,
+        "draft_out": 600,
+        "qa_in": 700,
+        "classify_in": 1000,
+        "reply_in": 2400,
+        "reply_out": 700,
+        "session_in": 540000,
+        "session_out": 6000,
+        "sessions_per_day": 12,
+        "reply_rate": 0.12,
+        "inbound_per_responder": 4,
+        "ongoing_reply_rate": 0.06,
+        "ongoing_inbound": 3,
+        "seg_out": 1,
+        "seg_in": 1,
+        "sms_out_per_segment": 0.01197,
+        "sms_in_per_segment": 0.01047
+      },
+      "reactivation": {
+        "kickoffs": 12950,
+        "responders": 1554,
+        "inbound": 6216,
+        "replies": 5284,
+        "ai_lines": [
+          {
+            "item": "Jev: ingest and normalize every partner record",
+            "usd": 0.4914,
+            "volume": 13000
+          },
+          {
+            "item": "Luna Pro: draft one personal kickoff text each",
+            "usd": 5.6106,
+            "volume": 12950
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.5361,
+            "volume": 18234
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.2611,
+            "volume": 6216
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 3.149,
+            "volume": 5284
+          }
+        ],
+        "ai_usd": 10.05,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (kickoffs + replies)",
+            "usd": 218.2562,
+            "volume": 18234
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 65.0815,
+            "volume": 6216
+          },
+          {
+            "item": "A2P 10DLC brand + campaign registration (one time)",
+            "usd": 71.9062,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 355.24,
+        "total_usd": 365.29,
+        "ai_per_1000_kickoffs_usd": 0.463,
+        "ai_per_conversation_usd": 0.00229,
+        "ai_per_reengaged_partner_usd": 0.0065
+      },
+      "monthly": {
+        "touches": 26000,
+        "inbound": 4680,
+        "replies": 3978,
+        "agent_sessions": 360,
+        "ai_lines": [
+          {
+            "item": "Luna Pro: personalized cadence touches (2 per partner)",
+            "usd": 11.2645,
+            "volume": 26000
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.8814,
+            "volume": 29978
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.1966,
+            "volume": 4680
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 2.3709,
+            "volume": 3978
+          },
+          {
+            "item": "Hermes agent: daily loop, reply triage, manager chat (uncached)",
+            "usd": 21.006,
+            "volume": 360
+          }
+        ],
+        "ai_usd": 35.72,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (touches + replies)",
+            "usd": 358.8367,
+            "volume": 29978
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 48.9996,
+            "volume": 4680
+          },
+          {
+            "item": "A2P 10DLC campaign fee",
+            "usd": 10.0,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 417.84,
+        "total_usd": 453.56
+      }
+    },
+    "high": {
+      "assumptions": {
+        "reply_share": 0.85,
+        "touches_per_month": 2,
+        "fallback_share": 0.05,
+        "days_per_month": 30,
+        "ingest_in": 1500,
+        "draft_in": 2000,
+        "draft_out": 1500,
+        "qa_in": 1000,
+        "classify_in": 1600,
+        "reply_in": 4000,
+        "reply_out": 1800,
+        "session_in": 1200000,
+        "session_out": 12000,
+        "sessions_per_day": 30,
+        "reply_rate": 0.25,
+        "inbound_per_responder": 8,
+        "ongoing_reply_rate": 0.12,
+        "ongoing_inbound": 5,
+        "seg_out": 2,
+        "seg_in": 1,
+        "sms_out_per_segment": 0.01247,
+        "sms_in_per_segment": 0.01047
+      },
+      "reactivation": {
+        "kickoffs": 12950,
+        "responders": 3238,
+        "inbound": 25900,
+        "replies": 22015,
+        "ai_lines": [
+          {
+            "item": "Jev: ingest and normalize every partner record",
+            "usd": 0.819,
+            "volume": 13000
+          },
+          {
+            "item": "Luna Pro: draft one personal kickoff text each",
+            "usd": 12.3673,
+            "volume": 12950
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 1.4685,
+            "volume": 34965
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 1.7405,
+            "volume": 25900
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 28.8396,
+            "volume": 22015
+          }
+        ],
+        "ai_usd": 45.23,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (kickoffs + replies)",
+            "usd": 872.0271,
+            "volume": 34965
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 271.173,
+            "volume": 25900
+          },
+          {
+            "item": "A2P 10DLC brand + campaign registration (one time)",
+            "usd": 71.9062,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 1215.11,
+        "total_usd": 1260.34,
+        "ai_per_1000_kickoffs_usd": 0.997,
+        "ai_per_conversation_usd": 0.00973,
+        "ai_per_reengaged_partner_usd": 0.014
+      },
+      "monthly": {
+        "touches": 26000,
+        "inbound": 15600,
+        "replies": 13260,
+        "agent_sessions": 900,
+        "ai_lines": [
+          {
+            "item": "Luna Pro: personalized cadence touches (2 per partner)",
+            "usd": 24.83,
+            "volume": 26000
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 1.6489,
+            "volume": 39260
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 1.0483,
+            "volume": 15600
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 17.3706,
+            "volume": 13260
+          },
+          {
+            "item": "Hermes agent: daily loop, reply triage, manager chat (uncached)",
+            "usd": 116.1,
+            "volume": 900
+          }
+        ],
+        "ai_usd": 161.0,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (touches + replies)",
+            "usd": 979.1444,
+            "volume": 39260
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 163.332,
+            "volume": 15600
+          },
+          {
+            "item": "A2P 10DLC campaign fee",
+            "usd": 10.0,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 1152.48,
+        "total_usd": 1313.47
+      }
+    },
+    "stress_10x_tokens": {
+      "assumptions": {
+        "reply_share": 0.85,
+        "touches_per_month": 2,
+        "fallback_share": 0.05,
+        "days_per_month": 30,
+        "ingest_in": 9000,
+        "draft_in": 13000,
+        "draft_out": 6000,
+        "qa_in": 7000,
+        "classify_in": 10000,
+        "reply_in": 24000,
+        "reply_out": 7000,
+        "session_in": 5400000,
+        "session_out": 60000,
+        "sessions_per_day": 12,
+        "reply_rate": 0.12,
+        "inbound_per_responder": 4,
+        "ongoing_reply_rate": 0.06,
+        "ongoing_inbound": 3,
+        "seg_out": 1,
+        "seg_in": 1,
+        "sms_out_per_segment": 0.01197,
+        "sms_in_per_segment": 0.01047
+      },
+      "reactivation": {
+        "kickoffs": 12950,
+        "responders": 1554,
+        "inbound": 6216,
+        "replies": 5284,
+        "ai_lines": [
+          {
+            "item": "Jev: ingest and normalize every partner record",
+            "usd": 4.914,
+            "volume": 13000
+          },
+          {
+            "item": "Luna Pro: draft one personal kickoff text each",
+            "usd": 56.1059,
+            "volume": 12950
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 5.3607,
+            "volume": 18234
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 2.6107,
+            "volume": 6216
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 31.4903,
+            "volume": 5284
+          }
+        ],
+        "ai_usd": 100.48,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (kickoffs + replies)",
+            "usd": 218.2562,
+            "volume": 18234
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 65.0815,
+            "volume": 6216
+          },
+          {
+            "item": "A2P 10DLC brand + campaign registration (one time)",
+            "usd": 71.9062,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 355.24,
+        "total_usd": 455.73,
+        "ai_per_1000_kickoffs_usd": 4.627,
+        "ai_per_conversation_usd": 0.02294,
+        "ai_per_reengaged_partner_usd": 0.0647
+      },
+      "monthly": {
+        "touches": 26000,
+        "inbound": 4680,
+        "replies": 3978,
+        "agent_sessions": 360,
+        "ai_lines": [
+          {
+            "item": "Luna Pro: personalized cadence touches (2 per partner)",
+            "usd": 112.645,
+            "volume": 26000
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 8.8135,
+            "volume": 29978
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 1.9656,
+            "volume": 4680
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 23.7089,
+            "volume": 3978
+          },
+          {
+            "item": "Hermes agent: daily loop, reply triage, manager chat (uncached)",
+            "usd": 210.06,
+            "volume": 360
+          }
+        ],
+        "ai_usd": 357.19,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (touches + replies)",
+            "usd": 358.8367,
+            "volume": 29978
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 48.9996,
+            "volume": 4680
+          },
+          {
+            "item": "A2P 10DLC campaign fee",
+            "usd": 10.0,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 417.84,
+        "total_usd": 775.03
+      }
+    },
+    "all_on_glm_fallback": {
+      "assumptions": {
+        "reply_share": 0.85,
+        "touches_per_month": 2,
+        "fallback_share": 1.0,
+        "days_per_month": 30,
+        "ingest_in": 900,
+        "draft_in": 1300,
+        "draft_out": 600,
+        "qa_in": 700,
+        "classify_in": 1000,
+        "reply_in": 2400,
+        "reply_out": 700,
+        "session_in": 540000,
+        "session_out": 6000,
+        "sessions_per_day": 12,
+        "reply_rate": 0.12,
+        "inbound_per_responder": 4,
+        "ongoing_reply_rate": 0.06,
+        "ongoing_inbound": 3,
+        "seg_out": 1,
+        "seg_in": 1,
+        "sms_out_per_segment": 0.01197,
+        "sms_in_per_segment": 0.01047
+      },
+      "reactivation": {
+        "kickoffs": 12950,
+        "responders": 1554,
+        "inbound": 6216,
+        "replies": 5284,
+        "ai_lines": [
+          {
+            "item": "Jev: ingest and normalize every partner record",
+            "usd": 0.4914,
+            "volume": 13000
+          },
+          {
+            "item": "Luna Pro: draft one personal kickoff text each",
+            "usd": 6.4102,
+            "volume": 12950
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.5361,
+            "volume": 18234
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.2611,
+            "volume": 6216
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 3.7514,
+            "volume": 5284
+          }
+        ],
+        "ai_usd": 11.45,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (kickoffs + replies)",
+            "usd": 218.2562,
+            "volume": 18234
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 65.0815,
+            "volume": 6216
+          },
+          {
+            "item": "A2P 10DLC brand + campaign registration (one time)",
+            "usd": 71.9062,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 355.24,
+        "total_usd": 366.69,
+        "ai_per_1000_kickoffs_usd": 0.524,
+        "ai_per_conversation_usd": 0.00268,
+        "ai_per_reengaged_partner_usd": 0.0074
+      },
+      "monthly": {
+        "touches": 26000,
+        "inbound": 4680,
+        "replies": 3978,
+        "agent_sessions": 360,
+        "ai_lines": [
+          {
+            "item": "Luna Pro: personalized cadence touches (2 per partner)",
+            "usd": 12.87,
+            "volume": 26000
+          },
+          {
+            "item": "Jev: compliance check on every draft",
+            "usd": 0.8814,
+            "volume": 29978
+          },
+          {
+            "item": "Jev: classify every inbound reply",
+            "usd": 0.1966,
+            "volume": 4680
+          },
+          {
+            "item": "Luna Pro: draft each conversation reply",
+            "usd": 2.8244,
+            "volume": 3978
+          },
+          {
+            "item": "Hermes agent: daily loop, reply triage, manager chat (uncached)",
+            "usd": 30.24,
+            "volume": 360
+          }
+        ],
+        "ai_usd": 47.01,
+        "sms_lines": [
+          {
+            "item": "Outbound texts (touches + replies)",
+            "usd": 358.8367,
+            "volume": 29978
+          },
+          {
+            "item": "Inbound texts",
+            "usd": 48.9996,
+            "volume": 4680
+          },
+          {
+            "item": "A2P 10DLC campaign fee",
+            "usd": 10.0,
+            "volume": 1
+          }
+        ],
+        "sms_usd": 417.84,
+        "total_usd": 464.85
+      }
+    }
+  },
+  "headline": {
+    "reactivation_ai_usd": 10.05,
+    "reactivation_ai_range_usd": [
+      3.47,
+      45.23
+    ],
+    "monthly_ai_usd": 35.72,
+    "monthly_ai_range_usd": [
+      11.9,
+      161.0
+    ],
+    "stress_monthly_ai_usd": 357.19,
+    "stress_reactivation_ai_usd": 100.48,
+    "reactivation_sms_usd": 355.24,
+    "monthly_sms_usd": 417.84,
+    "kickoff_batch_saving_usd": 2.81,
+    "recommended_monthly_ai_cap_usd": 250
+  },
+  "assumption_notes": [
+    "Kickoff draft: 1,300 tokens in, 600 out (including Luna Pro's reasoning).",
+    "Conversation reply: 2,400 in, 700 out. The agent answers 85% of inbound messages; the rest are STOPs and 'thanks'.",
+    "Each partner who replies sends 4 messages on average.",
+    "Jev: 900 tokens to ingest a record, 700 to check a draft, 1,000 to classify a reply.",
+    "Hermes agent: 12 sessions a day at 540,000 tokens each, priced uncached (a measured daily-loop session processed 539,187).",
+    "5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.",
+    "Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
+    "Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.",
+    "Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.",
+    "The monthly line keeps all partners on the two-week text cadence. Moving partners who never re-engage to email and the newsletter cuts the texting line sharply.",
+    "Sending the kickoff through OpenRouter's batch mode would save about $2.81 more."
+  ]
+}

@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>7FF Affiliate Demo Pack</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -172,6 +174,31 @@ dl.arch{display:grid;grid-template-columns:max-content 1fr;gap:10px 18px;margin:
 dl.arch dt{font:500 12px/1.6 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
 dl.arch dd{margin:0}
 @media (max-width:520px){dl.arch{grid-template-columns:1fr;gap:2px}dl.arch dd{margin-bottom:10px}}
+/* costs */
+.split{display:grid;gap:14px;margin-top:6px}
+.split .grp{display:grid;gap:6px}
+.split .gl{font-size:13px;font-weight:600;color:var(--ink-2)}
+.sbar{display:grid;grid-template-columns:1fr 92px;gap:10px;align-items:center;position:relative}
+.sbar .track{height:14px;border-radius:0 4px 4px 0;background:var(--chip)}
+.sbar .fillbar{height:100%;border-radius:0 4px 4px 0;min-width:2px}
+.sbar b{font-variant-numeric:tabular-nums;text-align:right;font-weight:600}
+.callout{display:grid;gap:6px;background:var(--fill);color:var(--fill-ink);border:1px solid var(--fill-line);border-radius:10px;padding:16px 18px}
+.callout b{color:inherit}
+ol.flow{list-style:none;counter-reset:f;margin:0;padding:0;display:grid;gap:8px}
+ol.flow li{counter-increment:f;display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start}
+ol.flow li::before{content:counter(f);font:600 13px/28px var(--mono);text-align:center;background:var(--accent-soft);color:var(--accent);border-radius:50%;height:28px}
+ol.flow b{display:block}
+ol.steps{margin:0;padding-left:22px}
+ol.steps li{margin:6px 0}
+td.st{white-space:nowrap}
+.loi{max-width:780px}
+.loi h1{font:700 clamp(26px,4vw,36px)/1.1 var(--display);margin:0 0 6px}
+.loi h2{font-size:20px;margin:26px 0 8px}
+.loi p,.loi li{max-width:72ch}
+.loi ul,.loi ol{padding-left:22px}
+.loi table{margin:8px 0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.loi .draftbar{display:inline-block;background:var(--fill);color:var(--fill-ink);border:1px solid var(--fill-line);padding:5px 9px;border-radius:999px;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
+.loi hr{border:0;border-top:1px solid var(--line);margin:22px 0}
 footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
 </style>
 
@@ -179,15 +206,17 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
 <header class="top">
   <div class="eyebrow">7 Figures Funding · Funding Affiliate Manager</div>
   <h1>The affiliate manager, shown end to end</h1>
-  <p class="lede">An AI Funding Affiliate Manager that keeps 10,000+ funding affiliates warm in GoHighLevel, with a human approving every message. This pack has the 30-day simulation, the CRM it leaves behind, the partnership proposal, and how it's built.</p>
+  <p class="lede">An AI Funding Affiliate Manager to bring 7FF's 13,000 partners back into conversation and keep them sending deals, working in GoHighLevel with a human approving every message. This pack has what it costs to run, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the letter of intent, and how it's built.</p>
   <div class="facts"><span>Simulation <b id="f-pop">253 affiliates · 30 days</b></span><span>Engine <b>the production code</b></span><span>Data <b>synthetic, nobody contacted</b></span></div>
 </header>
 
 <nav class="tabs" aria-label="Sections"><div class="row" role="tablist">
   <button role="tab" id="t-overview" aria-controls="overview" aria-selected="true">Overview</button>
+  <button role="tab" id="t-costs" aria-controls="costs" aria-selected="false">AI costs</button>
   <button role="tab" id="t-simulation" aria-controls="simulation" aria-selected="false">Simulation report</button>
   <button role="tab" id="t-crm" aria-controls="crm" aria-selected="false">Inside the CRM</button>
   <button role="tab" id="t-proposal" aria-controls="proposal" aria-selected="false">Partnership proposal</button>
+  <button role="tab" id="t-loi" aria-controls="loi" aria-selected="false">Letter of intent</button>
   <button role="tab" id="t-built" aria-controls="built" aria-selected="false">How it's built</button>
 </div></nav>
 
@@ -199,12 +228,64 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <h2 style="margin-top:34px">What's in this pack</h2>
   <p class="sub">Everything in one place. Each tab stands on its own.</p>
   <div class="grid2">
+    <button class="go" data-go="costs"><span class="k">AI costs</span><h3>What 13,000 partners cost to run</h3><span>The reactivation and the monthly run, priced on published model and texting rates, with the rollout in waves and a hard cap.</span></button>
     <button class="go" data-go="simulation"><span class="k">Simulation report</span><h3>What the agent did, day by day</h3><span>Check-ins, follow-ups, replies, deals, the with/without comparison, and a projection to 10,000 affiliates.</span></button>
     <button class="go" data-go="crm"><span class="k">Inside the CRM</span><h3>Every affiliate's month, record by record</h3><span>Browse all 253 affiliates the way GoHighLevel will hold them: tags, fields, tasks, messages and replies.</span></button>
     <button class="go" data-go="proposal"><span class="k">Partnership proposal</span><h3>How we'd run it with 7FF</h3><span>The team, what's included, the Growth Kit, milestones, and what we need from you.</span></button>
+    <button class="go" data-go="loi"><span class="k">Letter of intent</span><h3>The terms from our call, in writing</h3><span>Pilot scope, the partner-tier shares, usage at cost under a cap, data protection. A draft for both sides to review.</span></button>
     <button class="go" data-go="built"><span class="k">How it's built</span><h3>The agent, its computer, and its guardrails</h3><span>Where it runs, what it can touch, what always needs a human, and its memory.</span></button>
   </div>
+  <h2 style="margin-top:34px">Next steps</h2>
+  <p class="sub">From our call on the partner program.</p>
+  <ol class="steps" id="next"></ol>
   <p class="note">The full workflow map is on its own page: <a href="https://claude.ai/artifact/Ligihb8EmD6vb9oRvZhMoU">Funding Affiliate OS</a>.</p>
+</section>
+
+<section class="panel-tab" id="costs" role="tabpanel" aria-labelledby="t-costs" hidden>
+  <h2>What the AI costs for 13,000 partners</h2>
+  <p class="sub" id="cost-sub"></p>
+  <div class="stats" id="cost-stats"></div>
+  <div class="grid2" style="margin-top:16px">
+    <div class="box chart" id="c-split">
+      <div class="ttl">AI against texting, base case</div>
+      <div class="cap">Texting is billed by HighLevel's phone system, not by the AI.</div>
+      <div class="legend"><span><i style="background:var(--s-with)"></i>AI models</span><span><i style="background:var(--s-without)"></i>Texting through HighLevel</span></div>
+      <div class="split" id="split"></div>
+    </div>
+    <div class="callout" id="sms-callout"></div>
+  </div>
+  <h2 style="margin-top:34px">Rollout in waves</h2>
+  <p class="sub">Each wave opens only when the one before it clears every gate below. No wave is scheduled by date.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Wave</th><th class="num">Partners</th><th class="num">Expected replies</th><th class="num">AI</th><th class="num">Texting</th></tr></thead>
+    <tbody id="wave-rows"></tbody></table></div>
+  <div class="grid2" style="margin-top:14px">
+    <div class="box"><h3>Gates between waves</h3><ul id="gates" style="margin:0;padding-left:20px"></ul></div>
+    <div class="box"><h3>Before the pilot</h3><ul id="wave-notes" style="margin:0;padding-left:20px"></ul></div>
+  </div>
+  <h2 style="margin-top:34px">What runs it</h2>
+  <p class="sub">A Hermes agent connected to GoHighLevel, with Jev reading and classifying and low-cost models writing. What exists today and what gets built before the pilot:</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>Part</th><th>Status</th><th>What it does</th></tr></thead>
+    <tbody id="spec-rows"></tbody></table></div>
+  <h2 style="margin-top:34px">The reactivation, step by step</h2>
+  <div class="box"><ol class="flow" id="flow"></ol></div>
+  <h2 style="margin-top:34px">Scenarios</h2>
+  <p class="sub">Low, base and high bracket the realistic range. The last two columns are stress tests: every token estimate 10 times too low, and every call on the fallback model.</p>
+  <div class="tablebox"><table><thead id="scen-head"></thead><tbody id="scen-rows"></tbody></table></div>
+  <h2 style="margin-top:34px">Base case, line by line</h2>
+  <div class="grid2">
+    <div class="tablebox"><table><thead><tr><th>Reactivation, one time</th><th class="num">Volume</th><th class="num">Cost</th></tr></thead><tbody id="react-lines"></tbody></table></div>
+    <div class="tablebox"><table><thead><tr><th>Every month</th><th class="num">Volume</th><th class="num">Cost</th></tr></thead><tbody id="month-lines"></tbody></table></div>
+  </div>
+  <h2 style="margin-top:34px">Assumptions and prices</h2>
+  <div class="grid2">
+    <div class="box"><h3>Assumptions, base case</h3><ul id="assumptions" style="margin:0;padding-left:20px"></ul></div>
+    <div class="stack">
+      <div class="tablebox"><table><thead><tr><th>Model</th><th>Role</th><th class="num">In $/M</th><th class="num">Out $/M</th></tr></thead><tbody id="price-rows"></tbody></table></div>
+      <p class="note" id="price-note" style="margin:0"></p>
+    </div>
+  </div>
 </section>
 
 <section class="panel-tab" id="simulation" role="tabpanel" aria-labelledby="t-simulation" hidden>
@@ -261,12 +342,16 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <div class="proposal"><!--__PROPOSAL__--></div>
 </section>
 
+<section class="panel-tab" id="loi" role="tabpanel" aria-labelledby="t-loi" hidden>
+  <div class="loi"><!--__LOI__--></div>
+</section>
+
 <section class="panel-tab" id="built" role="tabpanel" aria-labelledby="t-built" hidden>
   <h2>How it's built</h2>
   <p class="sub">One agent with its own server, its own computer, and a memory you can open, working inside your GoHighLevel under a human's approval.</p>
   <div class="grid2">
     <div class="box"><dl class="arch">
-      <dt>Brain</dt><dd>Hermes agent on its own DigitalOcean server, running Claude</dd>
+      <dt>Brain</dt><dd>Hermes agent on its own server. For 7FF: GPT-6 Luna Pro through OpenRouter, GLM 5.3 Flash (open weights) as the fallback, and Jev to read, check and classify</dd>
       <dt>Hands</dt><dd>Its own Orgo cloud desktop, with a browser for the GoHighLevel screens, LinkedIn and Skool</dd>
       <dt>CRM</dt><dd>GoHighLevel through the API: contacts, tags, fields, notes, tasks, conversations, workflows, pipelines</dd>
       <dt>Research</dt><dd>Super Browser and Browser Box. The agent researches affiliates itself; no paid data vendors</dd>
@@ -286,10 +371,11 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <p class="sub" id="vault-sub"></p>
   <pre class="card" id="vault"></pre>
   <h2 style="margin-top:34px">Source and reruns</h2>
-  <p>The agent, this simulation and every page in this pack come from one repository: <a href="https://github.com/jbellsolutions/funding-affiliate-manager">jbellsolutions/funding-affiliate-manager</a> (private). The simulation is reproducible: the same seed gives the same numbers.</p>
-  <pre class="card">fam sim seed --count 250 --start 2026-09-01 --out sim-output
+  <p>Every document in this pack, the cost model and the simulation report are in <a href="https://github.com/jbellsolutions/7ff-affiliate-manager">jbellsolutions/7ff-affiliate-manager</a> (private; access on request). The agent's own code lives in a separate private repository. Every number reruns from source: the cost model from published prices, the simulation from a fixed seed, so the same inputs give the same numbers.</p>
+  <pre class="card">python3 scripts/cost_model.py                      # AI and texting costs
+fam sim seed --count 250 --start 2026-09-01 --out sim-output
 fam sim run  --days 30  --start 2026-09-01 --out sim-output
-python3 scripts/build_demo_pack.py --sim sim-output</pre>
+python3 scripts/build_demo_pack.py --sim sim-output  # this page</pre>
 </section>
 
 <footer class="page">Funding Affiliate Manager · built on Hermes, GoHighLevel, Orgo, Super Browser, Browser Box and Obsidian. Simulated data; nobody was contacted.</footer>
@@ -329,6 +415,64 @@ const DATA = /*__DATA__*/null;
   ];
   $('#stats').innerHTML = stats.map(([n,l,lead]) => `<div class="stat${lead?' lead':''}"><b>${n}</b><span>${esc(l)}</span></div>`).join('');
   $('#assume').textContent = `Reply rates are assumptions: ${Math.round(R.assumptions.reply_rate_personal*100)}% for personal messages and ${Math.round(R.assumptions.reply_rate_bulk*100)}% for bulk. Every "I have a deal" reply is assumed to be submitted 1–3 days later.`;
+
+  // next steps (overview)
+  $('#next').innerHTML = (DATA.next_steps || []).map(t => `<li>${esc(t)}</li>`).join('');
+
+  // AI costs
+  const K = DATA.cost, H = K.headline, SC = K.scenarios, BASE = SC.base;
+  const usd = v => v >= 100 ? '$' + Math.round(v).toLocaleString('en-US') : (v >= 0.01 || v === 0 ? '$' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2}) : '$' + v.toFixed(4));
+  const usd2 = v => '$' + v.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const pop = K.population;
+  $('#cost-sub').textContent = `One personal text to each of the ${fmt(pop.reactivation_audience)} inactive partners, then every conversation that follows, on GPT-6 Luna Pro with GLM 5.3 Flash as the fallback and Jev reading every record and reply. Priced ${monthDay(K.priced_on)} on published OpenRouter, TypeSafe and HighLevel rates.`;
+  const cstats = [
+    [usd2(H.reactivation_ai_usd), `AI for the whole reactivation: ${fmt(pop.reactivation_audience)} kickoff texts and every conversation after (range ${usd2(H.reactivation_ai_range_usd[0])} to ${usd2(H.reactivation_ai_range_usd[1])})`, true],
+    [`${usd2(H.monthly_ai_usd)}<small> /mo</small>`, `AI each month with all ${fmt(pop.partners_total)} partners on the two-week cadence (range ${usd2(H.monthly_ai_range_usd[0])} to ${usd2(H.monthly_ai_range_usd[1])})`],
+    [`${usd(H.stress_monthly_ai_usd)}<small> /mo</small>`, 'AI each month if every token estimate here were 10 times too low'],
+    [`$${fmt(H.recommended_monthly_ai_cap_usd)}<small> /mo</small>`, 'hard cap on the agent\'s model key. Anything more needs 7FF\'s approval'],
+  ];
+  $('#cost-stats').innerHTML = cstats.map(([n,l,lead]) => `<div class="stat${lead?' lead':''}"><b>${n}</b><span>${esc(l)}</span></div>`).join('');
+  const groups = [['Reactivation, one time', BASE.reactivation.ai_usd, BASE.reactivation.sms_usd], ['Every month', BASE.monthly.ai_usd, BASE.monthly.sms_usd]];
+  const smax = Math.max(...groups.flatMap(g => [g[1], g[2]]));
+  $('#split').innerHTML = groups.map(([l, ai, sms]) => `<div class="grp"><span class="gl">${esc(l)}</span>
+    ${[['AI models', ai, 'var(--s-with)'], ['Texting', sms, 'var(--s-without)']].map(([k, v, c]) => `<div class="sbar" tabindex="0" data-tip="<b>${esc(l)}</b> · ${k}: ${usd2(v)}"><div class="track"><div class="fillbar" style="width:${(v/smax*100).toFixed(2)}%;background:${c}"></div></div><b>${usd2(v)}</b></div>`).join('')}</div>`).join('');
+  $('#split').querySelectorAll('.sbar').forEach(el => {
+    const box = $('#c-split');
+    const on = () => { const r = el.querySelector('.fillbar').getBoundingClientRect(), cb = box.getBoundingClientRect(); tipAt(box, r.right - cb.left, r.top - cb.top - 2, el.dataset.tip); };
+    el.addEventListener('mouseenter', on); el.addEventListener('focus', on); el.addEventListener('mouseleave', hideTip); el.addEventListener('blur', hideTip);
+  });
+  const A0 = BASE.assumptions;
+  $('#sms-callout').innerHTML = `<h3 style="margin:0">Texting costs more than the AI</h3>
+    <p style="margin:0">About <b>${usd2(H.reactivation_sms_usd)}</b> for the reactivation and <b>${usd2(H.monthly_sms_usd)}</b> a month after, all billed by HighLevel: $${A0.sms_out_per_segment} per text sent and $${A0.sms_in_per_segment} per text received, carrier fees included, plus A2P 10DLC registration.</p>
+    <p style="margin:0">Every text is kept to one segment. A single em dash or curly quote would make a text bill as three; the agent strips them before anything sends.</p>
+    <p style="margin:0">The monthly figure keeps every partner on texts. Moving partners who never re-engage to email and the newsletter cuts it sharply.</p>`;
+  $('#wave-rows').innerHTML = K.waves.map(w => `<tr><td>${esc(w.wave)}</td><td class="num">${fmt(w.partners)}</td><td class="num">${fmt(w.expected_replies)}</td><td class="num">${usd2(w.ai_usd)}</td><td class="num">${usd2(w.sms_usd)}</td></tr>`).join('');
+  $('#gates').innerHTML = K.wave_gates.map(g => `<li>${esc(g)}</li>`).join('');
+  $('#wave-notes').innerHTML = K.wave_notes.map(g => `<li>${esc(g)}</li>`).join('') + '<li>7FF\'s NDA is signed. Partner data is used only for this program and handled only by the services that run it.</li>';
+  const ST = {'Built': 'producing', 'Set up': 'test', 'To build': 'quiet'};
+  $('#spec-rows').innerHTML = K.spec.map(x => `<tr><td><b style="font-weight:600">${esc(x.part)}</b></td><td class="st"><span class="lc ${ST[x.status] || ''}">${esc(x.status)}</span></td><td>${esc(x.does)}</td></tr>`).join('');
+  $('#flow').innerHTML = K.flow.map(x => `<li><div><b>${esc(x.step)}</b>${esc(x.what)}</div></li>`).join('');
+  const SN = [['low','Low'],['base','Base'],['high','High'],['stress_10x_tokens','10x tokens'],['all_on_glm_fallback','All on GLM']];
+  $('#scen-head').innerHTML = `<tr><th></th>${SN.map(([,n]) => `<th class="num">${n}</th>`).join('')}</tr>`;
+  const srow = (label, f, strong) => `<tr><td>${strong ? '<b style="font-weight:600">' + label + '</b>' : label}</td>${SN.map(([k]) => `<td class="num">${strong ? '<b style="font-weight:600">' + f(SC[k]) + '</b>' : f(SC[k])}</td>`).join('')}</tr>`;
+  $('#scen-rows').innerHTML = [
+    srow('Reply rate to the kickoff', s => Math.round(s.assumptions.reply_rate*100) + '%'),
+    srow('Partners who reply', s => fmt(s.reactivation.responders)),
+    srow('Reactivation AI, one time', s => usd2(s.reactivation.ai_usd), true),
+    srow('Reactivation texting, one time', s => usd2(s.reactivation.sms_usd)),
+    srow('AI per month', s => usd2(s.monthly.ai_usd), true),
+    srow('Texting per month', s => usd2(s.monthly.sms_usd)),
+    srow('AI per partner who replies', s => usd(s.reactivation.ai_per_reengaged_partner_usd)),
+  ].join('');
+  const lines = (rows, aiTotal, smsRows) => rows.map(r => `<tr><td>${esc(r.item)}</td><td class="num">${fmt(r.volume)}</td><td class="num">${usd(r.usd)}</td></tr>`).join('')
+    + `<tr><td><b style="font-weight:600">AI total</b></td><td></td><td class="num"><b style="font-weight:600">${usd2(aiTotal)}</b></td></tr>`
+    + smsRows.map(r => `<tr><td class="muted">${esc(r.item)}</td><td class="num muted">${fmt(r.volume)}</td><td class="num muted">${usd2(r.usd)}</td></tr>`).join('');
+  $('#react-lines').innerHTML = lines(BASE.reactivation.ai_lines, BASE.reactivation.ai_usd, BASE.reactivation.sms_lines);
+  $('#month-lines').innerHTML = lines(BASE.monthly.ai_lines, BASE.monthly.ai_usd, BASE.monthly.sms_lines);
+  $('#assumptions').innerHTML = K.assumption_notes.map(n => `<li>${esc(n)}</li>`).join('');
+  const ROLE = {luna: 'Primary: writes texts and replies', glm: 'Fallback', jev: 'Reads, checks, classifies'};
+  $('#price-rows').innerHTML = ['luna','glm','jev'].map(k => { const m = K.models[k]; return `<tr><td>${esc(m.label)}<div class="muted" style="font-size:12.5px">${esc(m.maker)}</div></td><td>${ROLE[k]}</td><td class="num">$${m.in}</td><td class="num">$${m.out}</td></tr>`; }).join('');
+  $('#price-note').innerHTML = `Per million tokens. Luna Pro's reasoning is billed as output and is counted in every estimate here. Sources: <a href="https://openrouter.ai/api/v1/models">OpenRouter model list</a>, <a href="https://docs.typesafe.ai/models">TypeSafe models</a>, ${K.sms.sources.map((u,i) => `<a href="${esc(u)}">HighLevel ${i ? 'A2P and carrier fees' : 'phone pricing'}</a>`).join(', ')}. The model is <code>scripts/cost_model.py</code>; change an assumption there and every number on this tab follows.`;
 
   // simulation copy + tables
   $('#sim-sub').textContent = `${R.population} synthetic affiliates, ${R.days} days starting ${monthDay(R.timeline[0].day)}. Reply rates are assumptions (${Math.round(R.assumptions.reply_rate_personal*100)}% personal, ${Math.round(R.assumptions.reply_rate_bulk*100)}% bulk), stated so you can judge them. The run is reproducible: the same seed gives the same numbers.`;

@@ -10,3 +10,6 @@ __pycache__/
 *.sqlite3
 mock-ghl.json
 .DS_Store
+
+# local preview config
+.claude/
