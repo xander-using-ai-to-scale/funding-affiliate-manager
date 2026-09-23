@@ -1,0 +1,4 @@
+{
+  "_comment": "Custom values the broadcast workflows read. The agent updates them as part of an APPROVED newsletter/event/offer action.",
+  "names": ["newsletter_subject", "newsletter_body", "monthly_offer_subject", "monthly_offer_body", "new_offer_subject", "new_offer_body", "next_event_title", "next_event_date", "next_event_link", "partner_submit_link", "partner_manager_name"]
+}

@@ -1,0 +1,231 @@
+# Secret-free Hermes v0.21.0 configuration for the Funding Affiliate Manager.
+# deploy/droplet/setup.sh renders __PLACEHOLDERS__ from ~/.fam/agent.env into ~/.hermes/config.yaml (chmod 600).
+# The brain runs on the DigitalOcean droplet; its hands are its own Orgo computer (orgo MCP).
+# Hermes' built-in computer_use/browser toolsets are deliberately NOT enabled: they would drive the
+# droplet itself, not the Orgo desktop.
+
+model:
+  default: __PRIMARY_MODEL__
+  provider: custom
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+
+fallback_providers:
+- provider: custom
+  model: __FALLBACK_MODEL__
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+
+toolsets:
+  - hermes-cli
+
+agent:
+  max_turns: 80
+  gateway_timeout: 1800
+  restart_drain_timeout: 60
+  api_max_retries: 3
+  tool_use_enforcement: auto
+  reasoning_effort: medium
+  verify_on_stop: true
+
+terminal:
+  backend: local
+  cwd: __REPO_DIR__
+  timeout: 300
+  persistent_shell: true
+  lifetime_seconds: 600
+
+checkpoints:
+  enabled: true
+  max_snapshots: 50
+  retention_days: 7
+  delete_orphans: true
+
+compression:
+  enabled: true
+  threshold: 0.5
+  target_ratio: 0.2
+  protect_last_n: 20
+  tail_mode: lean
+
+skills:
+  creation_nudge_interval: 15
+  write_approval: true
+  guard_agent_created: true
+  external_dirs:
+    - __REPO_DIR__/skills
+
+memory:
+  memory_enabled: true
+  user_profile_enabled: true
+  memory_char_limit: 2200
+  user_char_limit: 1375
+  nudge_interval: 10
+  flush_min_turns: 6
+
+delegation:
+  model: __FALLBACK_MODEL__
+  provider: custom
+  base_url: https://openrouter.ai/api/v1
+  key_env: OPENROUTER_API_KEY
+  inherit_mcp_toolsets: true
+  max_iterations: 50
+  child_timeout_seconds: 600
+  max_concurrent_children: 3
+  max_spawn_depth: 1
+  orchestrator_enabled: true
+  subagent_auto_approve: false
+
+display:
+  personality: Funding Affiliate Manager — warm, direct, relationship-first partner manager for a business-funding affiliate program
+  theme: midnight
+  streaming: true
+  interim_assistant_messages: true
+  tool_progress: all
+  show_reasoning: false
+  show_cost: false
+
+privacy:
+  redact_pii: true
+
+# Manual approvals: every untrusted MCP tool (fam-approvals) asks the human first.
+approvals:
+  mode: manual
+  timeout: 300
+  cron_mode: deny
+  mcp_reload_confirm: true
+  destructive_slash_confirm: true
+
+hooks_auto_accept: false
+
+security:
+  allow_private_urls: false
+  redact_secrets: true
+  tirith_enabled: true
+  tirith_fail_open: false
+
+tool_loop_guardrails:
+  hard_stop_enabled: true
+
+cron:
+  wrap_response: true
+
+kanban:
+  dispatch_in_gateway: true
+  dispatch_interval_seconds: 60
+
+code_execution:
+  mode: project
+  timeout: 300
+  max_tool_calls: 50
+
+sessions:
+  auto_prune: false
+  retention_days: 90
+  vacuum_after_prune: true
+
+session_reset:
+  mode: both
+  idle_minutes: 1440
+  at_hour: 4
+
+group_sessions_per_user: true
+
+platforms:
+  slack:
+    enabled: __SLACK_ENABLED__
+  telegram:
+    enabled: __TELEGRAM_ENABLED__
+
+platform_toolsets:
+  cli: [hermes-cli]
+  slack: [hermes-slack, clarify, code_execution, cronjob, delegation, file, kanban, memory, session_search, skills, terminal, todo, vision, web]
+  telegram: [hermes-telegram, clarify, code_execution, cronjob, delegation, file, kanban, memory, session_search, skills, terminal, todo, vision, web]
+
+SLACK_HOME_CHANNEL: '__SLACK_HOME_CHANNEL__'
+TELEGRAM_HOME_CHANNEL: '__TELEGRAM_HOME_CHANNEL__'
+
+mcp_servers:
+  # Full-trust core: reads, CRM hygiene, prepare/request/execute. It can NOT approve.
+  fam-core:
+    command: __HERMES_PYTHON__
+    args: [-m, fam.mcp_server]
+    env:
+      PYTHONPATH: __REPO_DIR__/files/local-packages/fam/src
+      FAM_CONFIG_DIR: __REPO_DIR__/config
+      FAM_POLICY_PATH: __REPO_DIR__/policies/permissions.json
+      FAM_STATE_DIR: __FAM_HOME__/state
+      FAM_VAULT_DIR: __VAULT_DIR__
+      FAM_GHL_MODE: __FAM_GHL_MODE__
+      FAM_DEMO_MODE: __FAM_DEMO_MODE__
+      GHL_API_KEY: __GHL_API_KEY__
+      GHL_LOCATION_ID: __GHL_LOCATION_ID__
+    trust: full
+    timeout: 900
+    tools:
+      exclude: [fam_action_approve, fam_standing_activate, fam_resume_external_writes]
+      resources: false
+      prompts: false
+
+  # The model cannot create an approval through the core above. These three tools exist only on
+  # this untrusted surface, so Hermes manual mode asks the human before the approval is written.
+  fam-approvals:
+    command: __HERMES_PYTHON__
+    args: [-m, fam.mcp_server]
+    env:
+      PYTHONPATH: __REPO_DIR__/files/local-packages/fam/src
+      FAM_CONFIG_DIR: __REPO_DIR__/config
+      FAM_POLICY_PATH: __REPO_DIR__/policies/permissions.json
+      FAM_STATE_DIR: __FAM_HOME__/state
+      FAM_VAULT_DIR: __VAULT_DIR__
+      FAM_GHL_MODE: __FAM_GHL_MODE__
+      FAM_DEMO_MODE: __FAM_DEMO_MODE__
+      GHL_API_KEY: __GHL_API_KEY__
+      GHL_LOCATION_ID: __GHL_LOCATION_ID__
+    trust: untrusted
+    timeout: 120
+    tools:
+      include: [fam_action_approve, fam_standing_activate, fam_resume_external_writes]
+      resources: false
+      prompts: false
+
+  ghl:
+    # gohighlevel-agency-cli MCP. On this box its registry holds ONLY the demo location profile,
+    # so it physically cannot reach the agency's real account.
+    command: __GHL_CLI_DIR__/.venv/bin/python
+    args: [__GHL_CLI_DIR__/ghl_mcp_server.py]
+    trust: untrusted
+    timeout: 180
+
+  orgo:
+    # The agent's own Orgo computer (its hands). Workspace-scoped key: it can only see its own
+    # workspace. Full trust so it can click/type/screenshot without a prompt per action; tools that
+    # create, delete, or re-shape computers/workspaces are excluded outright. Anything the desktop
+    # would PUBLISH or SEND (LinkedIn DM, Skool post, GHL publish) still needs a manager approval
+    # per skills/orgo-computer/SKILL.md.
+    command: npx
+    args: [-y, orgo-mcp-server@__ORGO_MCP_VERSION__]
+    env:
+      ORGO_API_KEY: __ORGO_API_KEY__
+      ORGO_DEFAULT_COMPUTER_ID: __ORGO_COMPUTER_ID__
+    trust: full
+    timeout: 300
+    tools:
+      exclude: [__ORGO_EXCLUDED_TOOLS__]
+
+  super-browser:
+    # Hosted Super Browser: research, enrichment, and many parallel browsers. Its own server-side
+    # approval gates (approve_browser_run) cover risky runs.
+    url: https://superbrowser.online/mcp/
+    headers:
+      Authorization: Bearer __SUPER_BROWSER_TOKEN__
+    trust: full
+    timeout: 300
+
+  browser-box:
+    # One self-hosted browser (fetch/read/session/status). Serialized: one call at a time.
+    url: __BROWSER_BOX_URL__
+    headers:
+      Authorization: Bearer __BROWSER_BOX_TOKEN__
+    trust: full
+    timeout: 180

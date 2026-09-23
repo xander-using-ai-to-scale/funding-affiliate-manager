@@ -1,0 +1,12 @@
+# secrets and runtime state never enter git
+.env
+*.env
+!agent.example.env
+.fam/
+sim-output/
+__pycache__/
+*.pyc
+.venv/
+*.sqlite3
+mock-ghl.json
+.DS_Store

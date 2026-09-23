@@ -1,0 +1,7 @@
+Run the Funding Affiliate Manager morning routine using skill affiliate-cadence.
+1. fam_status — if GHL is disconnected or external writes are stopped, post that first and stop.
+2. fam_sweep_apply_lifecycle — record cohorts, silent 30+/90+, lifecycle changes.
+3. fam_daily_queue — for every personal item, fam_affiliate_brief and draft one personalized message per knowledge/funding/05-conversation-playbook.md.
+4. fam_messages_prepare the batch, then fam_action_request_approval, and post the approval card verbatim for the manager. Do NOT approve or execute — cron cannot approve; the manager approves in the thread.
+5. Report bulk_counts and whether each cadence kind has an active standing approval; if one does, run fam_standing_run_cadence and report live/simulated/failed.
+6. Post the 5-line summary (hot, follow-ups due, newly quiet/dormant, what went out, blocked) and write it to the vault daily note.

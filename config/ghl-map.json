@@ -1,0 +1,9 @@
+{
+  "_comment": "Filled in by `fam ghl bootstrap` against the demo location. The agent refuses any GHL_LOCATION_ID other than location_id below.",
+  "profile": "mfm-demo",
+  "location_id": "",
+  "custom_fields": {},
+  "pipelines": {},
+  "workflows": {},
+  "users": {"manager": ""}
+}

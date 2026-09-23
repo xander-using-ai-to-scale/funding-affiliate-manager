@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fam"
+version = "1.0.0"
+description = "Funding Affiliate Manager core: cadence engine, GHL client, approvals, simulation"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+mcp = ["mcp>=2.0"]
+
+[project.scripts]
+fam = "fam.cli:main"
+fam-mcp = "fam.mcp_server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

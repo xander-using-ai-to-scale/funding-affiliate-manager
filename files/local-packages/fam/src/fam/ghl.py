@@ -1,0 +1,535 @@
+"""Location-scoped GoHighLevel client for affiliate operations.
+
+Ported from funding-director-orgo's narrow GHLClient and widened to the
+affiliate-ops surface: contacts, tags, custom fields, notes, tasks,
+conversations, workflow enrollment, opportunities, and location setup.
+
+Two backends share one interface:
+  * LiveGHL  — the public API v2 with a location Private Integration Token (pit-...).
+  * MockGHL  — a JSON-file CRM used by the demo simulation and tests.
+
+The client refuses to run against a location other than the one recorded in
+config/ghl-map.json, so a stray call can never hit the agency's real account.
+"""
+
+from __future__ import annotations
+
+import json
+import os
+import secrets
+import time
+from datetime import UTC, datetime
+from pathlib import Path
+from typing import Any, Protocol
+from urllib import error, parse, request
+
+from .errors import FamError
+
+BASE_URL = "https://services.leadconnectorhq.com"
+API_VERSION = "2021-07-28"
+CONVERSATIONS_VERSION = "2021-04-15"
+
+
+class GHLBackend(Protocol):
+    location_id: str
+
+    def search_contacts(self, *, query: str = "", tags: list[str] | None = None, limit: int = 100,
+                        page: int = 1) -> list[dict[str, Any]]: ...
+    def get_contact(self, contact_id: str) -> dict[str, Any]: ...
+    def create_contact(self, payload: dict[str, Any]) -> dict[str, Any]: ...
+    def update_contact(self, contact_id: str, payload: dict[str, Any]) -> dict[str, Any]: ...
+    def add_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]: ...
+    def remove_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]: ...
+    def list_notes(self, contact_id: str) -> list[dict[str, Any]]: ...
+    def add_note(self, contact_id: str, body: str) -> dict[str, Any]: ...
+    def list_tasks(self, contact_id: str) -> list[dict[str, Any]]: ...
+    def create_task(self, contact_id: str, title: str, due: str, body: str = "",
+                    assigned_to: str = "") -> dict[str, Any]: ...
+    def complete_task(self, contact_id: str, task_id: str) -> dict[str, Any]: ...
+    def list_conversations(self, contact_id: str = "", unread_only: bool = False,
+                           limit: int = 20) -> list[dict[str, Any]]: ...
+    def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]: ...
+    def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]: ...
+    def enroll_workflow(self, contact_id: str, workflow_id: str) -> dict[str, Any]: ...
+    def search_opportunities(self, pipeline_id: str = "", contact_id: str = "",
+                             limit: int = 50) -> list[dict[str, Any]]: ...
+    def upsert_opportunity(self, *, pipeline_id: str, stage_id: str, contact_id: str, name: str,
+                           status: str = "open", monetary_value: float = 0) -> dict[str, Any]: ...
+    def list_pipelines(self) -> list[dict[str, Any]]: ...
+    def list_custom_fields(self) -> list[dict[str, Any]]: ...
+    def create_custom_field(self, name: str, data_type: str, options: list[str] | None = None) -> dict[str, Any]: ...
+    def list_tags(self) -> list[dict[str, Any]]: ...
+    def create_tag(self, name: str) -> dict[str, Any]: ...
+    def list_workflows(self) -> list[dict[str, Any]]: ...
+    def list_users(self) -> list[dict[str, Any]]: ...
+    def location(self) -> dict[str, Any]: ...
+
+
+def _now_iso() -> str:
+    return datetime.now(UTC).replace(microsecond=0).isoformat()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Live backend
+# ─────────────────────────────────────────────────────────────────────────────
+class LiveGHL:
+    """Public API v2 client bound to exactly one location."""
+
+    MIN_INTERVAL_SECONDS = 0.12  # stays under GHL's ~100 requests / 10s burst limit
+
+    def __init__(self, token: str | None = None, location_id: str | None = None,
+                 expected_location_id: str = ""):
+        self.token = (token or os.getenv("GHL_API_KEY", "")).strip()
+        self.location_id = (location_id or os.getenv("GHL_LOCATION_ID", "")).strip()
+        if not self.token.startswith("pit-"):
+            raise FamError("GHL_API_KEY must be a location-scoped Private Integration Token (pit-...)")
+        if not self.location_id:
+            raise FamError("GHL_LOCATION_ID is required")
+        if expected_location_id and expected_location_id != self.location_id:
+            raise FamError(
+                "GHL_LOCATION_ID does not match config/ghl-map.json location_id — refusing to touch "
+                "a location this agent was not configured for"
+            )
+        self._last_call = 0.0
+
+    def _call(self, method: str, path: str, *, query: dict[str, Any] | None = None,
+              body: dict[str, Any] | None = None, version: str = API_VERSION) -> dict[str, Any]:
+        wait = self.MIN_INTERVAL_SECONDS - (time.monotonic() - self._last_call)
+        if wait > 0:
+            time.sleep(wait)
+        url = BASE_URL + path
+        if query:
+            url += "?" + parse.urlencode({k: v for k, v in query.items() if v not in (None, "")}, doseq=True)
+        headers = {
+            "Accept": "application/json",
+            "Authorization": f"Bearer {self.token}",
+            "Version": version,
+            "User-Agent": "FundingAffiliateManager/1.0",
+        }
+        data = None
+        if body is not None:
+            headers["Content-Type"] = "application/json"
+            data = json.dumps(body, separators=(",", ":")).encode()
+        outbound = request.Request(url, data=data, headers=headers, method=method)
+        for attempt in range(4):
+            try:
+                with request.urlopen(outbound, timeout=30) as response:
+                    raw = response.read(2_000_000)
+                    self._last_call = time.monotonic()
+                    break
+            except error.HTTPError as exc:
+                self._last_call = time.monotonic()
+                if exc.code == 429 and attempt < 3:
+                    time.sleep(2 ** attempt)
+                    continue
+                detail = ""
+                try:
+                    detail = exc.read(400).decode(errors="replace")
+                except Exception:  # pragma: no cover - best effort
+                    pass
+                raise FamError(f"GoHighLevel {method} {path} returned HTTP {exc.code} {detail}".strip()) from exc
+            except error.URLError as exc:
+                raise FamError("GoHighLevel could not be reached") from exc
+        try:
+            value = json.loads(raw or b"{}")
+        except json.JSONDecodeError as exc:
+            raise FamError("GoHighLevel returned invalid JSON") from exc
+        return value if isinstance(value, dict) else {"data": value}
+
+    # contacts
+    def search_contacts(self, *, query: str = "", tags: list[str] | None = None, limit: int = 100,
+                        page: int = 1) -> list[dict[str, Any]]:
+        body: dict[str, Any] = {"locationId": self.location_id, "pageLimit": min(max(limit, 1), 500),
+                                "page": max(page, 1)}
+        if query.strip():
+            body["query"] = query.strip()[:75]
+        if tags:
+            body["filters"] = [{"field": "tags", "operator": "contains", "value": tag} for tag in tags]
+        return self._call("POST", "/contacts/search", body=body).get("contacts", [])
+
+    def get_contact(self, contact_id: str) -> dict[str, Any]:
+        return self._call("GET", f"/contacts/{parse.quote(contact_id)}").get("contact", {})
+
+    def create_contact(self, payload: dict[str, Any]) -> dict[str, Any]:
+        body = dict(payload)
+        body["locationId"] = self.location_id
+        return self._call("POST", "/contacts/upsert", body=body).get("contact", {})
+
+    def update_contact(self, contact_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        return self._call("PUT", f"/contacts/{parse.quote(contact_id)}", body=payload).get("contact", {})
+
+    def add_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]:
+        return self._call("POST", f"/contacts/{parse.quote(contact_id)}/tags", body={"tags": tags})
+
+    def remove_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]:
+        return self._call("DELETE", f"/contacts/{parse.quote(contact_id)}/tags", body={"tags": tags})
+
+    def list_notes(self, contact_id: str) -> list[dict[str, Any]]:
+        return self._call("GET", f"/contacts/{parse.quote(contact_id)}/notes").get("notes", [])
+
+    def add_note(self, contact_id: str, body: str) -> dict[str, Any]:
+        return self._call("POST", f"/contacts/{parse.quote(contact_id)}/notes", body={"body": body}).get("note", {})
+
+    def list_tasks(self, contact_id: str) -> list[dict[str, Any]]:
+        return self._call("GET", f"/contacts/{parse.quote(contact_id)}/tasks").get("tasks", [])
+
+    def create_task(self, contact_id: str, title: str, due: str, body: str = "",
+                    assigned_to: str = "") -> dict[str, Any]:
+        payload: dict[str, Any] = {"title": title, "dueDate": due, "completed": False}
+        if body:
+            payload["body"] = body
+        if assigned_to:
+            payload["assignedTo"] = assigned_to
+        return self._call("POST", f"/contacts/{parse.quote(contact_id)}/tasks", body=payload).get("task", {})
+
+    def complete_task(self, contact_id: str, task_id: str) -> dict[str, Any]:
+        return self._call("PUT", f"/contacts/{parse.quote(contact_id)}/tasks/{parse.quote(task_id)}/completed",
+                          body={"completed": True})
+
+    # conversations
+    def list_conversations(self, contact_id: str = "", unread_only: bool = False,
+                           limit: int = 20) -> list[dict[str, Any]]:
+        query: dict[str, Any] = {"locationId": self.location_id, "limit": min(max(limit, 1), 100),
+                                 "sort": "desc", "sortBy": "last_message_date"}
+        if contact_id:
+            query["contactId"] = contact_id
+        if unread_only:
+            query["status"] = "unread"
+        return self._call("GET", "/conversations/search", query=query,
+                          version=CONVERSATIONS_VERSION).get("conversations", [])
+
+    def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]:
+        value = self._call("GET", f"/conversations/{parse.quote(conversation_id)}/messages",
+                           query={"limit": min(max(limit, 1), 100)}, version=CONVERSATIONS_VERSION)
+        messages = value.get("messages", {})
+        return messages.get("messages", []) if isinstance(messages, dict) else messages
+
+    def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]:
+        kind = {"sms": "SMS", "email": "Email"}.get(channel.lower())
+        if not kind:
+            raise FamError("channel must be sms or email")
+        payload: dict[str, Any] = {"type": kind, "contactId": contact_id}
+        if kind == "Email":
+            payload["subject"] = subject or "Checking in"
+            payload["html"] = "<p>" + "</p><p>".join(
+                part.replace("\n", "<br>") for part in body.strip().split("\n\n")) + "</p>"
+        else:
+            payload["message"] = body
+        return self._call("POST", "/conversations/messages", body=payload, version=CONVERSATIONS_VERSION)
+
+    # workflows
+    def enroll_workflow(self, contact_id: str, workflow_id: str) -> dict[str, Any]:
+        return self._call("POST", f"/contacts/{parse.quote(contact_id)}/workflow/{parse.quote(workflow_id)}",
+                          body={"eventStartTime": _now_iso()})
+
+    def list_workflows(self) -> list[dict[str, Any]]:
+        return self._call("GET", "/workflows/", query={"locationId": self.location_id}).get("workflows", [])
+
+    # opportunities
+    def search_opportunities(self, pipeline_id: str = "", contact_id: str = "",
+                             limit: int = 50) -> list[dict[str, Any]]:
+        query: dict[str, Any] = {"location_id": self.location_id, "limit": min(max(limit, 1), 100)}
+        if pipeline_id:
+            query["pipeline_id"] = pipeline_id
+        if contact_id:
+            query["contact_id"] = contact_id
+        return self._call("GET", "/opportunities/search", query=query).get("opportunities", [])
+
+    def upsert_opportunity(self, *, pipeline_id: str, stage_id: str, contact_id: str, name: str,
+                           status: str = "open", monetary_value: float = 0) -> dict[str, Any]:
+        body = {
+            "locationId": self.location_id,
+            "pipelineId": pipeline_id,
+            "pipelineStageId": stage_id,
+            "contactId": contact_id,
+            "name": name,
+            "status": status,
+            "monetaryValue": monetary_value,
+        }
+        return self._call("POST", "/opportunities/upsert", body=body).get("opportunity", {})
+
+    def list_pipelines(self) -> list[dict[str, Any]]:
+        return self._call("GET", "/opportunities/pipelines", query={"locationId": self.location_id}).get(
+            "pipelines", [])
+
+    # location setup
+    def list_custom_fields(self) -> list[dict[str, Any]]:
+        return self._call("GET", f"/locations/{self.location_id}/customFields",
+                          query={"model": "contact"}).get("customFields", [])
+
+    def create_custom_field(self, name: str, data_type: str, options: list[str] | None = None) -> dict[str, Any]:
+        body: dict[str, Any] = {"name": name, "dataType": data_type, "model": "contact"}
+        if options:
+            body["options"] = options
+        return self._call("POST", f"/locations/{self.location_id}/customFields", body=body).get("customField", {})
+
+    def list_tags(self) -> list[dict[str, Any]]:
+        return self._call("GET", f"/locations/{self.location_id}/tags").get("tags", [])
+
+    def create_tag(self, name: str) -> dict[str, Any]:
+        return self._call("POST", f"/locations/{self.location_id}/tags", body={"name": name}).get("tag", {})
+
+    def list_users(self) -> list[dict[str, Any]]:
+        return self._call("GET", "/users/", query={"locationId": self.location_id}).get("users", [])
+
+    def list_custom_values(self) -> list[dict[str, Any]]:
+        return self._call("GET", f"/locations/{self.location_id}/customValues").get("customValues", [])
+
+    def update_custom_value_by_name(self, name: str, value: str) -> dict[str, Any]:
+        """Newsletter / event / offer copy lives in custom values the workflows reference."""
+        for item in self.list_custom_values():
+            if item.get("name") == name:
+                return self._call("PUT", f"/locations/{self.location_id}/customValues/{item['id']}",
+                                  body={"name": name, "value": value}).get("customValue", {})
+        return self._call("POST", f"/locations/{self.location_id}/customValues",
+                          body={"name": name, "value": value}).get("customValue", {})
+
+    def location(self) -> dict[str, Any]:
+        return self._call("GET", f"/locations/{self.location_id}").get("location", {})
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Mock backend (demo simulation + tests)
+# ─────────────────────────────────────────────────────────────────────────────
+class MockGHL:
+    """A small JSON-file CRM with the same interface as LiveGHL.
+
+    Contacts store customFields as [{"id": key, "value": v}] exactly like the live API,
+    so the engine code path is identical in both modes.
+    """
+
+    location_id = "mock-location"
+
+    def __init__(self, path: Path):
+        self.path = path
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        if self.path.exists():
+            self.db = json.loads(self.path.read_text())
+        else:
+            self.db = {"contacts": {}, "notes": {}, "tasks": {}, "messages": [], "enrollments": [],
+                       "opportunities": {}, "custom_fields": [], "tags": [], "outbox": []}
+        self.now_override: str = ""
+        self.autosave = True
+
+    def _save(self) -> None:
+        if self.autosave:
+            self.flush()
+
+    def flush(self) -> None:
+        tmp = self.path.with_suffix(".tmp")
+        tmp.write_text(json.dumps(self.db, indent=1, sort_keys=True))
+        tmp.replace(self.path)
+
+    def _now(self) -> str:
+        return self.now_override or _now_iso()
+
+    @staticmethod
+    def _id(prefix: str) -> str:
+        return f"{prefix}_{secrets.token_hex(6)}"
+
+    def reset(self) -> None:
+        self.db = {"contacts": {}, "notes": {}, "tasks": {}, "messages": [], "enrollments": [],
+                   "opportunities": {}, "custom_fields": [], "tags": [], "outbox": []}
+        self._save()
+
+    # contacts
+    def search_contacts(self, *, query: str = "", tags: list[str] | None = None, limit: int = 100,
+                        page: int = 1) -> list[dict[str, Any]]:
+        rows = list(self.db["contacts"].values())
+        if query.strip():
+            q = query.strip().lower()
+            rows = [c for c in rows if q in json.dumps(
+                [c.get("firstName"), c.get("lastName"), c.get("email"), c.get("phone")]).lower()]
+        for tag in tags or []:
+            rows = [c for c in rows if tag in c.get("tags", [])]
+        rows.sort(key=lambda c: c["id"])
+        start = (max(page, 1) - 1) * limit
+        return [json.loads(json.dumps(c)) for c in rows[start:start + limit]]
+
+    def get_contact(self, contact_id: str) -> dict[str, Any]:
+        contact = self.db["contacts"].get(contact_id)
+        if not contact:
+            raise FamError(f"contact {contact_id} not found")
+        return json.loads(json.dumps(contact))
+
+    def create_contact(self, payload: dict[str, Any]) -> dict[str, Any]:
+        contact_id = payload.get("id") or self._id("c")
+        contact = {"id": contact_id, "tags": [], "customFields": [], "dateAdded": self._now()}
+        contact.update({k: v for k, v in payload.items() if k != "id"})
+        contact["tags"] = list(dict.fromkeys(contact.get("tags", [])))
+        self.db["contacts"][contact_id] = contact
+        self._save()
+        return contact
+
+    def update_contact(self, contact_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        contact = self.db["contacts"].get(contact_id)
+        if not contact:
+            raise FamError(f"contact {contact_id} not found")
+        for key, value in payload.items():
+            if key == "customFields":
+                existing = {f["id"]: f for f in contact.get("customFields", [])}
+                for item in value:
+                    existing[item["id"]] = {"id": item["id"], "value": item.get("field_value", item.get("value"))}
+                contact["customFields"] = list(existing.values())
+            else:
+                contact[key] = value
+        self._save()
+        return contact
+
+    def add_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]:
+        contact = self.db["contacts"][contact_id]
+        contact["tags"] = list(dict.fromkeys(contact.get("tags", []) + tags))
+        self._save()
+        return {"tags": contact["tags"]}
+
+    def remove_tags(self, contact_id: str, tags: list[str]) -> dict[str, Any]:
+        contact = self.db["contacts"][contact_id]
+        contact["tags"] = [t for t in contact.get("tags", []) if t not in tags]
+        self._save()
+        return {"tags": contact["tags"]}
+
+    def list_notes(self, contact_id: str) -> list[dict[str, Any]]:
+        return list(self.db["notes"].get(contact_id, []))
+
+    def add_note(self, contact_id: str, body: str) -> dict[str, Any]:
+        note = {"id": self._id("n"), "body": body, "dateAdded": self._now()}
+        self.db["notes"].setdefault(contact_id, []).append(note)
+        self._save()
+        return note
+
+    def list_tasks(self, contact_id: str) -> list[dict[str, Any]]:
+        return list(self.db["tasks"].get(contact_id, []))
+
+    def create_task(self, contact_id: str, title: str, due: str, body: str = "",
+                    assigned_to: str = "") -> dict[str, Any]:
+        task = {"id": self._id("t"), "title": title, "body": body, "dueDate": due,
+                "assignedTo": assigned_to, "completed": False, "contactId": contact_id}
+        self.db["tasks"].setdefault(contact_id, []).append(task)
+        self._save()
+        return task
+
+    def complete_task(self, contact_id: str, task_id: str) -> dict[str, Any]:
+        for task in self.db["tasks"].get(contact_id, []):
+            if task["id"] == task_id:
+                task["completed"] = True
+                task["completedAt"] = self._now()
+        self._save()
+        return {"succeded": True}
+
+    # conversations
+    def record_inbound(self, contact_id: str, channel: str, body: str) -> dict[str, Any]:
+        message = {"id": self._id("m"), "contactId": contact_id, "direction": "inbound",
+                   "messageType": channel.upper(), "body": body, "dateAdded": self._now(), "unread": True}
+        self.db["messages"].append(message)
+        self._save()
+        return message
+
+    def list_conversations(self, contact_id: str = "", unread_only: bool = False,
+                           limit: int = 20) -> list[dict[str, Any]]:
+        by_contact: dict[str, dict[str, Any]] = {}
+        for m in self.db["messages"]:
+            if contact_id and m["contactId"] != contact_id:
+                continue
+            conv = by_contact.setdefault(m["contactId"], {
+                "id": f"conv_{m['contactId']}", "contactId": m["contactId"], "unreadCount": 0,
+                "lastMessageBody": "", "lastMessageDate": "", "lastMessageDirection": ""})
+            if m.get("unread") and m["direction"] == "inbound":
+                conv["unreadCount"] += 1
+            if m["dateAdded"] >= conv["lastMessageDate"]:
+                conv.update(lastMessageBody=m["body"], lastMessageDate=m["dateAdded"],
+                            lastMessageDirection=m["direction"])
+        rows = list(by_contact.values())
+        if unread_only:
+            rows = [c for c in rows if c["unreadCount"] > 0]
+        rows.sort(key=lambda c: c["lastMessageDate"], reverse=True)
+        return rows[:limit]
+
+    def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]:
+        contact_id = conversation_id.removeprefix("conv_")
+        rows = [m for m in self.db["messages"] if m["contactId"] == contact_id]
+        return sorted(rows, key=lambda m: m["dateAdded"], reverse=True)[:limit]
+
+    def mark_read(self, contact_id: str) -> None:
+        for m in self.db["messages"]:
+            if m["contactId"] == contact_id:
+                m["unread"] = False
+        self._save()
+
+    def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]:
+        message = {"id": self._id("m"), "contactId": contact_id, "direction": "outbound",
+                   "messageType": channel.upper(), "subject": subject, "body": body,
+                   "dateAdded": self._now(), "unread": False}
+        self.db["messages"].append(message)
+        self.db["outbox"].append(message)
+        self._save()
+        return {"messageId": message["id"], "conversationId": f"conv_{contact_id}"}
+
+    def enroll_workflow(self, contact_id: str, workflow_id: str) -> dict[str, Any]:
+        self.db["enrollments"].append({"contactId": contact_id, "workflowId": workflow_id, "at": self._now()})
+        self._save()
+        return {"succeded": True}
+
+    def list_workflows(self) -> list[dict[str, Any]]:
+        seen = sorted({e["workflowId"] for e in self.db["enrollments"]})
+        return [{"id": w, "name": w, "status": "published"} for w in seen]
+
+    def search_opportunities(self, pipeline_id: str = "", contact_id: str = "",
+                             limit: int = 50) -> list[dict[str, Any]]:
+        rows = list(self.db["opportunities"].values())
+        if pipeline_id:
+            rows = [o for o in rows if o["pipelineId"] == pipeline_id]
+        if contact_id:
+            rows = [o for o in rows if o["contactId"] == contact_id]
+        return rows[:limit]
+
+    def upsert_opportunity(self, *, pipeline_id: str, stage_id: str, contact_id: str, name: str,
+                           status: str = "open", monetary_value: float = 0) -> dict[str, Any]:
+        key = f"{pipeline_id}:{contact_id}"
+        opp = self.db["opportunities"].get(key) or {"id": self._id("o"), "createdAt": self._now()}
+        opp.update(pipelineId=pipeline_id, pipelineStageId=stage_id, contactId=contact_id, name=name,
+                   status=status, monetaryValue=monetary_value, updatedAt=self._now())
+        self.db["opportunities"][key] = opp
+        self._save()
+        return opp
+
+    def list_pipelines(self) -> list[dict[str, Any]]:
+        return []
+
+    def list_custom_fields(self) -> list[dict[str, Any]]:
+        return list(self.db["custom_fields"])
+
+    def create_custom_field(self, name: str, data_type: str, options: list[str] | None = None) -> dict[str, Any]:
+        item = {"id": name, "name": name, "dataType": data_type, "options": options or []}
+        self.db["custom_fields"].append(item)
+        self._save()
+        return item
+
+    def list_tags(self) -> list[dict[str, Any]]:
+        return [{"id": t, "name": t} for t in self.db["tags"]]
+
+    def create_tag(self, name: str) -> dict[str, Any]:
+        if name not in self.db["tags"]:
+            self.db["tags"].append(name)
+            self._save()
+        return {"id": name, "name": name}
+
+    def list_users(self) -> list[dict[str, Any]]:
+        return [{"id": "user_manager", "name": "Funding Relationship Manager"}]
+
+    def list_custom_values(self) -> list[dict[str, Any]]:
+        return [{"id": k, "name": k, "value": v} for k, v in self.db.setdefault("custom_values", {}).items()]
+
+    def update_custom_value_by_name(self, name: str, value: str) -> dict[str, Any]:
+        self.db.setdefault("custom_values", {})[name] = value
+        self._save()
+        return {"id": name, "name": name, "value": value}
+
+    def location(self) -> dict[str, Any]:
+        return {"id": self.location_id, "name": "Mock 7FF Funding Affiliate Demo"}
+
+
+def open_backend(settings: Any) -> GHLBackend:
+    """Open the configured backend. Live mode is pinned to the mapped location."""
+    if settings.ghl_mode == "mock":
+        return MockGHL(settings.state_dir / "mock-ghl.json")
+    return LiveGHL(expected_location_id=str(settings.ghl_map.get("location_id", "")))

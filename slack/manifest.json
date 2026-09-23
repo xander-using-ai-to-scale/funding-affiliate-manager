@@ -1,0 +1,168 @@
+{
+  "_metadata": {
+    "major_version": 1,
+    "minor_version": 1
+  },
+  "display_information": {
+    "name": "Funding Affiliate Manager",
+    "description": "Your funding affiliate program partner \u2014 check-ins, follow-ups, newsletters, offers, reactivation, events. Every send is approved by you.",
+    "background_color": "#0f3d2e"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Funding Affiliate Manager",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/hermes",
+        "description": "Talk to Hermes or run a subcommand",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "[subcommand] [args]"
+      },
+      {
+        "command": "/new",
+        "description": "Start a new session (fresh session ID + history)",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "[name]"
+      },
+      {
+        "command": "/retry",
+        "description": "Retry the last message (resend to agent)",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/undo",
+        "description": "Remove the last user/assistant exchange",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/stop",
+        "description": "Kill all running background processes",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/approve",
+        "description": "Approve one pending action for this session",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "[session]"
+      },
+      {
+        "command": "/deny",
+        "description": "Deny a pending dangerous command",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/background",
+        "description": "Run a prompt in the background",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "<prompt>"
+      },
+      {
+        "command": "/agents",
+        "description": "Show active agents and running tasks",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/queue",
+        "description": "Queue a prompt for the next turn (doesn't interrupt)",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "<prompt>"
+      },
+      {
+        "command": "/sethome",
+        "description": "Set this chat as the home channel",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/model",
+        "description": "Switch model for this session",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands",
+        "usage_hint": "[model] [--provider name] [--global]"
+      },
+      {
+        "command": "/reload-mcp",
+        "description": "Reload MCP servers from config",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/reload-skills",
+        "description": "Re-scan ~/.hermes/skills/ for newly installed or removed skills",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/help",
+        "description": "Show available commands",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/restart",
+        "description": "Gracefully restart the gateway after draining active runs",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      },
+      {
+        "command": "/usage",
+        "description": "Show token usage and rate limits for the current session",
+        "should_escape": false,
+        "url": "https://hermes-agent.local/slack/commands"
+      }
+    ],
+    "assistant_view": {
+      "assistant_description": "Ask about affiliates, approve today's check-ins, draft the newsletter, launch reactivation."
+    }
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "assistant:write",
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "commands",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "groups:read",
+        "im:history",
+        "im:read",
+        "im:write",
+        "users:read"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "assistant_thread_context_changed",
+        "assistant_thread_started",
+        "message.channels",
+        "message.groups",
+        "message.im"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}

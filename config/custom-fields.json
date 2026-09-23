@@ -1,0 +1,24 @@
+{
+  "_comment": "Affiliate profile fields created in GHL by `fam ghl bootstrap`. key = logical name used by the agent; name = GHL display name.",
+  "fields": [
+    {"key": "affiliate_id",        "name": "Affiliate ID",          "dataType": "TEXT"},
+    {"key": "join_date",           "name": "Affiliate Join Date",   "dataType": "DATE"},
+    {"key": "source",              "name": "Affiliate Source",      "dataType": "SINGLE_OPTIONS", "options": ["skool", "linkedin", "referral", "webinar", "event", "facebook", "website", "legacy-import"]},
+    {"key": "niche",               "name": "Affiliate Niche",       "dataType": "TEXT"},
+    {"key": "audience_size",       "name": "Audience Size",         "dataType": "SINGLE_OPTIONS", "options": ["<500", "500-2k", "2k-10k", "10k+"]},
+    {"key": "deals_submitted",     "name": "Deals Submitted",       "dataType": "NUMERICAL"},
+    {"key": "last_deal_date",      "name": "Last Deal Date",        "dataType": "DATE"},
+    {"key": "funded_volume",       "name": "Funded Volume",         "dataType": "NUMERICAL"},
+    {"key": "last_touch_date",     "name": "Last Touch Date",       "dataType": "DATE"},
+    {"key": "last_touch_channel",  "name": "Last Touch Channel",    "dataType": "SINGLE_OPTIONS", "options": ["sms", "email", "workflow", "call"]},
+    {"key": "last_offer_date",     "name": "Last Offer Date",       "dataType": "DATE"},
+    {"key": "last_reply_date",     "name": "Last Reply Date",       "dataType": "DATE"},
+    {"key": "next_touch_date",     "name": "Next Touch Date",       "dataType": "DATE"},
+    {"key": "cadence_note",        "name": "Cadence Note",          "dataType": "TEXT"},
+    {"key": "preferred_channel",   "name": "Preferred Channel",     "dataType": "SINGLE_OPTIONS", "options": ["sms", "email"]},
+    {"key": "assigned_manager",    "name": "Assigned Manager",      "dataType": "TEXT"},
+    {"key": "products_of_interest","name": "Products of Interest",  "dataType": "TEXT"},
+    {"key": "services_offered",    "name": "Growth Services Offered","dataType": "TEXT"},
+    {"key": "obsidian_note",       "name": "Obsidian Note",         "dataType": "TEXT"}
+  ]
+}

@@ -1,0 +1,71 @@
+# Funding Affiliate Manager
+
+An AI affiliate manager for a business-funding partner program (built for 7 Figures Funding / My Funding
+Machine, "7FF"). It keeps thousands of affiliates warm and producing on **GoHighLevel**:
+
+- a touch every two weeks
+- an offer every month
+- personal check-ins for anyone who has gone quiet
+- "check back with me" follow-ups that land in the right morning's queue
+- the newsletter, reactivation, events, and done-for-you growth services
+
+A human Funding Relationship Manager approves everything that goes out.
+
+```
+Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean droplet
+                                        ├─ fam-core MCP      cadence engine, CRM hygiene, prepare/execute
+                                        ├─ fam-approvals MCP human-only approvals (untrusted surface)
+                                        ├─ ghl MCP           full GoHighLevel CLI (demo location only)
+                                        ├─ orgo MCP          its own Orgo cloud desktop (GHL UI, LinkedIn, Skool)
+                                        ├─ super-browser     research + many browsers
+                                        └─ browser-box       one self-hosted browser
+                                      Memory: Obsidian vault (Daily / Affiliates / Campaigns …)
+```
+
+## What's here
+
+| Path | What |
+|---|---|
+| `files/local-packages/fam/` | The core (Python stdlib + `mcp`): GHL client (live and mock), cadence rules, approvals ledger, Obsidian vault writer, MCP server, CLI, demo simulation |
+| `config/` | The GHL system as data: custom fields, tags, pipelines, workflows, custom values, cadence rules, and `ghl-map.json` (filled by bootstrap) |
+| `skills/` | Hermes skills: `funding-affiliates/*` (cadence, triage, newsletter, offers, reactivation, events, growth services, intake), `computer/orgo-computer`, `memory/obsidian-memory`, `browsers/*`, `sales/*` |
+| `routines/` | Cron prompts: daily tasks + sweep, hourly reply triage, bi-weekly newsletter, monthly offer, weekly scorecard |
+| `knowledge/funding/` | Sourced company, products, economics, segments, conversation playbook, compliance, FAQ (open questions flagged `UNVERIFIED`) |
+| `knowledge/program/` | Operating cadence, pre-call brief, partner recovery, scorecard templates |
+| `policies/permissions.json` | Tiers: read, CRM hygiene, outbound (approval), commercial (human-only), prohibited |
+| `hermes/config.template.yaml` | Hermes config, including the core/approvals MCP trust split |
+| `deploy/` | Droplet installer, vault sync |
+| `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split) |
+
+## Safety model
+
+1. **Reads and CRM hygiene** (lifecycle tags, notes, follow-up tasks) are autonomous and audited.
+2. **Outbound** (messages, workflow enrollments, broadcasts) is *prepare → approval card → a human approves on the untrusted `fam-approvals` MCP → execute once*. The model cannot approve its own sends. Recurring cadence can run under a bounded, expiring standing approval.
+3. **Demo mode** (`FAM_DEMO_MODE=1`): only contacts tagged `fam:test-contact` get real messages. Everyone else is a simulated send, written to the contact as a GHL note.
+4. The GHL client refuses any location other than the one in `config/ghl-map.json`. The droplet only holds the demo location's token.
+5. A compliance lint blocks "guaranteed", "no credit check", specific rates, and similar claims. SMS gets opt-out language and a send window. STOP means DNC forever.
+6. Kill switch: `fam_emergency_stop`. Only a human can resume.
+
+## Run the demo simulation (no credentials needed)
+
+```bash
+PYTHONPATH=files/local-packages/fam/src FAM_GHL_MODE=mock python3 -m fam.cli sim seed --count 250 --out sim-output
+PYTHONPATH=files/local-packages/fam/src FAM_GHL_MODE=mock python3 -m fam.cli sim run --days 30 --out sim-output
+```
+
+This runs 250 synthetic affiliates through 30 days of the real engine: sweep, approvals, sends, reply triage, deals, newsletter, and events. It writes `sim-output/report.md` plus an Obsidian vault of everything the agent did.
+
+## Tests
+
+```bash
+PYTHONPATH=files/local-packages/fam/src python3 -m unittest discover -s tests -v
+```
+
+## Deploy
+
+See [docs/DEPLOY.md](docs/DEPLOY.md). Short version: a pinned Hermes v2026.8.31 on the droplet, `~/.fam/agent.env`, then `./deploy/droplet/setup.sh`.
+
+## Related templates
+
+- [`affiliate-manager-agent/grok-bot`](https://github.com/jbellsolutions/affiliate-manager-agent/tree/main/grok-bot): a "Funding Partnerships Director" profile for Grok-style bots. Reference only; not part of this agent.
+- [`funding-director-orgo`](https://github.com/jbellsolutions/funding-director-orgo): the deal-side Funding Director. The GHL client and the core/approvals split here were ported from it.
