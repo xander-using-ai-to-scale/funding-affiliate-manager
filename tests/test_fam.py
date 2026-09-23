@@ -5,6 +5,8 @@
 
 from __future__ import annotations
 
+import contextlib
+import io
 import os
 import sys
 import tempfile
@@ -192,9 +194,10 @@ class EngineFlows(unittest.TestCase):
         saved = {k: os.environ.get(k) for k in env}
         os.environ.update(env)
         try:
-            self.assertEqual(cli.main(["sim", "inbound", "--text", "I've got a merchant who needs $80k"]), 0)
-            os.environ["FAM_GHL_MODE"] = "live"
-            self.assertEqual(cli.main(["sim", "inbound", "--text", "hi"]), 2)
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(cli.main(["sim", "inbound", "--text", "I've got a merchant who needs $80k"]), 0)
+                os.environ["FAM_GHL_MODE"] = "live"
+                self.assertEqual(cli.main(["sim", "inbound", "--text", "hi"]), 2)
         finally:
             for k, v in saved.items():
                 os.environ.pop(k) if v is None else os.environ.__setitem__(k, v)
