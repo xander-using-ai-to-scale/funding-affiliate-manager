@@ -185,6 +185,23 @@ class EngineFlows(unittest.TestCase):
         with self.assertRaises(FamError):
             self.engine.activate_standing("newsletter", 100, 30, "Justin")
 
+    def test_sim_inbound_lands_in_reply_inbox(self):
+        from fam import cli
+        env = {"FAM_GHL_MODE": "mock", "FAM_STATE_DIR": str(self.settings.state_dir),
+               "FAM_VAULT_DIR": str(self.settings.vault_dir)}
+        saved = {k: os.environ.get(k) for k in env}
+        os.environ.update(env)
+        try:
+            self.assertEqual(cli.main(["sim", "inbound", "--text", "I've got a merchant who needs $80k"]), 0)
+            os.environ["FAM_GHL_MODE"] = "live"
+            self.assertEqual(cli.main(["sim", "inbound", "--text", "hi"]), 2)
+        finally:
+            for k, v in saved.items():
+                os.environ.pop(k) if v is None else os.environ.__setitem__(k, v)
+        engine = FamEngine(settings=self.settings, backend=MockGHL(self.settings.state_dir / "mock-ghl.json"), today=TODAY)
+        inbox = engine.reply_inbox()
+        self.assertEqual([r["contact"]["id"] for r in inbox], [self.tester])
+
     def test_vault_records_the_day(self):
         self.engine.sweep(apply_lifecycle=True)
         daily = (self.settings.vault_dir / "Daily" / f"{TODAY.isoformat()}.md").read_text()

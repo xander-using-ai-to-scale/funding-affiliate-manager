@@ -155,11 +155,11 @@ mcp_servers:
       FAM_CONFIG_DIR: __REPO_DIR__/config
       FAM_POLICY_PATH: __REPO_DIR__/policies/permissions.json
       FAM_STATE_DIR: __FAM_HOME__/state
-      FAM_VAULT_DIR: __VAULT_DIR__
-      FAM_GHL_MODE: __FAM_GHL_MODE__
-      FAM_DEMO_MODE: __FAM_DEMO_MODE__
-      GHL_API_KEY: __GHL_API_KEY__
-      GHL_LOCATION_ID: __GHL_LOCATION_ID__
+      FAM_VAULT_DIR: "__VAULT_DIR__"
+      FAM_GHL_MODE: "__FAM_GHL_MODE__"
+      FAM_DEMO_MODE: "__FAM_DEMO_MODE__"
+      GHL_API_KEY: "__GHL_API_KEY__"
+      GHL_LOCATION_ID: "__GHL_LOCATION_ID__"
     trust: full
     timeout: 900
     tools:
@@ -177,11 +177,11 @@ mcp_servers:
       FAM_CONFIG_DIR: __REPO_DIR__/config
       FAM_POLICY_PATH: __REPO_DIR__/policies/permissions.json
       FAM_STATE_DIR: __FAM_HOME__/state
-      FAM_VAULT_DIR: __VAULT_DIR__
-      FAM_GHL_MODE: __FAM_GHL_MODE__
-      FAM_DEMO_MODE: __FAM_DEMO_MODE__
-      GHL_API_KEY: __GHL_API_KEY__
-      GHL_LOCATION_ID: __GHL_LOCATION_ID__
+      FAM_VAULT_DIR: "__VAULT_DIR__"
+      FAM_GHL_MODE: "__FAM_GHL_MODE__"
+      FAM_DEMO_MODE: "__FAM_DEMO_MODE__"
+      GHL_API_KEY: "__GHL_API_KEY__"
+      GHL_LOCATION_ID: "__GHL_LOCATION_ID__"
     trust: untrusted
     timeout: 120
     tools:
@@ -206,8 +206,8 @@ mcp_servers:
     command: npx
     args: [-y, orgo-mcp-server@__ORGO_MCP_VERSION__]
     env:
-      ORGO_API_KEY: __ORGO_API_KEY__
-      ORGO_DEFAULT_COMPUTER_ID: __ORGO_COMPUTER_ID__
+      ORGO_API_KEY: "__ORGO_API_KEY__"
+      ORGO_DEFAULT_COMPUTER_ID: "__ORGO_COMPUTER_ID__"
     trust: full
     timeout: 300
     tools:
@@ -218,7 +218,7 @@ mcp_servers:
     # approval gates (approve_browser_run) cover risky runs.
     url: https://superbrowser.online/mcp/
     headers:
-      Authorization: Bearer __SUPER_BROWSER_TOKEN__
+      Authorization: "Bearer __SUPER_BROWSER_TOKEN__"
     trust: full
     timeout: 300
 
@@ -226,6 +226,6 @@ mcp_servers:
     # One self-hosted browser (fetch/read/session/status). Serialized: one call at a time.
     url: __BROWSER_BOX_URL__
     headers:
-      Authorization: Bearer __BROWSER_BOX_TOKEN__
+      Authorization: "Bearer __BROWSER_BOX_TOKEN__"
     trust: full
     timeout: 180

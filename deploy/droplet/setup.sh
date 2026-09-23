@@ -157,7 +157,8 @@ if [ -n "${VAULT_GIT_REMOTE:-}" ]; then
   git -C "$VAULT_DIR" remote get-url origin >/dev/null 2>&1 || git -C "$VAULT_DIR" remote add origin "$VAULT_GIT_REMOTE"
 fi
 install -m 755 "$REPO_DIR/deploy/droplet/vault-sync.sh" "$FAM_HOME/vault-sync.sh"
-( crontab -l 2>/dev/null | grep -v 'fam/vault-sync.sh' ; echo "*/15 * * * * VAULT_DIR=$VAULT_DIR $FAM_HOME/vault-sync.sh >> $FAM_HOME/vault-sync.log 2>&1" ) | crontab -
+{ { crontab -l 2>/dev/null || true; } | { grep -v 'fam/vault-sync.sh' || true; }
+  echo "*/15 * * * * VAULT_DIR=$VAULT_DIR $FAM_HOME/vault-sync.sh >> $FAM_HOME/vault-sync.log 2>&1"; } | crontab -
 
 say "6/8 Scheduling routines (Hermes cron)"
 existing="$(hermes cron list 2>/dev/null || true)"

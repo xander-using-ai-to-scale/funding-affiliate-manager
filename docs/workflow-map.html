@@ -1,0 +1,349 @@
+<title>Funding Affiliate OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f4f7f5; --panel:#ffffff; --ink:#0e1a16; --ink-2:#4a5a55; --ink-3:#71807b;
+  --line:#d6dfdb; --accent:#0f6b4f; --accent-soft:#e2f0ea; --chip:#eef2f0;
+  --s-without:#eb6834; --s-with:#2a78d6; --grid:#e3e9e6;
+  --good:#0ca30c; --warn:#b77900; --crit:#d03b3b;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8a9893;
+    --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+    --s-without:#d95926; --s-with:#3987e5; --grid:#26302c;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8a9893;
+  --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+  --s-without:#d95926; --s-with:#3987e5; --grid:#26302c;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.6 var(--body);padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:1080px;margin:0 auto}
+header.top{padding-block:44px 22px;border-bottom:1px solid var(--line);display:grid;gap:14px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(34px,6vw,58px)/1.02 var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.lede{font-size:17px;color:var(--ink-2);max-width:66ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;font:13px/1.4 var(--mono);color:var(--ink-3)}
+.facts b{color:var(--ink);font-weight:500}
+nav.toc{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--line);overflow-x:auto}
+nav.toc ul{display:flex;gap:4px;list-style:none;margin:0;padding:10px 0;white-space:nowrap}
+nav.toc a{display:block;padding:6px 10px;border-radius:6px;color:var(--ink-2);text-decoration:none;font-size:14px}
+nav.toc a:hover,nav.toc a:focus-visible{background:var(--chip);color:var(--ink);outline:none}
+section{padding-block:40px 8px;scroll-margin-top:60px}
+h2{font:700 28px/1.15 var(--display);letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+h3{font:600 16px/1.3 var(--body);margin:0 0 6px}
+.sub{color:var(--ink-2);margin:0 0 22px;max-width:70ch}
+p{margin:0 0 12px}
+code,.tag{font:500 12.5px/1 var(--mono)}
+.tag{display:inline-block;padding:4px 7px;border-radius:5px;background:var(--chip);color:var(--ink);margin:2px 2px 2px 0;border:1px solid var(--line)}
+.tag.src{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.diagram{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;overflow-x:auto}
+pre.mermaid{margin:0;background:transparent;font-family:var(--body)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--chip)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.muted{color:var(--ink-3)}
+/* cadence strip */
+.cal{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px;margin-top:6px}
+.day{aspect-ratio:1/1;max-width:100%;border-radius:6px;border:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;justify-content:space-between;padding:4px;font:500 10px/1 var(--mono);color:var(--ink-3);min-width:0}
+.day .marks{display:flex;gap:2px;flex-wrap:wrap}
+.m{width:7px;height:7px;border-radius:2px}
+.m.touch{background:var(--accent)} .m.offer{background:var(--s-without)} .m.news{background:var(--s-with)} .m.event{background:var(--ink)} .m.daily{background:var(--ink-3);opacity:.45}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+@media (max-width:640px){.cal{grid-template-columns:repeat(10,minmax(0,1fr))}}
+/* steps */
+ol.loop{counter-reset:s;list-style:none;margin:0;padding:0;display:grid;gap:10px}
+ol.loop li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+ol.loop li::before{content:counter(s);font:700 18px/34px var(--display);text-align:center;border-radius:8px;background:var(--accent-soft);color:var(--accent);height:34px}
+ol.loop .who{font:500 11px/1 var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--ink-3);display:block;margin-top:6px}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.stat b{display:block;font:700 30px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.stat span{font-size:13px;color:var(--ink-2)}
+/* chart */
+.chart{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ttl{font-weight:600;margin-bottom:2px}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--ground);font:12.5px/1.4 var(--body);padding:7px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .12s}
+@media (prefers-reduced-motion:reduce){.tip{transition:none}}
+.note{font-size:13px;color:var(--ink-3);margin-top:10px}
+.guard{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start}
+.pill{font:600 11px/1 var(--mono);padding:5px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.pill.ok{color:var(--good)} .pill.gate{color:var(--warn)} .pill.no{color:var(--crit)}
+.card-quote{font:400 14px/1.55 var(--body);color:var(--ink-2);border-left:3px solid var(--line);padding-left:12px;margin:8px 0 0}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+a{color:var(--accent)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">7 Figures Funding · Affiliate program</div>
+  <h1>Funding Affiliate OS</h1>
+  <p class="lede">How one AI Funding Affiliate Manager and one human relationship manager keep 10,000+ funding affiliates warm, talking, and sending deals. The agent works in GoHighLevel and a human approves every message before it goes out.</p>
+  <div class="facts"><span>Brain <b>Hermes on a dedicated DigitalOcean box</b></span><span>Hands <b>its own Orgo cloud desktop</b></span><span>CRM <b>GoHighLevel</b></span><span>Memory <b>Obsidian vault</b></span><span>Channel <b>Slack</b></span></div>
+</header>
+
+<nav class="toc" aria-label="Sections"><ul>
+  <li><a href="#lifecycle">Lifecycle</a></li><li><a href="#cadence">Cadence</a></li><li><a href="#daily">Daily loop</a></li>
+  <li><a href="#replies">Conversations</a></li><li><a href="#ghl">GoHighLevel build</a></li><li><a href="#services">Growth &amp; events</a></li>
+  <li><a href="#roles">Who does what</a></li><li><a href="#guardrails">Guardrails</a></li><li><a href="#sim">Simulation</a></li>
+</ul></nav>
+
+<section id="lifecycle">
+  <h2>Every affiliate has a lifecycle, and the agent keeps it true</h2>
+  <p class="sub">"Silent" means no reply and no deal. The daily sweep moves each affiliate between stages and tags them in GoHighLevel. A reply or a deal brings them straight back.</p>
+  <div class="diagram">
+<pre class="mermaid">
+flowchart LR
+  A[Applied] -->|onboarding drip · 14 days| O[Onboarding]
+  O --> AC[Active]
+  AC -->|deal in last 30 days| P[Producing]
+  P -->|no new deal| AC
+  AC -->|45 days silent| Q[Quiet]
+  Q -->|60 days · personal check-in| Q
+  Q -->|90 days silent| D[Dormant]
+  D -->|180 days silent| X[Dead]
+  Q -->|replies| R[Reactivated]
+  D -->|replies| R
+  X -->|replies| R
+  R --> AC
+</pre>
+  </div>
+  <div class="grid2" style="margin-top:18px">
+    <div class="panel"><h3>Where they came from</h3><p class="muted">Tagged at intake, and it drives segmentation and offers.</p>
+      <span class="tag src">src:skool</span><span class="tag src">src:linkedin</span><span class="tag src">src:referral</span><span class="tag src">src:webinar</span><span class="tag src">src:event</span><span class="tag src">src:facebook</span><span class="tag src">src:website</span><span class="tag src">src:legacy-import</span></div>
+    <div class="panel"><h3>Where they are</h3><p class="muted">Owned by the daily sweep, mirrored in the Affiliate Lifecycle pipeline.</p>
+      <span class="tag">aff:applied</span><span class="tag">aff:onboarding</span><span class="tag">aff:active</span><span class="tag">aff:producing</span><span class="tag">aff:quiet</span><span class="tag">aff:dormant</span><span class="tag">aff:dead</span><span class="tag">aff:reactivated</span><span class="tag">aff:dnc</span></div>
+  </div>
+</section>
+
+<section id="cadence">
+  <h2>The rhythm: nobody goes more than two weeks without hearing from us</h2>
+  <p class="sub">One affiliate's month. Touches alternate SMS and email. Offers rotate between a funding program, a growth service, an event, and a partner incentive.</p>
+  <div class="panel">
+    <div class="cal" id="cal" aria-label="30-day cadence for one affiliate"></div>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i>Bi-weekly touch (SMS ⇄ email)</span>
+      <span><i style="background:var(--s-without)"></i>Monthly offer</span>
+      <span><i style="background:var(--s-with)"></i>Newsletter (1st &amp; 15th)</span>
+      <span><i style="background:var(--ink)"></i>Partner training</span>
+      <span><i style="background:var(--ink-3);opacity:.45"></i>Daily sweep</span>
+    </div>
+  </div>
+  <div class="tablebox" style="margin-top:14px"><table>
+    <thead><tr><th>Rule</th><th>Trigger</th><th>What happens</th><th>How it's sent</th></tr></thead>
+    <tbody>
+      <tr><td>Bi-weekly touch</td><td>14 days since last touch</td><td>Value tip, partner win, or quick question</td><td>Workflow WF-2 (bulk)</td></tr>
+      <tr><td>Monthly offer</td><td>30 days since last offer</td><td>A program, growth service, event, or incentive</td><td>Workflow WF-3 (bulk)</td></tr>
+      <tr><td>Personal check-in</td><td>60 days silent</td><td>"How's it going? What can I do to help? Seen the new programs?"</td><td>Agent-drafted, manager-approved</td></tr>
+      <tr><td>Dormant reactivation</td><td>90 days silent</td><td>4-touch win-back; past producers get a personal note</td><td>WF-4, or personal</td></tr>
+      <tr><td>Dead-lead campaign</td><td>180 days silent, every 90 days</td><td>What's new → free growth service → breakup</td><td>WF-5 (bulk)</td></tr>
+      <tr><td>"Check back with me"</td><td>They named a date</td><td>Note + GHL task + next-touch date; lands in that morning's queue</td><td>Agent-drafted, manager-approved</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="daily">
+  <h2>The daily loop: a short list and ready drafts by 8am</h2>
+  <p class="sub">This runs every weekday on a schedule. The manager's job shrinks to reading one card, editing if needed, and approving.</p>
+  <ol class="loop">
+    <li><div><h3>Health check</h3>GoHighLevel connected, outbound not frozen, today's send counts.<span class="who">agent · automatic</span></div></li>
+    <li><div><h3>Sweep and retag</h3>Every affiliate is scored for silence. Lifecycle tags and pipeline stages are updated. Silent 30+ and 90+ are counted.<span class="who">agent · automatic, audited</span></div></li>
+    <li><div><h3>Build today's queue</h3>"Check back with me" follow-ups first, then 60+ day check-ins, with past producers ranked highest. Capped at 40 per day; the rest roll over.<span class="who">agent · automatic</span></div></li>
+    <li><div><h3>Draft personally</h3>One message per person, from their profile, niche, source, last deal, and their own last words to us.<span class="who">agent</span></div></li>
+    <li><div><h3>One approval card</h3>The whole batch is frozen with a digest and posted to Slack. Nothing leaves until a human approves it.<span class="who">manager · one click</span></div></li>
+    <li><div><h3>Send and record</h3>Messages go out, last-touch dates update, follow-up tasks close, and the day is written to the Obsidian vault.<span class="who">agent</span></div></li>
+    <li><div><h3>Bulk cadence</h3>Bi-weekly touches, monthly offers, and reactivation go by workflow enrollment, under a standing approval with a daily cap that expires.<span class="who">agent · within manager's limits</span></div></li>
+  </ol>
+</section>
+
+<section id="replies">
+  <h2>Conversations turn into CRM actions within the hour</h2>
+  <p class="sub">Reply triage runs hourly during business hours. Every reply updates the affiliate's record. The agent drafts the response, and the manager approves it in the next card.</p>
+  <div class="tablebox"><table>
+    <thead><tr><th>They say</th><th>Classified as</th><th>What happens automatically</th></tr></thead>
+    <tbody>
+      <tr><td>"Got a merchant for you, restaurant doing ~80k/mo"</td><td><span class="tag">has_deal</span></td><td>🔥 Manager alerted, same-day CALL task, <code>deal:incoming</code></td></tr>
+      <tr><td>"Slammed with tax season, check back in a few weeks"</td><td><span class="tag">check_back_later</span></td><td>GHL task + <code>next_touch_date</code> on the date they gave; shows up in that morning's queue</td></tr>
+      <tr><td>"I have 2,000 old leads I never worked"</td><td><span class="tag">wants_service</span></td><td>Growth Services card (reactivation) + a scoping task</td></tr>
+      <tr><td>"When do commissions get paid?"</td><td><span class="tag">commission_question</span></td><td>Answer task for the human. The agent never states terms</td></tr>
+      <tr><td>"Send me the training invite"</td><td><span class="tag">event_interest</span></td><td><code>want:event</code>, next event link drafted</td></tr>
+      <tr><td>"STOP"</td><td><span class="tag">unsubscribe</span></td><td>Do-not-contact, permanently. No further messages of any kind</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="ghl">
+  <h2>What gets built in GoHighLevel</h2>
+  <p class="sub">The whole system is defined as data in the repo, so a new client gets the same build from one snapshot and one installer.</p>
+  <div class="grid3">
+    <div class="panel"><h3>19 profile fields</h3><p class="muted">Affiliate ID, join date, source, niche, audience size, deals submitted, last deal, funded volume, last touch (and channel), last offer, last reply, next touch, cadence note, preferred channel, assigned manager, products of interest, growth services, vault note.</p></div>
+    <div class="panel"><h3>2 pipelines</h3><p class="muted"><b>Affiliate Lifecycle</b>: Applied → Onboarded → Active → Producing → Quiet → Dormant → Reactivated.<br><b>Affiliate Growth Services</b>: Interested → Scoped → In Progress → Delivered.</p></div>
+    <div class="panel"><h3>Intake form + custom values</h3><p class="muted">The Affiliate Intake form fills the profile. Newsletter, offer, and event copy live in custom values the agent updates as part of an approved send.</p></div>
+  </div>
+  <div class="tablebox" style="margin-top:14px"><table>
+    <thead><tr><th>Workflow</th><th>Purpose</th><th>Steps</th></tr></thead>
+    <tbody>
+      <tr><td><code>WF-1</code></td><td>Onboarding drip</td><td>Welcome and how to submit → first-deal guide → day-5 SMS → training invite → "how's it going?"</td></tr>
+      <tr><td><code>WF-2</code></td><td>Bi-weekly touch</td><td>One message on the channel not used last time</td></tr>
+      <tr><td><code>WF-3</code></td><td>Monthly offer</td><td>Offer email, then an SMS teaser a day later</td></tr>
+      <tr><td><code>WF-4</code></td><td>Dormant reactivation</td><td>"Still in the funding game?" → SMS → new program → breakup</td></tr>
+      <tr><td><code>WF-5</code></td><td>Dead-lead campaign</td><td>Quarterly: what's new → free growth service → breakup</td></tr>
+      <tr><td><code>WF-6</code></td><td>Newsletter broadcast</td><td>Every two weeks from custom values</td></tr>
+      <tr><td><code>WF-7</code></td><td>Event invite</td><td>Invite → 24-hour reminder → 1-hour reminder → replay</td></tr>
+      <tr><td><code>WF-8</code></td><td>New offer announcement</td><td>Email + SMS to the segment it fits</td></tr>
+      <tr><td><code>WF-9</code></td><td>Reply router</td><td>Customer replied → notify manager, tag for triage</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="services">
+  <h2>Value first: growth services and events</h2>
+  <p class="sub">Affiliates send more deals when they have more leads. The agent offers help, queues it, and tracks it to delivery.</p>
+  <div class="grid2">
+    <div class="panel"><h3>The Affiliate Growth Kit</h3>
+      <p>Done-for-you help, offered in check-ins and on request:</p>
+      <span class="tag">funnel page</span><span class="tag">reactivate their old leads</span><span class="tag">email campaigns</span><span class="tag">social content</span><span class="tag">GoHighLevel / CRM help</span>
+      <p class="card-quote">"Do you need me to put together a funnel page for you? Want help reactivating your old list?"</p>
+      <p class="note">Packaged as a GoHighLevel snapshot that group members can add to their own account.</p></div>
+    <div class="panel"><h3>Events that feed the program</h3>
+      <p>Partner training twice a month ("How to use it and get more leads"), plus a weekly partnerships and affiliate-marketing coaching call in the Skool group.</p>
+      <p class="muted">The agent invites the right segments, sends reminders and the replay, tags who's interested, and follows up with anyone who asked a question.</p></div>
+  </div>
+</section>
+
+<section id="roles">
+  <h2>Who does what</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Role</th><th>Owns</th></tr></thead>
+    <tbody>
+      <tr><td><b>Funding Affiliate Manager</b> (the agent)</td><td>The rhythm. Daily sweep, queue, personalized drafts, reply triage, CRM hygiene, follow-up tasks, newsletter and offer drafts, event logistics, scorecards, memory.</td></tr>
+      <tr><td><b>Funding Relationship Manager</b> (dedicated VA, our side)</td><td>Relationships. Approves every send, takes the calls (deals, service scoping, recovery), works the daily task list with the agent.</td></tr>
+      <tr><td><b>7FF partner lead</b> (their side)</td><td>The client's dedicated partner. Program terms, commissions, new programs, escalations, final say on offers.</td></tr>
+      <tr><td><b>Official affiliate partner</b></td><td>Weekly partnerships coaching call in the group, events, growth-kit strategy.</td></tr>
+    </tbody></table></div>
+</section>
+
+<section id="guardrails">
+  <h2>Guardrails, built in</h2>
+  <div class="grid2">
+    <div class="panel guard"><span class="pill ok">AUTONOMOUS</span><div>Reading, sweeping, lifecycle tags, notes, follow-up tasks. Every change is audited.</div></div>
+    <div class="panel guard"><span class="pill gate">HUMAN APPROVES</span><div>Every message and every workflow enrollment: frozen, digested, approved once, then executed. The agent cannot approve its own sends.</div></div>
+    <div class="panel guard"><span class="pill gate">BOUNDED</span><div>Recurring cadence runs under a standing approval with a daily cap and an expiry, revocable instantly. One command freezes all outbound.</div></div>
+    <div class="panel guard"><span class="pill no">NEVER</span><div>Guaranteed approvals, rates, or income claims; changing commissions or payouts; messaging opted-out contacts; paid data-enrichment vendors.</div></div>
+  </div>
+  <p class="note">Compliance built into the send path: SMS carries opt-out language and only goes out 11:00–20:00 ET, STOP means do-not-contact forever, and a lint blocks "guaranteed", "no credit check", and stated rates. The demo runs in demo mode, where only designated test contacts receive real messages.</p>
+</section>
+
+<section id="sim">
+  <h2>Simulation: 30 days, 253 affiliates, the real engine</h2>
+  <p class="sub">A synthetic affiliate program run day by day through the same code the live agent uses: sweep, approvals, sends, reply triage, deals, newsletter, events. Nobody was contacted. Reply rates are assumptions (22% for personal messages, 7% for bulk), stated so you can judge them.</p>
+  <div class="stats">
+    <div class="stat"><b>152</b><span>personal check-ins and follow-ups</span></div>
+    <div class="stat"><b>57</b><span>"check back with me" tasks worked on their day</span></div>
+    <div class="stat"><b>65</b><span>replies triaged into CRM actions</span></div>
+    <div class="stat"><b>17</b><span>deals submitted after outreach</span></div>
+  </div>
+  <div class="chart" id="cohortChart">
+    <div class="ttl">Where the same 253 affiliates end up after 30 days</div>
+    <div class="muted" style="font-size:13px">Count of affiliates per lifecycle stage on day 30, with no outreach vs. with the agent running</div>
+    <div class="legend" aria-hidden="false"><span><i style="background:var(--s-without)"></i>Without the agent</span><span><i style="background:var(--s-with)"></i>With the agent</span></div>
+    <svg id="cohortSvg" role="img" aria-label="Grouped bar chart comparing lifecycle stages on day 30 with and without the agent"></svg>
+    <div class="tip" id="tip"></div>
+  </div>
+  <div class="tablebox" style="margin-top:14px"><table>
+    <thead><tr><th>Lifecycle</th><th class="num">Day 0</th><th class="num">Day 30, without agent</th><th class="num">Day 30, with agent</th></tr></thead>
+    <tbody id="cohortTable"></tbody></table></div>
+  <div class="tablebox" style="margin-top:14px"><table>
+    <thead><tr><th>What the agent did</th><th class="num">Simulation (253)</th><th class="num">Projected at 10,000</th></tr></thead>
+    <tbody>
+      <tr><td>Personal check-ins / follow-ups sent</td><td class="num">152</td><td class="num">6,008</td></tr>
+      <tr><td>Cadence enrollments (bi-weekly, monthly, reactivation)</td><td class="num">435</td><td class="num">17,194</td></tr>
+      <tr><td>Newsletter deliveries</td><td class="num">759</td><td class="num">30,000</td></tr>
+      <tr><td>Event / training invites</td><td class="num">393</td><td class="num">15,534</td></tr>
+      <tr><td>"Check back with me" tasks worked on their day</td><td class="num">57</td><td class="num">2,253</td></tr>
+      <tr><td>Replies triaged</td><td class="num">65</td><td class="num">2,569</td></tr>
+      <tr><td>Deals submitted after outreach</td><td class="num">17</td><td class="num">672</td></tr>
+    </tbody></table></div>
+  <p class="note">The projection scales the simulation linearly and is only as good as its reply-rate assumptions. At full scale the personal queue is capped at 40 per day per manager, so personal volume grows with manager seats, not linearly. The live demo runs the same engine against a GoHighLevel demo account.</p>
+</section>
+
+<footer>Funding Affiliate Manager · built on Hermes, GoHighLevel, Orgo, Super Browser, Browser Box · system spec lives in the <code>funding-affiliate-manager</code> repo.</footer>
+</div>
+
+<script>
+(function(){
+  // 30-day cadence strip for one affiliate
+  var cal=document.getElementById('cal');
+  var touch={1:1,15:1,29:1}, offer={8:1}, news={1:1,15:1}, ev={10:1,24:1};
+  for(var d=1; d<=30; d++){
+    var el=document.createElement('div'); el.className='day';
+    var marks='<span class="marks">'+(touch[d]?'<i class="m touch" title="touch"></i>':'')+(offer[d]?'<i class="m offer"></i>':'')+(news[d]?'<i class="m news"></i>':'')+(ev[d]?'<i class="m event"></i>':'')+'<i class="m daily"></i></span>';
+    el.innerHTML='<span>'+d+'</span>'+marks; cal.appendChild(el);
+  }
+  // cohort chart
+  var rows=[
+    ["Applied",12,12,0],["Active",93,47,50],["Producing",45,1,43],["Reactivated",0,0,12],
+    ["Quiet",56,124,96],["Dormant",20,39,24],["Dead",27,30,28]
+  ];
+  var tb=document.getElementById('cohortTable');
+  rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r[0]+'</td><td class="num">'+r[1]+'</td><td class="num">'+r[2]+'</td><td class="num">'+r[3]+'</td>';tb.appendChild(tr);});
+  var svg=document.getElementById('cohortSvg'), tip=document.getElementById('tip'), box=document.getElementById('cohortChart');
+  var W=720,H=300,L=40,R=10,T=26,B=40, max=130;
+  svg.setAttribute('viewBox','0 0 '+W+' '+H);
+  var ns='http://www.w3.org/2000/svg', plotW=W-L-R, plotH=H-T-B, band=plotW/rows.length, bw=Math.min(28,(band-18)/2);
+  function y(v){return T+plotH-(v/max)*plotH;}
+  function add(tag,attrs,parent){var e=document.createElementNS(ns,tag);for(var k in attrs)e.setAttribute(k,attrs[k]);(parent||svg).appendChild(e);return e;}
+  [0,25,50,75,100,125].forEach(function(t){
+    add('line',{x1:L,x2:W-R,y1:y(t),y2:y(t),stroke:'var(--grid)','stroke-width':1});
+    var tx=add('text',{x:L-8,y:y(t)+4,'text-anchor':'end','font-size':11,fill:'var(--ink-3)','font-family':'IBM Plex Mono, monospace'}); tx.textContent=t;
+  });
+  function bar(x,v,color,label,series){
+    var h=Math.max((v/max)*plotH,0), top=T+plotH-h, r=Math.min(4,h/2);
+    var d = h>0 ? ('M'+x+','+(T+plotH)+'V'+(top+r)+'Q'+x+','+top+' '+(x+r)+','+top+'H'+(x+bw-r)+'Q'+(x+bw)+','+top+' '+(x+bw)+','+(top+r)+'V'+(T+plotH)+'Z') : '';
+    if(d) add('path',{d:d,fill:color});
+    var hit=add('rect',{x:x-3,y:T,width:bw+6,height:plotH,fill:'transparent',tabindex:0,'aria-label':label+' '+series+': '+v});
+    function show(){var bb=svg.getBoundingClientRect(), cb=box.getBoundingClientRect(), sx=bb.width/W; tip.style.left=(bb.left-cb.left+(x+bw/2)*sx)+'px'; tip.style.top=(bb.top-cb.top+top*sx-4)+'px'; tip.innerHTML='<b>'+label+'</b> · '+series+': '+v; tip.style.opacity=1;}
+    hit.addEventListener('mouseenter',show); hit.addEventListener('focus',show);
+    hit.addEventListener('mouseleave',function(){tip.style.opacity=0}); hit.addEventListener('blur',function(){tip.style.opacity=0});
+  }
+  rows.forEach(function(r,i){
+    var cx=L+band*i+band/2;
+    bar(cx-bw-1,r[2],'var(--s-without)',r[0],'without agent');
+    bar(cx+1,r[3],'var(--s-with)',r[0],'with agent');
+    var lb=add('text',{x:cx,y:H-B+18,'text-anchor':'middle','font-size':12,fill:'var(--ink-2)','font-family':'IBM Plex Sans, sans-serif'}); lb.textContent=r[0];
+  });
+  // selective direct labels on the two stories: producing and quiet
+  [[2,'1 → 43'],[4,'124 → 96']].forEach(function(p){
+    var r=rows[p[0]], cx=L+band*p[0]+band/2, top=y(Math.max(r[2],r[3]));
+    var t=add('text',{x:cx,y:top-8,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)','font-family':'IBM Plex Sans, sans-serif'}); t.textContent=p[1];
+  });
+  add('line',{x1:L,x2:W-R,y1:T+plotH,y2:T+plotH,stroke:'var(--ink-3)','stroke-width':1});
+})();
+</script>
+<script type="module">
+import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+const cs = getComputedStyle(document.documentElement);
+const v = n => cs.getPropertyValue(n).trim();
+mermaid.initialize({ startOnLoad: false, theme: 'base', flowchart: { curve: 'basis', useMaxWidth: false, nodeSpacing: 36, rankSpacing: 44 },
+  themeVariables: { primaryColor: v('--accent-soft'), primaryTextColor: v('--ink'), primaryBorderColor: v('--accent'),
+    lineColor: v('--ink-3'), edgeLabelBackground: v('--panel'), tertiaryColor: v('--panel'),
+    fontFamily: 'IBM Plex Sans, system-ui, sans-serif', fontSize: '14px' } });
+await mermaid.run({ querySelector: 'pre.mermaid' });
+</script>

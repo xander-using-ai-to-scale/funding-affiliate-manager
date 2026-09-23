@@ -1,0 +1,209 @@
+<title>7FF Partnership Proposal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f4f7f5; --panel:#ffffff; --ink:#0e1a16; --ink-2:#4a5a55; --ink-3:#71807b;
+  --line:#d6dfdb; --accent:#0f6b4f; --accent-soft:#e2f0ea; --chip:#eef2f0;
+  --fill:#fff4d6; --fill-ink:#6b4a00; --fill-line:#e8cf8a;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8a9893;
+    --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+    --fill:#3a2f12; --fill-ink:#f2d58a; --fill-line:#6b5520;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8a9893;
+  --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+  --fill:#3a2f12; --fill-ink:#f2d58a; --fill-line:#6b5520;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:16px/1.65 var(--body);padding-inline:16px;padding-block:0 72px}
+.wrap{max-width:860px;margin:0 auto}
+header.top{padding-block:48px 28px;border-bottom:1px solid var(--line)}
+.eyebrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.draft{background:var(--fill);color:var(--fill-ink);border:1px solid var(--fill-line);padding:5px 8px;border-radius:999px;letter-spacing:.06em}
+h1{font:700 clamp(34px,6vw,54px)/1.04 var(--display);letter-spacing:-.02em;margin:0 0 14px;text-wrap:balance}
+.lede{font-size:18px;color:var(--ink-2);margin:0;max-width:62ch}
+.meta{margin-top:18px;font:13px/1.5 var(--mono);color:var(--ink-3)}
+section{padding-block:36px 4px}
+h2{font:700 26px/1.15 var(--display);letter-spacing:-.01em;margin:0 0 12px;text-wrap:balance}
+h3{font:600 16px/1.35 var(--body);margin:0 0 6px}
+p{margin:0 0 14px}
+ul{margin:0 0 14px;padding-left:20px}
+li{margin:4px 0}
+.fill{background:var(--fill);color:var(--fill-ink);border:1px dashed var(--fill-line);border-radius:4px;padding:0 5px;font:500 .92em/1.4 var(--mono);white-space:normal}
+.big{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
+.big .n{font:700 64px/1 var(--display);color:var(--accent);letter-spacing:-.03em}
+.big p{margin:0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.card .role{font:500 11px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;display:block}
+.card p:last-child,.card ul:last-child{margin-bottom:0}
+table{border-collapse:collapse;width:100%;font-size:15px}
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--chip)}
+tr:last-child td{border-bottom:0}
+td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+ol.ms{list-style:none;counter-reset:m;margin:0;padding:0;display:grid;gap:10px}
+ol.ms li{counter-increment:m;display:grid;grid-template-columns:44px 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0}
+ol.ms li::before{content:"M" counter(m);font:600 13px/32px var(--mono);text-align:center;background:var(--accent-soft);color:var(--accent);border-radius:7px;height:32px}
+ol.ms .done{font:500 13px/1.5 var(--body);color:var(--ink-3);display:block;margin-top:4px}
+.check li{list-style:none;position:relative;padding-left:4px}
+.check{padding-left:22px}
+.check li::before{content:"";position:absolute;left:-20px;top:.55em;width:10px;height:10px;border:1.5px solid var(--accent);border-radius:3px}
+.quote{border-left:3px solid var(--accent);padding:4px 0 4px 14px;color:var(--ink-2);font-style:italic;margin:0 0 14px}
+.note{font-size:14px;color:var(--ink-3)}
+a{color:var(--accent)}
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+@media (max-width:520px){.big{grid-template-columns:1fr}.big .n{font-size:52px}}
+@media print{body{background:#fff}.draft{border-color:#999}}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow"><span>Partnership proposal</span><span class="draft">Draft · for discussion</span></div>
+  <h1>Running the 7 Figures Funding affiliate program, together</h1>
+  <p class="lede">We run the affiliate relationship engine: an AI Funding Affiliate Manager in your GoHighLevel, a dedicated human relationship manager, campaigns, newsletter, events, and a growth offer for your affiliates. We're paid a share of results.</p>
+  <div class="meta">Prepared for 7 Figures Funding · Prepared by <span class="fill">[your company]</span> · <span class="fill">[date]</span></div>
+</header>
+
+<section>
+  <h2>The problem worth solving</h2>
+  <p>You have 10,000+ affiliates and a Skool community. In most affiliate programs a small group sends the deals and the rest sign up, send one or two, then go quiet. Nobody is doing anything wrong. There just aren't enough people to check in with thousands of partners every two weeks, remember who said "check back after tax season," and bring back the ones who drifted away.</p>
+  <p>Each affiliate who comes back sends more deals. The job is keeping every one of those relationships warm, at 10,000-person scale, without spamming anyone and without losing the personal touch.</p>
+</section>
+
+<section>
+  <h2>What we run for you</h2>
+  <p>This is the full operating system, built inside your GoHighLevel (the <a href="https://claude.ai/artifact/Ligihb8EmD6vb9oRvZhMoU">workflow map</a> covers every piece):</p>
+  <div class="grid2">
+    <div class="card"><h3>Every affiliate, every two weeks</h3><p>An SMS or email touch every two weeks, an offer once a month, and a newsletter on the 1st and 15th. Everyone is tagged by where they came from and where they are in the lifecycle.</p></div>
+    <div class="card"><h3>Real conversations, followed up on the day</h3><p>"How's it going? What can I help with? Seen the new programs?" When someone says "check back with me," it becomes a note and a task in GoHighLevel, and it shows up on that morning's list.</p></div>
+    <div class="card"><h3>Quiet and dead affiliates brought back</h3><p>A daily look at everyone silent for 30, 60, and 90+ days. Personal check-ins for past producers, and reactivation campaigns for the rest.</p></div>
+    <div class="card"><h3>Events that feed the program</h3><p>Regular partner trainings on how to use the program and get more leads: invites, reminders, replays, and follow-up with everyone who showed interest.</p></div>
+    <div class="card"><h3>New offers, launched properly</h3><p>New programs and products go to the segments they fit, with the copy approved by your team first.</p></div>
+    <div class="card"><h3>The truth, weekly</h3><p>A scorecard from the CRM: who's producing, who replied, who's slipping, what went out, and what came back.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>The team</h2>
+  <div class="grid2">
+    <div class="card"><span class="role">AI · our side</span><h3>Funding Affiliate Manager</h3><p>Runs the rhythm around the clock: sweeps, tags, drafts every message personally, triages replies, creates tasks, keeps the CRM clean, and logs everything. It never sends without a human's approval.</p></div>
+    <div class="card"><span class="role">Human · our side</span><h3>Dedicated Funding Relationship Manager</h3><p>A dedicated VA who owns the relationships. They approve every send, take the calls (new deals, growth-service scoping, recovery), and work the daily task list alongside the agent.</p></div>
+    <div class="card"><span class="role">Human · your side</span><h3>Your partner lead <span class="note">(e.g. Francois)</span></h3><p>Your dedicated point person. Owns program terms, commissions, new programs, and escalations, and has final say on offers.</p></div>
+    <div class="card"><span class="role">Human · our side</span><h3>Official affiliate partner for the group</h3><p>Justin as the group's official affiliate guy, with a <b>weekly coaching call in the Skool group</b> on partnerships and affiliate marketing, plus the regular events.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>The Affiliate Growth Kit: a 7FF offer for your affiliates</h2>
+  <p>Affiliates send more deals when they have more leads and a system to work them. We package done-with-you help as a 7FF-branded affiliate offer:</p>
+  <ul>
+    <li><b>Funnel page</b> for their funding referrals, built in GoHighLevel</li>
+    <li><b>Reactivation</b> of their own old leads and past clients</li>
+    <li><b>Email campaigns</b> they can run to their list</li>
+    <li><b>Social content</b> for promoting funding to their audience</li>
+    <li><b>CRM help</b>: setting up and working their GoHighLevel so leads don't go cold</li>
+  </ul>
+  <p class="quote">"Do you need me to put together a funnel page for you? Want help reactivating your old list?"</p>
+  <p>The agent offers this in check-ins and tracks every request through a Growth Services pipeline. The same system is available to group members to buy as an <b>add-on for their own GoHighLevel</b>, installed from a snapshot.</p>
+</section>
+
+<section>
+  <h2>Commercials</h2>
+  <div class="big"><div class="n">5%</div><p><b>of overall net</b>, and that covers everything above. We pay for the infrastructure (AI, servers, the agent's cloud computer, and tooling), and we provide the dedicated relationship manager.</p></div>
+  <div class="tablebox" style="margin-top:14px"><table>
+    <thead><tr><th>Term</th><th>Proposal</th></tr></thead>
+    <tbody>
+      <tr><td>Our share</td><td>5% of overall net</td></tr>
+      <tr><td>Definition of "net"</td><td><span class="fill">[to agree: which revenue lines, after what]</span></td></tr>
+      <tr><td>Infrastructure &amp; tooling</td><td>Covered by us</td></tr>
+      <tr><td>Dedicated Funding Relationship Manager (VA)</td><td>Provided by us</td></tr>
+      <tr><td>Campaigns, newsletter, events, GHL communication</td><td>Run by us, with copy approved by your partner lead</td></tr>
+      <tr><td>Weekly Skool coaching call</td><td>Included</td></tr>
+      <tr><td>Growth Kit add-on for members</td><td><span class="fill">[price and revenue split to agree]</span></td></tr>
+      <tr><td>Reporting &amp; settlement</td><td><span class="fill">[reporting source, cadence, and payment terms]</span></td></tr>
+      <tr><td>Term &amp; exit</td><td><span class="fill">[term, notice, and what you keep if we part]</span></td></tr>
+    </tbody></table></div>
+  <p class="note" style="margin-top:10px">Your data stays in your GoHighLevel. The workflows, fields, tags, and pipelines we build are yours.</p>
+</section>
+
+<section>
+  <h2>Proof</h2>
+  <div class="grid2">
+    <div class="card"><span class="role">Simulation</span><h3>30 days, 253 affiliates, the same engine</h3>
+      <p>A synthetic program run day by day through the production code. Nobody was contacted.</p>
+      <ul>
+        <li><b>43</b> affiliates still producing on day 30, vs <b>1</b> with no outreach</li>
+        <li>12 quiet or dormant affiliates reactivated</li>
+        <li>152 personal check-ins, 57 "check back" follow-ups done on their day</li>
+        <li>65 replies turned into CRM actions, 17 deals submitted</li>
+      </ul>
+      <p class="note">Reply rates are assumptions (22% for personal messages, 7% for bulk), stated openly. Full results are in the <a href="https://claude.ai/artifact/Ligihb8EmD6vb9oRvZhMoU#sim">workflow map</a>.</p></div>
+    <div class="card"><span class="role">Live deployment</span><h3>ConnectMed affiliate manager</h3>
+      <p>An affiliate-manager agent we deployed for ConnectMed's affiliate program. It runs on the same approach: approved message library, pre-call briefs, a partner support agenda, weekly scorecards, and runbooks, with the agent drafting and humans approving.</p><p><span class="fill">[result to cite, with permission]</span></p></div>
+    <div class="card"><span class="role">Live deployment</span><h3>Apollo agent</h3><p><span class="fill">[one-line description, result, and permission to reference]</span></p></div>
+    <div class="card"><span class="role">Live demo</span><h3>See it run in GoHighLevel</h3><p>A demo GoHighLevel account with synthetic affiliates. We walk through the morning list, a Slack approval, a reply turning into a task, the newsletter, and a reactivation, with messages reaching only our own test phones.</p></div>
+  </div>
+</section>
+
+<section>
+  <h2>Guardrails</h2>
+  <ul>
+    <li>A human approves every message and every campaign before it goes out. The agent cannot approve its own sends.</li>
+    <li>Your partner lead signs off on offer copy and anything about program terms. Commissions and payouts are never changed by us or the agent.</li>
+    <li>No approval, rate, or income promises. "Guaranteed" and "no credit check" are blocked in the send path.</li>
+    <li>SMS only to opted-in contacts on registered numbers, with opt-out language and quiet hours. STOP means never contacted again.</li>
+    <li>One command freezes all outbound. Every action is audited.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How we start</h2>
+  <p class="note" style="margin-top:-4px">Milestones in order. Each starts when the one before it is done.</p>
+  <ol class="ms">
+    <li><div><h3>Access and alignment</h3>Agree terms and the definition of net. Your partner lead is named. We get GoHighLevel access and the program's terms and approved offers.<span class="done">Done when: we have access and signed terms.</span></div></li>
+    <li><div><h3>Build in your GoHighLevel</h3>Profile fields, source and lifecycle tags, the two pipelines, the intake form, and workflows WF-1 to WF-9, all reviewed by your team.<span class="done">Done when: your team signs off on the build.</span></div></li>
+    <li><div><h3>Import and tag your affiliates</h3>Load the affiliate base with source and deal history, and tag every affiliate's lifecycle stage on day one.<span class="done">Done when: every affiliate has a source and a stage.</span></div></li>
+    <li><div><h3>Pilot cohort</h3>Run the full daily loop on one segment (for example, past producers who went quiet) with approvals from your partner lead.<span class="done">Done when: the pilot scorecard is reviewed together.</span></div></li>
+    <li><div><h3>Full program</h3>Every affiliate on the cadence, plus the newsletter, monthly offers, events, and reactivation.<span class="done">Done when: the whole base is on cadence.</span></div></li>
+    <li><div><h3>Growth Kit and coaching call</h3>Launch the Growth Kit offer to affiliates and the add-on for group members, and start the weekly Skool coaching call.<span class="done">Done when: the first members are onboarded.</span></div></li>
+  </ol>
+</section>
+
+<section>
+  <h2>What we need from you</h2>
+  <ul class="check">
+    <li>A GoHighLevel sub-account (or location) for the program, and API access to it</li>
+    <li>An affiliate export with source, join date, deals submitted, and last deal date</li>
+    <li>Program terms, the commission structure, and the offers you want promoted, as approved copy</li>
+    <li>SMS registration (A2P 10DLC) on the sending number, and your opt-in records</li>
+    <li>A named partner lead with authority to approve offers</li>
+    <li>Access to the Skool group for the weekly coaching call and events</li>
+    <li>The reporting source we'll use to calculate net</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Questions to settle together</h2>
+  <ul>
+    <li>Which brands or programs do the 10,000+ affiliates belong to, and is that the current count?</li>
+    <li>Are Skool members automatically affiliates, or a separate audience we invite into the program?</li>
+    <li>What's the system of record for deals and commissions, and can the agent read deal status?</li>
+    <li>Which products and programs can we mention by name, and which are off-limits?</li>
+  </ul>
+</section>
+
+<footer>Draft for discussion. Items in <span class="fill">highlighted brackets</span> are open and will be filled in together. Nothing here is a commitment to specific results.</footer>
+</div>

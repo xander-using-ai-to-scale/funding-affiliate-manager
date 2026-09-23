@@ -1,0 +1,562 @@
+{
+  "days": 30,
+  "population": 253,
+  "cohorts_before": {
+    "aff:active": 93,
+    "aff:applied": 12,
+    "aff:dead": 27,
+    "aff:dormant": 20,
+    "aff:producing": 45,
+    "aff:quiet": 56
+  },
+  "cohorts_after": {
+    "aff:active": 50,
+    "aff:dead": 28,
+    "aff:dormant": 24,
+    "aff:producing": 43,
+    "aff:quiet": 96,
+    "aff:reactivated": 12
+  },
+  "totals": {
+    "personal_sent": 152,
+    "bulk_enrolled": 435,
+    "replies": 65,
+    "deals_recorded": 17,
+    "tasks_worked": 57,
+    "newsletter_sends": 759,
+    "event_invites": 393,
+    "reply_intents": {
+      "wants_service": 15,
+      "check_back_later": 12,
+      "event_interest": 9,
+      "general_reply": 5,
+      "has_deal": 23,
+      "unsubscribe": 1
+    }
+  },
+  "projection_10k": {
+    "personal_sent": 6008,
+    "bulk_enrolled": 17194,
+    "replies": 2569,
+    "deals_recorded": 672,
+    "tasks_worked": 2253,
+    "newsletter_sends": 30000,
+    "event_invites": 15534,
+    "manager_approvals_per_day": "1 batch card for personal touches + 1 per campaign",
+    "personal_touches_per_day_at_cap": 40
+  },
+  "scorecard_end": {
+    "date": "2026-10-01",
+    "affiliates": 253,
+    "by_source": {
+      "skool": 85,
+      "referral": 39,
+      "linkedin": 31,
+      "webinar": 29,
+      "website": 27,
+      "facebook": 20,
+      "event": 11,
+      "legacy-import": 11
+    },
+    "cohorts": {
+      "aff:active": 50,
+      "aff:dead": 28,
+      "aff:dormant": 24,
+      "aff:producing": 43,
+      "aff:quiet": 96,
+      "aff:reactivated": 12
+    },
+    "submitted_deal_last_30d": 17,
+    "replied_last_30d": 60,
+    "touched_last_30d": 253,
+    "reply_rate_30d": 0.237,
+    "active_rate": 0.415,
+    "silent_90_plus": 52,
+    "dnc": 1,
+    "open_growth_services": 23
+  },
+  "samples": {
+    "drafts": [
+      {
+        "kind": "scheduled_followup",
+        "channel": "email",
+        "body": "Hi Priya,\n\nYou asked me to circle back after tax season, so here I am. How are things looking now?\n\nIf any of your credit repair pro clients need working capital, I can walk you through the fastest way to send the file over. And if it's still not the right time, just tell me when and I'll put it on my calendar."
+      },
+      {
+        "kind": "personal_checkin",
+        "channel": "sms",
+        "body": "Hey Ethan, it's been a minute! How's business going? Anything I can help with \u2014 resources, new programs, or help working your leads?"
+      },
+      {
+        "kind": "personal_checkin",
+        "channel": "email",
+        "body": "Hi Priya,\n\nIt's been a little while since we connected and I wanted to check in personally. How's business going on your side?\n\nIs there anything I can help with \u2014 resources for your CPA clients, our newest funding programs, or even help reactivating your own leads?\n\nJust hit reply \u2014 I read every one."
+      },
+      {
+        "kind": "personal_checkin",
+        "channel": "email",
+        "body": "Hi Derek,\n\nIt's been a little while since we connected and I wanted to check in personally. How's business going on your side?\n\nIs there anything I can help with \u2014 resources for your bookkeeper clients, our newest funding programs, or even help reactivating your own leads?\n\nJust hit reply \u2014 I read every one."
+      },
+      {
+        "kind": "personal_checkin",
+        "channel": "sms",
+        "body": "Hey Heather, it's been a minute! How's business going? Anything I can help with \u2014 resources, new programs, or help working your leads?"
+      },
+      {
+        "kind": "personal_checkin",
+        "channel": "email",
+        "body": "Hi Marcus,\n\nIt's been a little while since we connected and I wanted to check in personally. How's business going on your side?\n\nIs there anything I can help with \u2014 resources for your consultant clients, our newest funding programs, or even help reactivating your own leads?\n\nJust hit reply \u2014 I read every one."
+      }
+    ],
+    "triage": [
+      {
+        "reply": "I have about 2,000 old leads on my list I never worked. Can you help reactivate them?",
+        "intent": "wants_service",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated",
+          "growth service queued: reactivation"
+        ],
+        "alert": "Victor Diaz wants help with reactivation."
+      },
+      {
+        "reply": "Slammed with tax season right now, check back with me in a few weeks.",
+        "intent": "check_back_later",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated",
+          "follow-up task 2026-09-15"
+        ],
+        "alert": ""
+      },
+      {
+        "reply": "Yes \u2014 send me the training invite.",
+        "intent": "event_interest",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated",
+          "want:event"
+        ],
+        "alert": ""
+      },
+      {
+        "reply": "Thanks, appreciate you checking in!",
+        "intent": "general_reply",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated"
+        ],
+        "alert": ""
+      },
+      {
+        "reply": "I actually have a client who needs about $150k for equipment \u2014 can I send you the file?",
+        "intent": "has_deal",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated",
+          "deal:incoming + same-day call task"
+        ],
+        "alert": "\ud83d\udd25 Camila Powell has a deal. Same-day call task created."
+      },
+      {
+        "reply": "I actually have a client who needs about $150k for equipment \u2014 can I send you the file?",
+        "intent": "has_deal",
+        "actions": [
+          "last_reply_date=today",
+          "lifecycle \u2192 aff:reactivated",
+          "deal:incoming + same-day call task"
+        ],
+        "alert": "\ud83d\udd25 Tanya Long has a deal. Same-day call task created."
+      },
+      {
+        "reply": "I actually have a client who needs about $150k for equipment \u2014 can I send you the file?",
+        "intent": "has_deal",
+        "actions": [
+          "last_reply_date=today",
+          "deal:incoming + same-day call task"
+        ],
+        "alert": "\ud83d\udd25 Camila Bennett has a deal. Same-day call task created."
+      },
+      {
+        "reply": "Got a merchant for you, restaurant owner doing around 80k a month. How do I submit?",
+        "intent": "has_deal",
+        "actions": [
+          "last_reply_date=today",
+          "deal:incoming + same-day call task"
+        ],
+        "alert": "\ud83d\udd25 Brandon Price has a deal. Same-day call task created."
+      }
+    ],
+    "approval_cards": [
+      "*Approval needed* \u2014 22 daily personal touches (3 real, 19 simulated)\naction `act_366863531fa3` \u00b7 digest `684b01dbad56b4f7` \u00b7 demo mode: True\n1. Priya Brooks (email, simulated) \u2014 _Circling back, Priya_: Hi Priya, You asked me to circle back after tax season, so here I am. How are things looking now? If any of your credit repair pro clients need working capital, I can walk you thro\n2. Ethan Bell (sms, simulated): Hey Ethan, it's been a minute! How's business going? Anything I can help with \u2014 resources, new programs, or help working your leads? Reply STOP to opt out.\n3. Priya Russell (email, simulated) \u2014 _Priya, quick check-in_: Hi Priya, It's been a little while since we connected and I wanted to check in personally. How's business going on your side? Is there anything I can help with \u2014 resources for your\n4. Derek Powell (email, simulated) \u2014 _Derek, quick check-in_: Hi Derek, It's been a little while since we connected and I wanted to check in personally. How's business going on your side? Is there anything I can help with \u2014 resources for your\n5. Heather Powell (sms, simulated): Hey Heather, it's been a minute! How's business going? Anything I can help with \u2014 resources, new programs, or help working your leads? Reply STOP to opt out.\n6. Marcus Sanders (email, simulated) \u2014 _Marcus, quick check-in_: Hi Marcus, It's been a little while since we connected and I wanted to check in personally. How's business going on your side? Is there anything I can help with \u2014 resources for you\n7. Victor Diaz (sms, simulated): Hey Victor, it's been a minute! How's business going? Anything I can help with \u2014 resources, new programs, or help working your leads? Reply STOP to opt out.\n8. Brittany Russell (email, simulated) \u2014 _Brittany, quick check-in_: Hi Brittany, It's been a little while since we connected and I wanted to check in personally. How's business going on your side? Is there anything I can help with \u2014 resources for y\nReply *approve act_366863531fa3* to send, or tell me what to change.",
+      "*Approval needed* \u2014 9 daily personal touches (0 real, 9 simulated)\naction `act_878583e1a2be` \u00b7 digest `8b23eec3595554f1` \u00b7 demo mode: True\n1. Camila Bennett (email, simulated) \u2014 _Circling back, Camila_: Hi Camila, You asked me to circle back Has a deal to send \u2014 call today. They said: I actually have a client who needs about $150k for equipment \u2014 can I send you the file?, so here \n2. Priya Ross (email, simulated) \u2014 _Circling back, Priya_: Hi Priya, You asked me to circle back Has a deal to send \u2014 call today. They said: Got a merchant for you, restaurant owner doing around 80k a month. How do I submit?, so here I am.\n3. Victor Diaz (email, simulated) \u2014 _Circling back, Victor_: Hi Victor, You asked me to circle back Scope reactivation help for Victor Diaz. I have about 2,000 old leads on my list I never worked. Can you help reactivate them?, so here I am.\n4. Brandon Price (sms, simulated): Hey Brandon, circling back Has a deal to send \u2014 call today. They said: Got a merchant for you, restaurant owner doing around 80k a month. How do I submit? like you asked. Anything \n5. Brittany Nguyen (sms, simulated): Hey Brittany, circling back once her new office opens like you asked. Anything on your plate where funding could help one of your credit repair pro clients? Reply STOP to opt out.\n6. Tanya Diaz (sms, simulated): Hey Tanya, circling back after his vacation like you asked. Anything on your plate where funding could help one of your insurance agent clients? Reply STOP to opt out.\n7. Camila Powell (email, simulated) \u2014 _Circling back, Camila_: Hi Camila, You asked me to circle back Has a deal to send \u2014 call today. They said: I actually have a client who needs about $150k for equipment \u2014 can I send you the file?, so here \n8. Tanya Long (email, simulated) \u2014 _Circling back, Tanya_: Hi Tanya, You asked me to circle back Has a deal to send \u2014 call today. They said: I actually have a client who needs about $150k for equipment \u2014 can I send you the file?, so here I\nReply *approve act_878583e1a2be* to send, or tell me what to change."
+    ]
+  },
+  "timeline": [
+    {
+      "day": "2026-09-01",
+      "lifecycle_changes": 148,
+      "silent_90_plus": 47,
+      "personal_sent": 22,
+      "tasks_worked": 1,
+      "bulk_enrolled": {
+        "biweekly_touch": 69,
+        "dormant_reactivation": 7,
+        "monthly_offer": 48,
+        "onboarding": 12
+      },
+      "newsletter": 253,
+      "replies": {
+        "wants_service": 2,
+        "check_back_later": 4,
+        "event_interest": 2,
+        "general_reply": 3,
+        "has_deal": 5
+      },
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-02",
+      "lifecycle_changes": 4,
+      "silent_90_plus": 48,
+      "personal_sent": 9,
+      "tasks_worked": 9,
+      "bulk_enrolled": {},
+      "replies": {
+        "wants_service": 1,
+        "has_deal": 2
+      },
+      "deals_recorded": 2
+    },
+    {
+      "day": "2026-09-03",
+      "lifecycle_changes": 0,
+      "silent_90_plus": 47,
+      "personal_sent": 6,
+      "tasks_worked": 6,
+      "bulk_enrolled": {},
+      "replies": {
+        "event_interest": 1,
+        "wants_service": 1
+      },
+      "deals_recorded": 1
+    },
+    {
+      "day": "2026-09-04",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 46,
+      "personal_sent": 3,
+      "tasks_worked": 3,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 4
+    },
+    {
+      "day": "2026-09-05",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 47,
+      "personal_sent": 4,
+      "tasks_worked": 4,
+      "bulk_enrolled": {},
+      "replies": {
+        "check_back_later": 1
+      },
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-06",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 48,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-07",
+      "lifecycle_changes": 1,
+      "silent_90_plus": 48,
+      "personal_sent": 2,
+      "tasks_worked": 2,
+      "bulk_enrolled": {},
+      "replies": {
+        "has_deal": 1
+      },
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-08",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 48,
+      "personal_sent": 1,
+      "tasks_worked": 1,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-09",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 48,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 1
+    },
+    {
+      "day": "2026-09-10",
+      "lifecycle_changes": 0,
+      "silent_90_plus": 48,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "event_invites": 193,
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-11",
+      "lifecycle_changes": 4,
+      "silent_90_plus": 49,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-12",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 49,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-13",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 49,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-14",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 50,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-15",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 50,
+      "personal_sent": 40,
+      "tasks_worked": 4,
+      "bulk_enrolled": {
+        "biweekly_touch": 67,
+        "dormant_reactivation": 12,
+        "monthly_offer": 72
+      },
+      "newsletter": 253,
+      "replies": {
+        "wants_service": 5,
+        "check_back_later": 2,
+        "has_deal": 5,
+        "event_interest": 3,
+        "general_reply": 1
+      },
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-16",
+      "lifecycle_changes": 7,
+      "silent_90_plus": 49,
+      "personal_sent": 10,
+      "tasks_worked": 10,
+      "bulk_enrolled": {},
+      "replies": {
+        "wants_service": 2
+      },
+      "deals_recorded": 1
+    },
+    {
+      "day": "2026-09-17",
+      "lifecycle_changes": 3,
+      "silent_90_plus": 49,
+      "personal_sent": 2,
+      "tasks_worked": 2,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-18",
+      "lifecycle_changes": 7,
+      "silent_90_plus": 49,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 4
+    },
+    {
+      "day": "2026-09-19",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 50,
+      "personal_sent": 1,
+      "tasks_worked": 1,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-20",
+      "lifecycle_changes": 1,
+      "silent_90_plus": 51,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-21",
+      "lifecycle_changes": 6,
+      "silent_90_plus": 51,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-22",
+      "lifecycle_changes": 4,
+      "silent_90_plus": 52,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-23",
+      "lifecycle_changes": 3,
+      "silent_90_plus": 52,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-24",
+      "lifecycle_changes": 3,
+      "silent_90_plus": 53,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "event_invites": 200,
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-25",
+      "lifecycle_changes": 3,
+      "silent_90_plus": 53,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-26",
+      "lifecycle_changes": 7,
+      "silent_90_plus": 54,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-27",
+      "lifecycle_changes": 4,
+      "silent_90_plus": 54,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-28",
+      "lifecycle_changes": 5,
+      "silent_90_plus": 54,
+      "personal_sent": 0,
+      "tasks_worked": 0,
+      "bulk_enrolled": {},
+      "replies": {},
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-29",
+      "lifecycle_changes": 2,
+      "silent_90_plus": 54,
+      "personal_sent": 40,
+      "tasks_worked": 2,
+      "bulk_enrolled": {
+        "biweekly_touch": 90,
+        "dormant_reactivation": 15,
+        "monthly_offer": 43
+      },
+      "newsletter": 253,
+      "replies": {
+        "event_interest": 3,
+        "has_deal": 8,
+        "wants_service": 4,
+        "unsubscribe": 1,
+        "general_reply": 1,
+        "check_back_later": 5
+      },
+      "deals_recorded": 0
+    },
+    {
+      "day": "2026-09-30",
+      "lifecycle_changes": 13,
+      "silent_90_plus": 51,
+      "personal_sent": 12,
+      "tasks_worked": 12,
+      "bulk_enrolled": {},
+      "replies": {
+        "has_deal": 2
+      },
+      "deals_recorded": 4
+    }
+  ],
+  "cohorts_no_agent": {
+    "aff:active": 47,
+    "aff:applied": 12,
+    "aff:dead": 30,
+    "aff:dormant": 39,
+    "aff:producing": 1,
+    "aff:quiet": 124
+  },
+  "assumptions": {
+    "reply_rate_personal": 0.22,
+    "reply_rate_bulk": 0.07,
+    "deal_follow_through": "every 'has a deal' reply is submitted 1\u20133 days later",
+    "manager": "approves each daily batch (simulated as sim-manager)"
+  }
+}
