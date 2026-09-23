@@ -44,7 +44,7 @@ The 30-day simulation (253 synthetic affiliates, seed-reproducible, reply rates 
 | Quiet or dormant affiliates reactivated | 11 |
 | Producing on day 30, with vs. without the agent | 13 vs 1 |
 
-Rebuild the demo pack after a new run with `python3 scripts/build_demo_pack.py --sim sim-output`.
+Rebuild the demo pack after a new run, or after editing the proposal (the pack embeds a copy of it), with `python3 scripts/build_demo_pack.py --sim sim-output`.
 
 ## What's here
 

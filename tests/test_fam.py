@@ -185,6 +185,21 @@ class EngineFlows(unittest.TestCase):
         self.assertTrue(all(t["completed"] for t in self.ghl.list_tasks(self.synthetic)
                             if t["title"].startswith("CALL ")))
 
+    def test_manager_task_with_free_title_survives_a_followup_send(self):
+        self.engine.schedule_followup(self.tester, TODAY.isoformat(), "Tom wants a call about payouts",
+                                      title="Call Tom back", customer_touch=False)
+        self.assertFalse(self.engine.affiliate(self.tester).fields.get("next_touch_date"))
+        self.engine.schedule_followup(self.tester, TODAY.isoformat(), "after tax season")
+        action = self.engine.prepare_messages([{"contact_id": self.tester, "channel": "email", "subject": "Hi",
+                                                "body": "Circling back after tax season.",
+                                                "kind": "scheduled_followup"}])
+        self.engine.request_approval(action["action_id"])
+        self.engine.approve(action["action_id"], action["action_digest"], "Justin")
+        self.engine.execute(action["action_id"])
+        done = {t["title"]: t["completed"] for t in self.ghl.list_tasks(self.tester)}
+        self.assertFalse(done["Call Tom back"])
+        self.assertTrue(any(v for k, v in done.items() if k.startswith("Follow up with")))
+
     def test_kill_switch_blocks_execute(self):
         action = self.batch()
         self.engine.request_approval(action["action_id"])

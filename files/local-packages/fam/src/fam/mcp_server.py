@@ -136,8 +136,18 @@ def fam_note_add(contact_id: str, body: str) -> str:
 
 @server.tool(annotations=INTERNAL_WRITE)
 def fam_followup_schedule(contact_id: str, due_date: str, note: str, title: str = "") -> str:
-    """'Check back with me on X': create a GHL task + set next_touch_date so it lands in that day's queue."""
+    """The affiliate said "check back with me on X": create a GHL task and set next_touch_date, so a touch
+    TO THE AFFILIATE lands in that day's queue. For work the human does (call about a deal, answer a
+    question, scope a service), use fam_manager_task instead."""
     return response(lambda: FamEngine().schedule_followup(contact_id, due_date, note, title))
+
+
+@server.tool(annotations=INTERNAL_WRITE)
+def fam_manager_task(contact_id: str, due_date: str, note: str, title: str) -> str:
+    """A GHL task for the human manager on this affiliate (call about a deal, answer a commission question,
+    scope a growth service). It never queues a message to the affiliate, and sending a touch never closes it."""
+    return response(lambda: FamEngine().schedule_followup(contact_id, due_date, note, title,
+                                                          customer_touch=False))
 
 
 @server.tool(annotations=INTERNAL_WRITE)

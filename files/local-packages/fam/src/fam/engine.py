@@ -46,6 +46,7 @@ BANNED_PHRASES = (
 )
 SERVICES = {"funnel", "reactivation", "email_campaigns", "social", "crm_help"}
 MANAGER_TASK_PREFIXES = ("CALL ", "Answer ", "Scope ")  # human work; a sent touch never closes these
+MANAGER_TASK_MARK = "[For the manager]"
 SERVICE_LABELS = {"funnel": "a funnel page", "reactivation": "lead reactivation", "email_campaigns": "email campaigns",
                   "social": "social content", "crm_help": "CRM help"}
 BULK_WORKFLOW_KEYS = {"onboarding", "biweekly_touch", "monthly_offer", "dormant_reactivation",
@@ -272,7 +273,7 @@ class FamEngine:
             contact_id,
             title or f"Follow up with {aff.first_name} — {note[:60]}",
             datetime.combine(due, datetime.min.time(), self.tz).replace(hour=10).astimezone(UTC).isoformat(),
-            body=note,
+            body=note if customer_touch else f"{MANAGER_TASK_MARK} {note}",
             assigned_to=assignee,
         )
         if customer_touch:
@@ -602,8 +603,9 @@ class FamEngine:
             values["next_touch_date"] = ""
             for task in self.ghl.list_tasks(aff.id):
                 due = cadence.parse_day(task.get("dueDate"))
-                if (not task.get("completed") and due and due <= self.today()
-                        and not str(task.get("title", "")).startswith(MANAGER_TASK_PREFIXES)):
+                manager_work = (str(task.get("title", "")).startswith(MANAGER_TASK_PREFIXES)
+                                or str(task.get("body", "")).startswith(MANAGER_TASK_MARK))
+                if not task.get("completed") and due and due <= self.today() and not manager_work:
                     self.ghl.complete_task(aff.id, task["id"])
         self._set_fields(aff.id, values)
 

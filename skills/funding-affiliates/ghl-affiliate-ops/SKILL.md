@@ -11,7 +11,8 @@ description: "Operate the affiliate program inside GoHighLevel: find affiliates,
 | Find / read affiliates | `fam_affiliate_search`, `fam_affiliate_brief` | none (read) |
 | Who's due / cohorts | `fam_sweep`, `fam_daily_queue` | none |
 | Lifecycle tag + pipeline stage | `fam_lifecycle_set`, `fam_sweep_apply_lifecycle` | audited |
-| Note / "check back on X" task | `fam_note_add`, `fam_followup_schedule` | audited |
+| Note / "check back on X" (queues a touch to the affiliate) | `fam_note_add`, `fam_followup_schedule` | audited |
+| Task for the human: call about a deal, answer a question, scope a service (never messages the affiliate) | `fam_manager_task` | audited |
 | Deal came in | `fam_deal_record` | audited |
 | Message / enroll | `fam_messages_prepare` / `fam_enrollment_prepare` → card → approve → `fam_action_execute` | **human** |
 | Anything else in GHL (calendars, forms, opportunities, custom values, workflows list) | `ghl` MCP (`ghl_catalog`, `ghl_help`, `ghl`) | writes prompt the manager |

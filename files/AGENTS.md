@@ -30,7 +30,7 @@
 ## Replies (routines/reply-triage.prompt)
 
 `fam_reply_inbox`, then decide the intent yourself (the baseline is only a hint), then `fam_reply_record`
-with a follow-up date when they gave one. Draft the reply (`kind: "reply"`) and put it in the next approval
+with a follow-up date when they gave one. Work for the human (a call about a deal, a commission answer, scoping a service) goes in `fam_manager_task`, never `fam_followup_schedule`, which queues a message to the affiliate. Draft the reply (`kind: "reply"`) and put it in the next approval
 batch. Alert the manager immediately for `has_deal`, `commission_question`, and complaints.
 
 ## Hard rules
