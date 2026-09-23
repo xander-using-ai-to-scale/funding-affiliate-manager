@@ -22,6 +22,30 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
                                       Memory: Obsidian vault (Daily / Affiliates / Campaigns …)
 ```
 
+## Demo pack and docs
+
+| Doc | What |
+|---|---|
+| [`docs/demo-pack.html`](docs/demo-pack.html) | Everything in one page: headline stats, the simulation report, a browsable CRM of all 253 simulated affiliates, the partnership proposal, and how the agent is built |
+| [`docs/simulation-report.md`](docs/simulation-report.md) | The 30-day simulation report (`.json` alongside) |
+| [`docs/workflow-map.html`](docs/workflow-map.html) | The Funding Affiliate OS: lifecycle, cadence, daily loop, GHL build, guardrails |
+| [`docs/proposal-7ff.html`](docs/proposal-7ff.html) | Partnership proposal draft for 7 Figures Funding |
+| [`docs/DEMO-RUNBOOK.md`](docs/DEMO-RUNBOOK.md) | Step-by-step live demo, on the mock CRM today and on GoHighLevel later |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Droplet, Orgo, GHL, and Slack setup |
+
+The 30-day simulation (253 synthetic affiliates, seed-reproducible, reply rates of 22% personal and 7% bulk):
+
+| | Result |
+|---|---:|
+| Personal check-ins sent | 115 |
+| "Check back with me" follow-ups done on the day promised | 24 |
+| Replies turned into CRM actions | 59 |
+| Deals submitted after outreach | 12 |
+| Quiet or dormant affiliates reactivated | 11 |
+| Producing on day 30, with vs. without the agent | 13 vs 1 |
+
+Rebuild the demo pack after a new run with `python3 scripts/build_demo_pack.py --sim sim-output`.
+
 ## What's here
 
 | Path | What |
@@ -35,6 +59,7 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
 | `policies/permissions.json` | Tiers: read, CRM hygiene, outbound (approval), commercial (human-only), prohibited |
 | `hermes/config.template.yaml` | Hermes config, including the core/approvals MCP trust split |
 | `deploy/` | Droplet installer, vault sync |
+| `scripts/` | `build_demo_pack.py`: turns a simulation run into `docs/demo-pack.html` |
 | `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split) |
 
 ## Safety model

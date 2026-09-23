@@ -310,8 +310,11 @@ def classify_reply(text: str) -> dict[str, Any]:
     t = " " + (text or "").lower() + " "
     if any(k in t for k in (" stop ", " unsubscribe", "remove me", "do not contact", "don't text")):
         return {"intent": "unsubscribe", "urgency": "high"}
-    if any(k in t for k in ("deal", "client needs", "client who needs", "have a client", "got a client", "merchant",
-                            "file for you", "send you the file", "send you a file", "referral for you", "submit",
+    # Offering a deal, not merely mentioning one: "when do I get paid on funded deals?" is a commission
+    # question and "how do I submit a deal?" is a question — neither is new deal flow.
+    if any(k in t for k in ("deal for you", "have a deal", "got a deal", "deal to send", "deal to submit",
+                            "client needs", "client who needs", "have a client", "got a client", "merchant",
+                            "file for you", "send you the file", "send you a file", "referral for you",
                             "needs funding", "needs capital", "looking for funding", "needs about $")):
         return {"intent": "has_deal", "urgency": "high"}
     if any(k in t for k in ("commission", "paid", "payout", "split", "comp ")):

@@ -1,0 +1,490 @@
+<title>7FF Affiliate Demo Pack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --ground:#f4f7f5; --panel:#ffffff; --ink:#0e1a16; --ink-2:#4a5a55; --ink-3:#6b7a75;
+  --line:#d6dfdb; --accent:#0f6b4f; --accent-soft:#e2f0ea; --chip:#eef2f0;
+  --s-without:#eb6834; --s-with:#2a78d6; --grid:#e3e9e6;
+  --fill:#fff4d6; --fill-ink:#6b4a00; --fill-line:#e8cf8a;
+  --hot:#b3261e; --hot-soft:#fbe9e7; --blue-soft:#e6effa; --blue-ink:#1f5aa6;
+  --display:"Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8f9d98;
+    --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+    --s-without:#d95926; --s-with:#3987e5; --grid:#26302c;
+    --fill:#3a2f12; --fill-ink:#f2d58a; --fill-line:#6b5520;
+    --hot:#ff8a80; --hot-soft:#3a1d1b; --blue-soft:#172538; --blue-ink:#8bb8f0;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ground:#0f1513; --panel:#161e1b; --ink:#e7efeb; --ink-2:#aebcb6; --ink-3:#8f9d98;
+  --line:#2a3531; --accent:#43c08e; --accent-soft:#17312a; --chip:#1d2723;
+  --s-without:#d95926; --s-with:#3987e5; --grid:#26302c;
+  --fill:#3a2f12; --fill-ink:#f2d58a; --fill-line:#6b5520;
+  --hot:#ff8a80; --hot-soft:#3a1d1b; --blue-soft:#172538; --blue-ink:#8bb8f0;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font:15px/1.6 var(--body);padding-inline:16px;padding-block:0 72px}
+.wrap{max-width:1120px;margin:0 auto}
+a{color:var(--accent)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header.top{padding-block:40px 20px;display:grid;gap:12px}
+.eyebrow{font:500 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(32px,5.4vw,54px)/1.03 var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.lede{font-size:17px;color:var(--ink-2);max-width:68ch;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px/1.4 var(--mono);color:var(--ink-3)}
+.facts b{color:var(--ink);font-weight:500}
+nav.tabs{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ground);border-bottom:1px solid var(--line);overflow-x:auto}
+nav.tabs .row{display:flex;gap:2px;padding-block:8px;white-space:nowrap}
+nav.tabs button{background:none;border:0;border-radius:7px;padding:8px 12px;font-size:14px;font-weight:500;color:var(--ink-2);cursor:pointer}
+nav.tabs button:hover{background:var(--chip);color:var(--ink)}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--ground)}
+section.panel-tab{padding-block:30px 8px}
+h2{font:700 28px/1.15 var(--display);letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+h3{font:600 16px/1.3 var(--body);margin:0 0 6px}
+.sub{color:var(--ink-2);margin:0 0 20px;max-width:72ch}
+p{margin:0 0 12px}
+.muted{color:var(--ink-3)}
+.note{font-size:13px;color:var(--ink-3);margin-top:10px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.stack{display:grid;gap:16px}
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+.stat b{display:block;font:700 34px/1.05 var(--display);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.stat b small{font:500 15px var(--body);color:var(--ink-3);letter-spacing:0}
+.stat span{display:block;margin-top:6px;font-size:13px;color:var(--ink-2);line-height:1.4}
+.stat.lead{background:var(--accent-soft);border-color:transparent}
+.stat.lead b{color:var(--accent)}
+/* pack cards */
+.go{display:grid;gap:4px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;cursor:pointer}
+.go:hover{border-color:var(--accent)}
+.go .k{font:500 11px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--accent)}
+.go h3{margin:4px 0 2px}
+.go span:last-child{color:var(--ink-2);font-size:14px}
+/* tables */
+.tablebox{overflow-x:auto;border:1px solid var(--line);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 12px/1.3 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3);background:var(--chip)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+/* charts */
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart .ttl{font-weight:600}
+.chart .cap{font-size:13px;color:var(--ink-3);margin-bottom:8px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--ink-2);margin-block:6px 4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--ground);font:12.5px/1.4 var(--body);padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-115%);opacity:0;transition:opacity .12s;z-index:3}
+@media (prefers-reduced-motion:reduce){.tip{transition:none}}
+.hbar{display:grid;grid-template-columns:minmax(120px,190px) 1fr 38px;gap:10px;align-items:center;padding-block:6px;border-bottom:1px solid var(--line)}
+.hbar:last-child{border-bottom:0}
+.hbar .track{height:10px;background:var(--chip);border-radius:0 4px 4px 0;overflow:hidden}
+.hbar .fillbar{height:100%;background:var(--accent);border-radius:0 4px 4px 0}
+.hbar .what{grid-column:1/-1;font-size:13px;color:var(--ink-3);margin-top:-2px}
+.hbar b{font-variant-numeric:tabular-nums;text-align:right}
+code,.tag{font:500 12.5px/1 var(--mono)}
+.tag{display:inline-block;padding:4px 7px;border-radius:5px;background:var(--chip);border:1px solid var(--line);margin:2px 2px 2px 0}
+.msg{white-space:pre-wrap;font-size:14px;line-height:1.55;background:var(--chip);border-radius:8px;padding:12px;margin:0}
+.msg .subj{display:block;font-weight:600;margin-bottom:6px}
+pre.card{white-space:pre-wrap;font:12.5px/1.55 var(--mono);background:var(--chip);border-radius:8px;padding:14px;margin:0;overflow-x:auto;max-height:420px;overflow-y:auto}
+/* crm */
+.crm{display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:16px;align-items:start}
+@media (max-width:820px){.crm{grid-template-columns:1fr}}
+.controls{display:grid;gap:10px;margin-bottom:12px}
+.controls input,.controls select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--ink);font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chipbtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer}
+.chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.chipbtn span{font-variant-numeric:tabular-nums;opacity:.7;margin-left:4px}
+.list{background:var(--panel);border:1px solid var(--line);border-radius:10px;max-height:680px;overflow-y:auto}
+.list button{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:10px 12px;cursor:pointer}
+.list button:hover{background:var(--chip)}
+.list button[aria-current="true"]{background:var(--accent-soft)}
+.list .nm{font-weight:600}
+.list .meta{grid-column:1/2;font-size:12.5px;color:var(--ink-3)}
+.list .count{font:12px var(--mono);color:var(--ink-3)}
+.lc{display:inline-block;font:600 11px/1 var(--mono);padding:4px 7px;border-radius:999px;background:var(--chip);color:var(--ink-2);text-transform:lowercase;white-space:nowrap}
+.lc.producing,.lc.reactivated{background:var(--accent-soft);color:var(--accent)}
+.lc.quiet{background:var(--fill);color:var(--fill-ink)}
+.lc.hot{background:var(--hot-soft);color:var(--hot)}
+.lc.test{background:var(--blue-soft);color:var(--blue-ink)}
+.detail h3{font:700 24px/1.15 var(--display);margin:0}
+.dhead{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:4px}
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 18px;margin:14px 0 18px;padding:14px 0;border-block:1px solid var(--line)}
+.fields div span{display:block;font:500 11px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.fields div b{font-weight:500;font-variant-numeric:tabular-nums}
+ol.tl{list-style:none;margin:0;padding:0;display:grid;gap:0}
+ol.tl li{display:grid;grid-template-columns:62px 1fr;gap:12px;padding-block:9px;border-bottom:1px dashed var(--line)}
+ol.tl li:last-child{border-bottom:0}
+ol.tl .d{font:12px/1.6 var(--mono);color:var(--ink-3)}
+ol.tl .k{font:600 11px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3);display:block;margin-bottom:5px}
+ol.tl .k.reply{color:var(--accent)}
+ol.tl .k.deal{color:var(--accent)}
+ol.tl .k.task{color:var(--fill-ink)}
+ol.tl .k.optout{color:var(--hot)}
+ol.tl .t{font-size:14px}
+ol.tl .t.quote{font-style:italic}
+.wfline{color:var(--ink-2);font-size:14px}
+/* proposal (embedded) */
+.proposal{max-width:860px}
+.proposal header.top{padding-block:8px 20px;border-bottom:1px solid var(--line)}
+.proposal .eyebrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.proposal .draft{background:var(--fill);color:var(--fill-ink);border:1px solid var(--fill-line);padding:5px 8px;border-radius:999px;letter-spacing:.06em}
+.proposal h1{font-size:clamp(28px,4.4vw,42px)}
+.proposal .meta{margin-top:14px;font:13px/1.5 var(--mono);color:var(--ink-3)}
+.proposal section{padding-block:28px 4px}
+.proposal h2{font-size:24px;margin-bottom:12px}
+.proposal ul{margin:0 0 14px;padding-left:20px}
+.proposal li{margin:4px 0}
+.proposal .fill{background:var(--fill);color:var(--fill-ink);border:1px dashed var(--fill-line);border-radius:4px;padding:0 5px;font:500 .92em/1.4 var(--mono)}
+.proposal .big{display:grid;gap:18px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:22px}
+.proposal .big p{margin:0}
+.proposal .grid2{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
+.proposal .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}
+.proposal .card .role{font:500 11px/1 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);margin-bottom:8px;display:block}
+.proposal .card p:last-child,.proposal .card ul:last-child{margin-bottom:0}
+.proposal ol.ms{list-style:none;counter-reset:m;margin:0;padding:0;display:grid;gap:10px}
+.proposal ol.ms li{counter-increment:m;display:grid;grid-template-columns:44px 1fr;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:0}
+.proposal ol.ms li::before{content:"M" counter(m);font:600 13px/32px var(--mono);text-align:center;background:var(--accent-soft);color:var(--accent);border-radius:7px;height:32px}
+.proposal ol.ms .done{font:500 13px/1.5 var(--body);color:var(--ink-3);display:block;margin-top:4px}
+.proposal .check{padding-left:22px}
+.proposal .check li{list-style:none;position:relative;padding-left:4px}
+.proposal .check li::before{content:"";position:absolute;left:-20px;top:.55em;width:10px;height:10px;border:1.5px solid var(--accent);border-radius:3px}
+.proposal .quote{border-left:3px solid var(--accent);padding:4px 0 4px 14px;color:var(--ink-2);font-style:italic;margin:0 0 14px}
+.proposal .note{font-size:14px}
+.proposal footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+/* built */
+dl.arch{display:grid;grid-template-columns:max-content 1fr;gap:10px 18px;margin:0}
+dl.arch dt{font:500 12px/1.6 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+dl.arch dd{margin:0}
+@media (max-width:520px){dl.arch{grid-template-columns:1fr;gap:2px}dl.arch dd{margin-bottom:10px}}
+footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">7 Figures Funding · Funding Affiliate Manager</div>
+  <h1>The affiliate manager, shown end to end</h1>
+  <p class="lede">An AI Funding Affiliate Manager that keeps 10,000+ funding affiliates warm in GoHighLevel, with a human approving every message. This pack has the 30-day simulation, the CRM it leaves behind, the partnership proposal, and how it's built.</p>
+  <div class="facts"><span>Simulation <b id="f-pop">253 affiliates · 30 days</b></span><span>Engine <b>the production code</b></span><span>Data <b>synthetic, nobody contacted</b></span></div>
+</header>
+
+<nav class="tabs" aria-label="Sections"><div class="row" role="tablist">
+  <button role="tab" id="t-overview" aria-controls="overview" aria-selected="true">Overview</button>
+  <button role="tab" id="t-simulation" aria-controls="simulation" aria-selected="false">Simulation report</button>
+  <button role="tab" id="t-crm" aria-controls="crm" aria-selected="false">Inside the CRM</button>
+  <button role="tab" id="t-proposal" aria-controls="proposal" aria-selected="false">Partnership proposal</button>
+  <button role="tab" id="t-built" aria-controls="built" aria-selected="false">How it's built</button>
+</div></nav>
+
+<section class="panel-tab" id="overview" role="tabpanel" aria-labelledby="t-overview">
+  <h2>Thirty days of the agent, in numbers</h2>
+  <p class="sub">A synthetic affiliate program run day by day through the same code the live agent uses: the morning sweep, one approval card a day, sends, reply handling, deals, the newsletter and trainings.</p>
+  <div class="stats" id="stats"></div>
+  <p class="note" id="assume"></p>
+  <h2 style="margin-top:34px">What's in this pack</h2>
+  <p class="sub">Everything in one place. Each tab stands on its own.</p>
+  <div class="grid2">
+    <button class="go" data-go="simulation"><span class="k">Simulation report</span><h3>What the agent did, day by day</h3><span>Check-ins, follow-ups, replies, deals, the with/without comparison, and a projection to 10,000 affiliates.</span></button>
+    <button class="go" data-go="crm"><span class="k">Inside the CRM</span><h3>Every affiliate's month, record by record</h3><span>Browse all 253 affiliates the way GoHighLevel will hold them: tags, fields, tasks, messages and replies.</span></button>
+    <button class="go" data-go="proposal"><span class="k">Partnership proposal</span><h3>How we'd run it with 7FF</h3><span>The team, what's included, the Growth Kit, milestones, and what we need from you.</span></button>
+    <button class="go" data-go="built"><span class="k">How it's built</span><h3>The agent, its computer, and its guardrails</h3><span>Where it runs, what it can touch, what always needs a human, and its memory.</span></button>
+  </div>
+  <p class="note">The full workflow map is on its own page: <a href="https://claude.ai/artifact/Ligihb8EmD6vb9oRvZhMoU">Funding Affiliate OS</a>.</p>
+</section>
+
+<section class="panel-tab" id="simulation" role="tabpanel" aria-labelledby="t-simulation" hidden>
+  <h2>Simulation report</h2>
+  <p class="sub" id="sim-sub"></p>
+  <div class="grid2">
+    <div class="box chart" id="c-personal"><div class="ttl">Personal check-ins sent per day</div><div class="cap">Drafted by the agent and approved as one batch each morning</div><svg role="img"></svg></div>
+    <div class="box chart" id="c-replies"><div class="ttl">Replies handled per day</div><div class="cap">Each one turned into tags, notes, and tasks the same day</div><svg role="img"></svg></div>
+  </div>
+  <div class="box chart" id="c-life" style="margin-top:16px">
+    <div class="ttl">Where the same 253 affiliates end up on day 30</div>
+    <div class="cap">The no-outreach side assumes nobody replies or sends a deal on their own, so it is a floor, not a forecast.</div>
+    <div class="legend"><span><i style="background:var(--s-without)"></i>Without the agent</span><span><i style="background:var(--s-with)"></i>With the agent</span></div>
+    <svg role="img" aria-label="Lifecycle stage counts on day 30 with and without the agent"></svg>
+  </div>
+  <div class="tablebox" style="margin-top:12px"><table>
+    <thead><tr><th>Lifecycle</th><th class="num">Day 0</th><th class="num">Day 30, without</th><th class="num">Day 30, with the agent</th></tr></thead>
+    <tbody id="life-rows"></tbody></table></div>
+  <h2 style="margin-top:34px">What the agent did</h2>
+  <div class="tablebox"><table>
+    <thead><tr><th>Activity</th><th class="num">In the simulation</th><th class="num">Projected at 10,000</th></tr></thead>
+    <tbody id="did-rows"></tbody></table></div>
+  <p class="note">The projection scales the simulation linearly. Personal check-ins are capped at 40 a day per manager, so at full scale they grow with manager seats rather than linearly.</p>
+  <h2 style="margin-top:34px">Every reply, routed</h2>
+  <p class="sub">What affiliates said, and what happened in the CRM without anyone lifting a finger.</p>
+  <div class="box" id="intents"></div>
+  <h2 style="margin-top:34px">In the agent's words</h2>
+  <div class="grid2">
+    <div class="stack" id="drafts"></div>
+    <div><h3>A morning approval card</h3><p class="muted" style="font-size:14px">One card a day in Slack. Nothing leaves until a person approves it.</p><pre class="card" id="card"></pre></div>
+  </div>
+</section>
+
+<section class="panel-tab" id="crm" role="tabpanel" aria-labelledby="t-crm" hidden>
+  <h2>Inside the CRM on day 30</h2>
+  <p class="sub">This is the simulated CRM exactly as the agent left it: every affiliate's tags, profile fields, tasks, messages and replies. It's the same structure GoHighLevel holds once the agent runs there. All affiliates are synthetic, and messages to them were logged, not delivered.</p>
+  <div class="crm">
+    <div>
+      <div class="controls">
+        <label class="muted" for="q" style="font-size:13px">Search affiliates</label>
+        <input id="q" type="search" placeholder="Name or niche" autocomplete="off">
+        <div class="chips" id="lc-chips" aria-label="Filter by lifecycle"></div>
+        <label class="muted" for="src" style="font-size:13px">Source</label>
+        <select id="src"></select>
+      </div>
+      <div class="list" id="list" aria-label="Affiliates"></div>
+      <p class="note" id="list-count"></p>
+    </div>
+    <div class="box detail" id="detail" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="panel-tab" id="proposal" role="tabpanel" aria-labelledby="t-proposal" hidden>
+  <div class="proposal"><!--__PROPOSAL__--></div>
+</section>
+
+<section class="panel-tab" id="built" role="tabpanel" aria-labelledby="t-built" hidden>
+  <h2>How it's built</h2>
+  <p class="sub">One agent with its own server, its own computer, and a memory you can open, working inside your GoHighLevel under a human's approval.</p>
+  <div class="grid2">
+    <div class="box"><dl class="arch">
+      <dt>Brain</dt><dd>Hermes agent on its own DigitalOcean server, running Claude</dd>
+      <dt>Hands</dt><dd>Its own Orgo cloud desktop, with a browser for the GoHighLevel screens, LinkedIn and Skool</dd>
+      <dt>CRM</dt><dd>GoHighLevel through the API: contacts, tags, fields, notes, tasks, conversations, workflows, pipelines</dd>
+      <dt>Research</dt><dd>Super Browser and Browser Box. The agent researches affiliates itself; no paid data vendors</dd>
+      <dt>Memory</dt><dd>An Obsidian vault: a note for every day, every affiliate and every campaign</dd>
+      <dt>Channel</dt><dd>A Slack app where the manager talks to it and approves each morning's card</dd>
+    </dl></div>
+    <div class="box"><h3>Always a human's call</h3><ul style="margin:0;padding-left:20px">
+      <li>Every message and every campaign enrollment is frozen, shown on an approval card, and sent only after a person approves it. The agent cannot approve its own sends.</li>
+      <li>Recurring cadence can run under a standing approval that has a daily cap and an expiry, and can be revoked at any time.</li>
+      <li>Commissions, payouts and program terms are never changed by the agent.</li>
+      <li>No approval, rate or income promises. "Guaranteed" and "no credit check" are blocked before anything sends.</li>
+      <li>SMS carries opt-out language and only goes out during daytime hours. STOP means never contacted again.</li>
+      <li>One command freezes all outbound. Every action is logged.</li>
+    </ul></div>
+  </div>
+  <h2 style="margin-top:34px">Its memory, one day</h2>
+  <p class="sub" id="vault-sub"></p>
+  <pre class="card" id="vault"></pre>
+  <h2 style="margin-top:34px">Source and reruns</h2>
+  <p>The agent, this simulation and every page in this pack come from one repository: <a href="https://github.com/jbellsolutions/funding-affiliate-manager">jbellsolutions/funding-affiliate-manager</a> (private). The simulation is reproducible: the same seed gives the same numbers.</p>
+  <pre class="card">fam sim seed --count 250 --start 2026-09-01 --out sim-output
+fam sim run  --days 30  --start 2026-09-01 --out sim-output
+python3 scripts/build_demo_pack.py --sim sim-output</pre>
+</section>
+
+<footer class="page">Funding Affiliate Manager · built on Hermes, GoHighLevel, Orgo, Super Browser, Browser Box and Obsidian. Simulated data; nobody was contacted.</footer>
+</div>
+
+<script>
+const DATA = /*__DATA__*/null;
+(function(){
+  const R = DATA.report, T = R.totals, A = R.cohorts_after, B = R.cohorts_no_agent, B0 = R.cohorts_before, P = R.projection_10k;
+  const $ = (s, el=document) => el.querySelector(s);
+  const fmt = n => Number(n).toLocaleString('en-US');
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const g = (o,k) => o[k] || 0;
+  const monthDay = iso => { const d = new Date(iso + 'T12:00:00Z'); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',timeZone:'UTC'}); };
+
+  // tabs
+  const tabs = [...document.querySelectorAll('[role=tab]')];
+  function show(id, focus){
+    tabs.forEach(t => { const on = t.getAttribute('aria-controls') === id; t.setAttribute('aria-selected', on); document.getElementById(t.getAttribute('aria-controls')).hidden = !on; });
+    if (focus) window.scrollTo({top: 0});
+    try { history.replaceState(null, '', '#' + id); } catch(e) {}
+    drawCharts();
+  }
+  tabs.forEach(t => t.addEventListener('click', () => show(t.getAttribute('aria-controls'), false)));
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => show(b.dataset.go, true)));
+  const start = (location.hash || '').slice(1);
+
+  // overview
+  $('#f-pop').textContent = `${R.population} affiliates · ${R.days} days`;
+  const stats = [
+    [fmt(T.personal_sent), 'personal check-ins, each drafted for one person', true],
+    [fmt(T.tasks_worked), '"check back with me" follow-ups done on the day promised'],
+    [fmt(T.replies), 'replies turned into CRM actions'],
+    [fmt(T.deals_recorded), 'deals submitted after outreach'],
+    [fmt(g(A,'aff:reactivated')), 'quiet or dormant affiliates reactivated'],
+    [`${g(A,'aff:producing')}<small> vs ${g(B,'aff:producing')}</small>`, 'affiliates producing on day 30, with vs without the agent'],
+  ];
+  $('#stats').innerHTML = stats.map(([n,l,lead]) => `<div class="stat${lead?' lead':''}"><b>${n}</b><span>${esc(l)}</span></div>`).join('');
+  $('#assume').textContent = `Reply rates are assumptions: ${Math.round(R.assumptions.reply_rate_personal*100)}% for personal messages and ${Math.round(R.assumptions.reply_rate_bulk*100)}% for bulk. Every "I have a deal" reply is assumed to be submitted 1–3 days later.`;
+
+  // simulation copy + tables
+  $('#sim-sub').textContent = `${R.population} synthetic affiliates, ${R.days} days starting ${monthDay(R.timeline[0].day)}. Reply rates are assumptions (${Math.round(R.assumptions.reply_rate_personal*100)}% personal, ${Math.round(R.assumptions.reply_rate_bulk*100)}% bulk), stated so you can judge them. The run is reproducible: the same seed gives the same numbers.`;
+  const LC = [['aff:applied','Applied'],['aff:active','Active'],['aff:producing','Producing'],['aff:reactivated','Reactivated'],['aff:quiet','Quiet'],['aff:dormant','Dormant'],['aff:dead','Dead']];
+  $('#life-rows').innerHTML = LC.map(([k,l]) => `<tr><td>${l}</td><td class="num">${g(B0,k)}</td><td class="num">${g(B,k)}</td><td class="num">${g(A,k)}</td></tr>`).join('');
+  const did = [
+    ['Personal check-ins and follow-ups sent', T.personal_sent, P.personal_sent],
+    ['Cadence enrollments (bi-weekly touch, monthly offer, reactivation)', T.bulk_enrolled, P.bulk_enrolled],
+    ['Newsletter deliveries', T.newsletter_sends, P.newsletter_sends],
+    ['Training invites', T.event_invites, P.event_invites],
+    ['"Check back with me" follow-ups done on their day', T.tasks_worked, P.tasks_worked],
+    ['Replies handled', T.replies, P.replies],
+    ['Deals submitted after outreach', T.deals_recorded, P.deals_recorded],
+  ];
+  $('#did-rows').innerHTML = did.map(([l,a,b]) => `<tr><td>${esc(l)}</td><td class="num">${fmt(a)}</td><td class="num">${fmt(b)}</td></tr>`).join('');
+
+  const INTENT = {
+    has_deal: ['Has a deal to send', 'Manager alerted, same-day call task, tagged deal:incoming'],
+    check_back_later: ['"Check back with me"', 'Note, a follow-up task on the date they gave, and it lands in that morning\'s queue'],
+    wants_service: ['Wants growth help', 'Tagged (funnel, reactivation, social, CRM), a Growth Services card, and a scoping task'],
+    event_interest: ['Wants the training', 'Tagged want:event and sent the next invite'],
+    commission_question: ['Commission question', 'Task for a human to answer. The agent never states terms'],
+    question: ['Other question', 'Task for the manager to answer the same day'],
+    general_reply: ['General reply', 'Logged, and they count as engaged again'],
+    unsubscribe: ['STOP', 'Do-not-contact, permanently'],
+  };
+  const ints = Object.entries(T.reply_intents).sort((a,b) => b[1]-a[1]);
+  const maxI = Math.max(...ints.map(i => i[1]));
+  $('#intents').innerHTML = ints.map(([k,v]) => `<div class="hbar"><span>${esc((INTENT[k]||[k])[0])}</span><div class="track"><div class="fillbar" style="width:${(v/maxI*100).toFixed(1)}%"></div></div><b>${v}</b><span class="what">${esc((INTENT[k]||['',''])[1])}</span></div>`).join('');
+
+  const drafts = (R.samples.drafts || []).slice(0,3);
+  $('#drafts').innerHTML = `<h3>Drafts it wrote</h3>` + drafts.map(d => `<div><span class="k muted" style="font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase">${esc(d.kind.replace('_',' '))} · ${esc(d.channel)}</span><p class="msg" style="margin-top:6px">${esc(d.body)}</p></div>`).join('');
+  $('#card').textContent = (R.samples.approval_cards || [''])[0];
+
+  // charts
+  let tip;
+  function tipAt(box, x, y, html){ if(!tip){ tip = document.createElement('div'); tip.className='tip'; } box.appendChild(tip); tip.style.left = x+'px'; tip.style.top = y+'px'; tip.innerHTML = html; tip.style.opacity = 1; }
+  function hideTip(){ if (tip) tip.style.opacity = 0; }
+  const NS = 'http://www.w3.org/2000/svg';
+  function add(svg, tag, attrs){ const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); svg.appendChild(e); return e; }
+  function niceMax(v){ if (v <= 5) return 5; const p = Math.pow(10, Math.floor(Math.log10(v))); for (const m of [1,2,2.5,5,10]) if (m*p >= v) return m*p; return 10*p; }
+  function roundTop(x, y, w, h, r){ r = Math.min(r, h/2, w/2); return `M${x},${y+h}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${y+h}Z`; }
+
+  function daily(id, values, labels, color, unit){
+    const box = document.getElementById(id), svg = box.querySelector('svg'); svg.innerHTML = '';
+    const W = 520, H = 200, L = 30, Rr = 6, Tt = 10, Bb = 26, pw = W-L-Rr, ph = H-Tt-Bb, n = values.length;
+    const max = niceMax(Math.max(1, ...values)), step = max/ (max <= 5 ? max : 4);
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const y = v => Tt + ph - v/max*ph;
+    for (let t = 0; t <= max + 1e-9; t += step){ add(svg,'line',{x1:L,x2:W-Rr,y1:y(t),y2:y(t),stroke:'var(--grid)','stroke-width':1}); const tx = add(svg,'text',{x:L-6,y:y(t)+4,'text-anchor':'end','font-size':11,fill:'var(--ink-3)','font-family':'IBM Plex Mono, monospace'}); tx.textContent = Math.round(t); }
+    const band = pw/n, bw = Math.max(3, band - 3);
+    values.forEach((v,i) => {
+      const x = L + i*band + (band-bw)/2, h = v/max*ph;
+      if (h > 0) add(svg,'path',{d:roundTop(x, Tt+ph-h, bw, h, 3), fill:color});
+      const hit = add(svg,'rect',{x:L+i*band, y:Tt, width:band, height:ph, fill:'transparent', tabindex:0, 'aria-label':`${labels[i]}: ${v} ${unit}`});
+      const on = () => { const bb = svg.getBoundingClientRect(), cb = box.getBoundingClientRect(), s = bb.width/W; tipAt(box, bb.left-cb.left+(x+bw/2)*s, bb.top-cb.top+(Tt+ph-h)*s-4, `<b>${labels[i]}</b> · ${v} ${unit}`); };
+      hit.addEventListener('mouseenter', on); hit.addEventListener('focus', on); hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+      if (i % 7 === 0){ const tx = add(svg,'text',{x:L+i*band+band/2,y:H-8,'text-anchor':'middle','font-size':11,fill:'var(--ink-3)','font-family':'IBM Plex Sans, sans-serif'}); tx.textContent = labels[i]; }
+    });
+    add(svg,'line',{x1:L,x2:W-Rr,y1:Tt+ph,y2:Tt+ph,stroke:'var(--ink-3)','stroke-width':1});
+  }
+
+  function lifecycle(){
+    const box = document.getElementById('c-life'), svg = box.querySelector('svg'); svg.innerHTML = '';
+    const rows = LC.map(([k,l]) => [l, g(B,k), g(A,k)]);
+    const W = 760, H = 280, L = 36, Rr = 8, Tt = 24, Bb = 34, pw = W-L-Rr, ph = H-Tt-Bb;
+    const max = niceMax(Math.max(...rows.map(r => Math.max(r[1], r[2])))), step = max/5;
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const y = v => Tt + ph - v/max*ph;
+    for (let t = 0; t <= max + 1e-9; t += step){ add(svg,'line',{x1:L,x2:W-Rr,y1:y(t),y2:y(t),stroke:'var(--grid)','stroke-width':1}); const tx = add(svg,'text',{x:L-8,y:y(t)+4,'text-anchor':'end','font-size':11,fill:'var(--ink-3)','font-family':'IBM Plex Mono, monospace'}); tx.textContent = Math.round(t); }
+    const band = pw/rows.length, bw = Math.min(30, (band-18)/2);
+    rows.forEach((r,i) => {
+      const cx = L + band*i + band/2;
+      [[r[1],'var(--s-without)','without the agent',cx-bw-1],[r[2],'var(--s-with)','with the agent',cx+1]].forEach(([v,c,lab,x]) => {
+        const h = v/max*ph; if (h > 0) add(svg,'path',{d:roundTop(x, Tt+ph-h, bw, h, 4), fill:c});
+        const hit = add(svg,'rect',{x:x-3,y:Tt,width:bw+6,height:ph,fill:'transparent',tabindex:0,'aria-label':`${r[0]}, ${lab}: ${v}`});
+        const on = () => { const bb = svg.getBoundingClientRect(), cb = box.getBoundingClientRect(), s = bb.width/W; tipAt(box, bb.left-cb.left+(x+bw/2)*s, bb.top-cb.top+(Tt+ph-h)*s-4, `<b>${r[0]}</b> · ${lab}: ${v}`); };
+        hit.addEventListener('mouseenter', on); hit.addEventListener('focus', on); hit.addEventListener('mouseleave', hideTip); hit.addEventListener('blur', hideTip);
+      });
+      const tx = add(svg,'text',{x:cx,y:H-12,'text-anchor':'middle','font-size':12,fill:'var(--ink-2)','font-family':'IBM Plex Sans, sans-serif'}); tx.textContent = r[0];
+      if (r[0] === 'Producing' || r[0] === 'Quiet'){ const lb = add(svg,'text',{x:cx,y:y(Math.max(r[1],r[2]))-8,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)','font-family':'IBM Plex Sans, sans-serif'}); lb.textContent = `${r[1]} → ${r[2]}`; }
+    });
+    add(svg,'line',{x1:L,x2:W-Rr,y1:Tt+ph,y2:Tt+ph,stroke:'var(--ink-3)','stroke-width':1});
+  }
+
+  let drawn = false;
+  function drawCharts(){
+    if (drawn || document.getElementById('simulation').hidden) return;
+    drawn = true;
+    const labels = R.timeline.map(t => monthDay(t.day));
+    daily('c-personal', R.timeline.map(t => t.personal_sent || 0), labels, 'var(--accent)', 'check-ins');
+    daily('c-replies', R.timeline.map(t => Object.values(t.replies || {}).reduce((a,b) => a+b, 0)), labels, 'var(--accent)', 'replies');
+    lifecycle();
+  }
+
+  // CRM browser
+  const C = DATA.crm, byId = Object.fromEntries(C.map(c => [c.id, c]));
+  const LCN = ['producing','reactivated','active','quiet','dormant','dead','applied','onboarding'];
+  const counts = C.reduce((m,c) => (m[c.lc] = (m[c.lc]||0)+1, m), {});
+  let fLc = '', fSrc = '', q = '', current = DATA.featured || (C[0] && C[0].id);
+  $('#lc-chips').innerHTML = [['','All',C.length], ...LCN.filter(k => counts[k]).map(k => [k, k[0].toUpperCase()+k.slice(1), counts[k]])]
+    .map(([k,l,n]) => `<button class="chipbtn" data-lc="${k}" aria-pressed="${k===''}">${l}<span>${n}</span></button>`).join('');
+  const sources = [...new Set(C.map(c => c.src))].sort();
+  $('#src').innerHTML = `<option value="">All sources</option>` + sources.map(s => `<option value="${esc(s)}">${esc(s)}</option>`).join('');
+  $('#lc-chips').addEventListener('click', e => { const b = e.target.closest('[data-lc]'); if (!b) return; fLc = b.dataset.lc; [...$('#lc-chips').children].forEach(x => x.setAttribute('aria-pressed', x === b)); renderList(); });
+  $('#src').addEventListener('change', e => { fSrc = e.target.value; renderList(); });
+  $('#q').addEventListener('input', e => { q = e.target.value.trim().toLowerCase(); renderList(); });
+
+  function pill(c){
+    if (c.dnc) return `<span class="lc hot">opted out</span>`;
+    if (c.hot) return `<span class="lc hot">deal incoming</span>`;
+    return `<span class="lc ${esc(c.lc)}">${esc(c.lc)}</span>`;
+  }
+  function renderList(){
+    const rows = C.filter(c => (!fLc || c.lc === fLc) && (!fSrc || c.src === fSrc) && (!q || (c.n + ' ' + c.niche).toLowerCase().includes(q)));
+    $('#list').innerHTML = rows.map(c => {
+      const replies = c.ev.filter(e => e[1] === 'reply').length;
+      return `<button data-id="${c.id}" aria-current="${c.id===current}"><span class="nm">${esc(c.n)}${c.test ? ' <span class="lc test">test contact</span>' : ''}</span>${pill(c)}<span class="meta">${esc(c.niche)} · ${esc(c.src)}</span><span class="count">${replies ? replies + ' repl' + (replies>1?'ies':'y') : ''}</span></button>`;
+    }).join('') || `<p class="muted" style="padding:14px;margin:0">No affiliates match.</p>`;
+    $('#list-count').textContent = `${rows.length} of ${C.length} affiliates`;
+  }
+  $('#list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; current = b.dataset.id; [...$('#list').querySelectorAll('[data-id]')].forEach(x => x.setAttribute('aria-current', x === b)); renderDetail(); if (window.innerWidth <= 820) $('#detail').scrollIntoView({behavior:'smooth', block:'start'}); });
+
+  const KIND = {wf:'Workflow', sms:'SMS', email:'Email', reply:'Reply', task:'Task', deal:'Deal', optout:'Opted out', note:'Note'};
+  const INTENT_LABEL = k => (INTENT[k] || [k])[0];
+  function renderDetail(){
+    const c = byId[current]; if (!c) { $('#detail').innerHTML = ''; return; }
+    const field = (l,v) => `<div><span>${l}</span><b>${esc(v || '—')}</b></div>`;
+    const day = v => v ? monthDay(v) : '';
+    const wfRuns = []; const items = [];
+    // group same-day workflow enrollments into one line to keep the timeline readable
+    c.ev.forEach(e => {
+      if (e[1] === 'wf'){ const last = items[items.length-1]; if (last && last.kind === 'wf' && last.d === e[0]) { last.names.push(e[2]); return; } items.push({kind:'wf', d:e[0], names:[e[2]], real:e[3]}); return; }
+      items.push({kind:e[1], d:e[0], text:e[2], x:e[3], subj:e[4]});
+    });
+    const li = it => {
+      if (it.kind === 'wf') return `<li><span class="d">${day(it.d)}</span><div><span class="k">Workflow${it.real ? '' : ' · logged'}</span><span class="wfline">Enrolled in ${esc(it.names.join(', '))}</span></div></li>`;
+      if (it.kind === 'sms' || it.kind === 'email') return `<li><span class="d">${day(it.d)}</span><div><span class="k">${KIND[it.kind]} from the agent · ${it.x ? 'delivered to test contact' : 'logged, not delivered'}</span><p class="msg">${it.subj ? `<span class="subj">${esc(it.subj)}</span>` : ''}${esc(it.text)}</p></div></li>`;
+      if (it.kind === 'reply') return `<li><span class="d">${day(it.d)}</span><div><span class="k reply">They replied · ${esc(INTENT_LABEL(it.x))}</span><span class="t quote">“${esc(it.text)}”</span></div></li>`;
+      if (it.kind === 'task') return `<li><span class="d">${day(it.d)}</span><div><span class="k task">Task · ${it.x ? 'done' : 'open'}</span><span class="t">${esc(it.text)}</span></div></li>`;
+      return `<li><span class="d">${day(it.d)}</span><div><span class="k ${it.kind}">${KIND[it.kind] || 'Note'}</span><span class="t">${esc(it.text)}</span></div></li>`;
+    };
+    const stage = c.stage ? c.stage[0].toUpperCase() + c.stage.slice(1) : '';
+    const svc = c.svc ? `${c.wants.join(', ')} (${c.svc.replace('_',' ')})` : (c.wants.filter(w => w !== 'event').join(', '));
+    $('#detail').innerHTML = `<div class="dhead"><h3>${esc(c.n)}</h3>${pill(c)}${c.test ? '<span class="lc test">test contact</span>' : ''}</div>
+      <div class="muted">${esc(c.niche)} · came from ${esc(c.src)}${c.aud ? ' · audience ' + esc(c.aud) : ''} · joined ${esc(day(c.join))}</div>
+      <div class="fields">${field('Deals submitted', String(c.deals))}${field('Last deal', day(c.ld))}${field('Last reply', day(c.lr))}${field('Last touch', c.lt ? day(c.lt) + (c.ltc ? ' · ' + c.ltc : '') : '')}${field('Next touch', day(c.nt))}${field('Pipeline stage', stage)}${svc ? field('Wants help with', svc) : ''}</div>
+      <h3 style="font:600 15px var(--body);margin-bottom:6px">Their month</h3>
+      ${items.length ? `<ol class="tl">${items.map(li).join('')}</ol>` : '<p class="muted">No activity in the 30 days.</p>'}`;
+  }
+  renderList(); renderDetail();
+
+  // built
+  $('#vault-sub').textContent = `The agent writes every decision to an Obsidian vault the manager can open. This is its daily note for ${monthDay(DATA.vault_day)}, straight from the simulation.`;
+  $('#vault').textContent = DATA.vault_note;
+
+  if (start && document.getElementById(start) && document.getElementById(start).getAttribute('role') === 'tabpanel') show(start, false);
+})();
+</script>

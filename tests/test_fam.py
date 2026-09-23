@@ -92,6 +92,11 @@ class CadenceRules(unittest.TestCase):
         self.assertEqual(cadence.classify_reply("STOP")["intent"], "unsubscribe")
         self.assertEqual(cadence.classify_reply("I have a client who needs about $150k, can I send you the file?")
                          ["intent"], "has_deal")
+        self.assertEqual(cadence.classify_reply("Got a merchant for you, restaurant doing 80k a month")["intent"],
+                         "has_deal")
+        self.assertEqual(cadence.classify_reply("When do commissions get paid out on funded deals?")["intent"],
+                         "commission_question")
+        self.assertEqual(cadence.classify_reply("How do I submit a deal again? Lost the link.")["intent"], "question")
         self.assertEqual(cadence.classify_reply("busy, check back with me next month")["intent"], "check_back_later")
         self.assertEqual(cadence.classify_reply("can you help me with a funnel page")["service"], "funnel")
 
@@ -168,6 +173,17 @@ class EngineFlows(unittest.TestCase):
         self.assertEqual(a.fields["next_touch_date"], (TODAY + timedelta(days=14)).isoformat())
         self.assertTrue(any(not t["completed"] for t in self.ghl.list_tasks(self.synthetic)))
         self.assertIn("aff:reactivated", a.tags)  # was 70 days silent -> quiet -> now reactivated by reply
+
+    def test_deal_reply_is_manager_work_not_an_outbound_touch(self):
+        self.engine.record_reply(self.synthetic, "Got a merchant for you, restaurant doing 80k a month")
+        a = self.engine.affiliate(self.synthetic)
+        self.assertFalse(a.fields.get("next_touch_date"))  # nothing queued to message the affiliate
+        call = [t for t in self.ghl.list_tasks(self.synthetic) if t["title"].startswith("CALL ")]
+        self.assertEqual(len(call), 1)
+        self.assertFalse(call[0]["completed"])
+        self.engine.record_deal(self.synthetic, "test")
+        self.assertTrue(all(t["completed"] for t in self.ghl.list_tasks(self.synthetic)
+                            if t["title"].startswith("CALL ")))
 
     def test_kill_switch_blocks_execute(self):
         action = self.batch()

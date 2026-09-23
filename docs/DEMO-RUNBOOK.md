@@ -38,7 +38,7 @@ The mock CRM holds 150 synthetic affiliates plus the test contact "Demo Tester".
 | 10 | "Turn on a standing approval for the bi-weekly touch: 100 a day for 30 days." → approve the prompt → `fam cadence run-standing` | Bulk cadence runs under a capped approval that expires. Show `fam status` → `standing_approvals`. |
 | 11 | `fam stop "demo"` → try to send → `fam resume --actor Justin` | Kill switch: everything outbound is frozen until a human resumes it. |
 | 12 | `ls ~/fam-vault/Daily ~/fam-vault/Affiliates \| head` | The Obsidian vault holds today's note, per-affiliate timelines, and campaign notes. |
-| 13 | Workflow map tab → Simulation | 30 days, 253 affiliates: 67 replies, 17 deals, and 13 reactivated. On day 30, 16 are producing vs 1 in a no-outreach baseline. |
+| 13 | Workflow map tab → Simulation | 30 days, 253 affiliates: 59 replies, 12 deals, and 11 reactivated. On day 30, 13 are producing vs 1 in a no-outreach baseline. |
 
 Step 3 always produces a fresh card. Approval requests expire after 12 hours (`approval_ttl_hours`), so don't reuse an old one from `fam actions`.
 

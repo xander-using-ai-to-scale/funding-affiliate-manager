@@ -14,6 +14,7 @@ config/ghl-map.json, so a stray call can never hit the agency's real account.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import secrets
@@ -323,9 +324,11 @@ class MockGHL:
     def _now(self) -> str:
         return self.now_override or _now_iso()
 
-    @staticmethod
-    def _id(prefix: str) -> str:
-        return f"{prefix}_{secrets.token_hex(6)}"
+    def _id(self, prefix: str) -> str:
+        # Deterministic ids (a counter kept in the file), so the same seed gives the same simulation.
+        seq = int(self.db.get("_seq", 0)) + 1
+        self.db["_seq"] = seq
+        return f"{prefix}_{hashlib.sha256(f'{prefix}:{seq}'.encode()).hexdigest()[:12]}"
 
     def reset(self) -> None:
         self.db = {"contacts": {}, "notes": {}, "tasks": {}, "messages": [], "enrollments": [],

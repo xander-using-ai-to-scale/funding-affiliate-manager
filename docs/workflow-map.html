@@ -255,10 +255,10 @@ flowchart LR
   <h2>Simulation: 30 days, 253 affiliates, the real engine</h2>
   <p class="sub">A synthetic affiliate program run day by day through the same code the live agent uses: sweep, approvals, sends, reply triage, deals, newsletter, events. Nobody was contacted. Reply rates are assumptions (22% for personal messages, 7% for bulk), stated so you can judge them.</p>
   <div class="stats">
-    <div class="stat"><b>152</b><span>personal check-ins and follow-ups</span></div>
-    <div class="stat"><b>57</b><span>"check back with me" tasks worked on their day</span></div>
-    <div class="stat"><b>67</b><span>replies triaged into CRM actions</span></div>
-    <div class="stat"><b>17</b><span>deals submitted after outreach</span></div>
+    <div class="stat"><b>115</b><span>personal check-ins and follow-ups</span></div>
+    <div class="stat"><b>24</b><span>"check back with me" tasks worked on their day</span></div>
+    <div class="stat"><b>59</b><span>replies triaged into CRM actions</span></div>
+    <div class="stat"><b>12</b><span>deals submitted after outreach</span></div>
   </div>
   <div class="chart" id="cohortChart">
     <div class="ttl">Where the same 253 affiliates end up after 30 days</div>
@@ -273,13 +273,13 @@ flowchart LR
   <div class="tablebox" style="margin-top:14px"><table>
     <thead><tr><th>What the agent did</th><th class="num">Simulation (253)</th><th class="num">Projected at 10,000</th></tr></thead>
     <tbody>
-      <tr><td>Personal check-ins / follow-ups sent</td><td class="num">152</td><td class="num">6,008</td></tr>
-      <tr><td>Cadence enrollments (bi-weekly, monthly, reactivation)</td><td class="num">437</td><td class="num">17,273</td></tr>
+      <tr><td>Personal check-ins / follow-ups sent</td><td class="num">115</td><td class="num">4,545</td></tr>
+      <tr><td>Cadence enrollments (bi-weekly, monthly, reactivation)</td><td class="num">449</td><td class="num">17,747</td></tr>
       <tr><td>Newsletter deliveries</td><td class="num">759</td><td class="num">30,000</td></tr>
-      <tr><td>Event / training invites</td><td class="num">391</td><td class="num">15,455</td></tr>
-      <tr><td>"Check back with me" tasks worked on their day</td><td class="num">57</td><td class="num">2,253</td></tr>
-      <tr><td>Replies triaged</td><td class="num">67</td><td class="num">2,648</td></tr>
-      <tr><td>Deals submitted after outreach</td><td class="num">17</td><td class="num">672</td></tr>
+      <tr><td>Event / training invites</td><td class="num">390</td><td class="num">15,415</td></tr>
+      <tr><td>"Check back with me" tasks worked on their day</td><td class="num">24</td><td class="num">949</td></tr>
+      <tr><td>Replies triaged</td><td class="num">59</td><td class="num">2,332</td></tr>
+      <tr><td>Deals submitted after outreach</td><td class="num">12</td><td class="num">474</td></tr>
     </tbody></table></div>
   <p class="note">The projection scales the simulation linearly and is only as good as its reply-rate assumptions. At full scale the personal queue is capped at 40 per day per manager, so personal volume grows with manager seats, not linearly. The live demo runs the same engine against a GoHighLevel demo account.</p>
 </section>
@@ -299,8 +299,8 @@ flowchart LR
   }
   // cohort chart
   var rows=[
-    ["Applied",12,12,0],["Active",93,47,72],["Producing",45,1,16],["Reactivated",0,0,13],
-    ["Quiet",56,124,98],["Dormant",20,39,25],["Dead",27,30,29]
+    ["Applied",12,12,0],["Active",93,47,70],["Producing",45,1,13],["Reactivated",0,0,11],
+    ["Quiet",56,124,104],["Dormant",20,39,26],["Dead",27,30,29]
   ];
   var tb=document.getElementById('cohortTable');
   rows.forEach(function(r){var tr=document.createElement('tr');tr.innerHTML='<td>'+r[0]+'</td><td class="num">'+r[1]+'</td><td class="num">'+r[2]+'</td><td class="num">'+r[3]+'</td>';tb.appendChild(tr);});
@@ -330,7 +330,7 @@ flowchart LR
     var lb=add('text',{x:cx,y:H-B+18,'text-anchor':'middle','font-size':12,fill:'var(--ink-2)','font-family':'IBM Plex Sans, sans-serif'}); lb.textContent=r[0];
   });
   // selective direct labels on the two stories: producing and quiet
-  [[2,'1 → 16'],[4,'124 → 98']].forEach(function(p){
+  [[2,'1 → 13'],[4,'124 → 104']].forEach(function(p){
     var r=rows[p[0]], cx=L+band*p[0]+band/2, top=y(Math.max(r[2],r[3]));
     var t=add('text',{x:cx,y:top-8,'text-anchor':'middle','font-size':12,'font-weight':600,fill:'var(--ink)','font-family':'IBM Plex Sans, sans-serif'}); t.textContent=p[1];
   });

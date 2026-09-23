@@ -112,8 +112,8 @@ def synthetic_affiliates(count: int, today: date, seed: int = 7) -> list[dict[st
             fields["last_deal_date"] = (today - timedelta(days=deal_age)).isoformat()
         if bucket[2] == "aff:active" and rng.random() < 0.06:
             fields["next_touch_date"] = (today + timedelta(days=rng.randint(0, 6))).isoformat()
-            fields["cadence_note"] = rng.choice(["after tax season", "once her new office opens",
-                                                 "when Q4 budget is set", "after his vacation"])
+            fields["cadence_note"] = rng.choice(["after tax season", "once the new office opens",
+                                                 "once the Q4 budget is set", "after the vacation"])
         tags = [f"src:{source}", bucket[2], "fam:synthetic"]
         rows.append({
             "firstName": first,
@@ -164,9 +164,11 @@ def draft(aff: cadence.Affiliate, item: dict[str, Any]) -> dict[str, Any]:
     first = aff.first_name or "there"
     niche = aff.fields.get("niche") or "your"
     kind = item["kind"]
+    note = str(item.get("context", {}).get("cadence_note") or "")
+    # "They asked: …" is the agent's own record of the reply, not a phrase to quote back to them.
+    when = "" if not note or note.lower().startswith("they asked") else f" {note}"
     if kind == "scheduled_followup":
-        note = item.get("context", {}).get("cadence_note") or "like you asked"
-        sms = (f"Hey {first}, circling back {note} like you asked. Anything on your plate where funding "
+        sms = (f"Hey {first}, circling back{when} like you asked. Anything on your plate where funding "
                f"could help one of your {niche} clients?")
         subject = f"Circling back, {first}"
     else:
@@ -174,8 +176,7 @@ def draft(aff: cadence.Affiliate, item: dict[str, Any]) -> dict[str, Any]:
                f"new programs, or help working your leads?")
         subject = f"{first}, quick check-in"
     if kind == "scheduled_followup":
-        note = item.get("context", {}).get("cadence_note") or "when we last talked"
-        body_email = (f"Hi {first},\n\nYou asked me to circle back {note}, so here I am. How are things looking "
+        body_email = (f"Hi {first},\n\nYou asked me to circle back{when}, so here I am. How are things looking "
                       f"now?\n\nIf any of your {niche} clients need working capital, I can walk you through the "
                       f"fastest way to send the file over. And if it's still not the right time, just tell me when "
                       f"and I'll put it on my calendar.")

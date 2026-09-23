@@ -45,6 +45,9 @@ BANNED_PHRASES = (
     "cannot lose",
 )
 SERVICES = {"funnel", "reactivation", "email_campaigns", "social", "crm_help"}
+MANAGER_TASK_PREFIXES = ("CALL ", "Answer ", "Scope ")  # human work; a sent touch never closes these
+SERVICE_LABELS = {"funnel": "a funnel page", "reactivation": "lead reactivation", "email_campaigns": "email campaigns",
+                  "social": "social content", "crm_help": "CRM help"}
 BULK_WORKFLOW_KEYS = {"onboarding", "biweekly_touch", "monthly_offer", "dormant_reactivation",
                       "dead_reactivation", "newsletter", "event_invite", "new_offer"}
 STANDING_ALLOWED = {"onboarding", "biweekly_touch", "monthly_offer", "dormant_reactivation", "dead_reactivation"}
@@ -253,7 +256,11 @@ class FamEngine:
                          result="ok", details={"chars": len(body)})
         return {"ok": True, "note_id": note.get("id", "")}
 
-    def schedule_followup(self, contact_id: str, due_date: str, note: str, title: str = "") -> dict[str, Any]:
+    def schedule_followup(self, contact_id: str, due_date: str, note: str, title: str = "",
+                          customer_touch: bool = True) -> dict[str, Any]:
+        """A GHL task on the contact. customer_touch=True is a "check back with me" promise: it also sets
+        next_touch_date/cadence_note so the agent drafts a touch that morning. False is internal work for
+        the human (call, answer, scope) and never feeds an outbound message."""
         due = cadence.parse_day(due_date)
         if not due:
             raise FamError("due_date must be YYYY-MM-DD")
@@ -268,8 +275,11 @@ class FamEngine:
             body=note,
             assigned_to=assignee,
         )
-        self._set_fields(contact_id, {"next_touch_date": due.isoformat(), "cadence_note": note[:250]})
-        self.ghl.add_note(contact_id, f"Follow-up scheduled for {due.isoformat()}: {note}")
+        if customer_touch:
+            self._set_fields(contact_id, {"next_touch_date": due.isoformat(), "cadence_note": note[:250]})
+            self.ghl.add_note(contact_id, f"Follow-up scheduled for {due.isoformat()}: {note}")
+        else:
+            self.ghl.add_note(contact_id, f"Task for the manager, due {due.isoformat()}: {note}")
         self.vault.affiliate(aff.name, aff.id, f"follow-up set for [[Daily/{due.isoformat()}]] — {note}",
                              day=self.today().isoformat())
         self.store.audit(actor=self.actor, action="followup.schedule", resource=contact_id,
@@ -291,9 +301,9 @@ class FamEngine:
                                                   name=f"{aff.name} — {service.replace('_', ' ')}")
         except FamError:
             pass
-        label = service.replace("_", " ")
-        self.schedule_followup(contact_id, self.today().isoformat(), f"Scope {label} help for {aff.name}. {note}",
-                               title=f"Scope {label} for {aff.first_name}")
+        label = SERVICE_LABELS.get(service, service.replace("_", " "))
+        self.schedule_followup(contact_id, self.today().isoformat(), f"Scope {label} for {aff.name}. {note}",
+                               title=f"Scope {label} for {aff.first_name}", customer_touch=False)
         self.vault.log("Growth service queued", f"- {self.vault.affiliate_link(aff.name, aff.id)} wants **{label}**"
                        f" {('— ' + note) if note else ''}", day=self.today().isoformat())
         return {"ok": True, "service": service, "opportunity_id": opp.get("id", "")}
@@ -329,7 +339,7 @@ class FamEngine:
                 self.ghl.add_tags(contact_id, ["deal:incoming"])
                 self.schedule_followup(contact_id, today.isoformat(),
                                        f"Has a deal to send — call today. They said: {text[:160]}",
-                                       title=f"CALL {aff.first_name} — has a deal")
+                                       title=f"CALL {aff.first_name} — has a deal", customer_touch=False)
                 taken.append("deal:incoming + same-day call task")
                 alert = f"🔥 {aff.name} has a deal. Same-day call task created."
             elif intent == "check_back_later":
@@ -339,10 +349,10 @@ class FamEngine:
             elif intent == "wants_service":
                 self.queue_growth_service(contact_id, baseline.get("service", "crm_help"), text[:160])
                 taken.append(f"growth service queued: {baseline.get('service', 'crm_help')}")
-                alert = f"{aff.name} wants help with {baseline.get('service', 'crm_help').replace('_', ' ')}."
+                alert = f"{aff.name} wants help with {SERVICE_LABELS.get(baseline.get('service', 'crm_help'), 'CRM help')}."
             elif intent in {"commission_question", "question"}:
                 self.schedule_followup(contact_id, today.isoformat(), f"Answer: {text[:180]}",
-                                       title=f"Answer {aff.first_name}'s question")
+                                       title=f"Answer {aff.first_name}'s question", customer_touch=False)
                 taken.append("answer task today")
                 alert = f"{aff.name} asked: {text[:140]}"
             elif intent == "event_interest":
@@ -360,6 +370,9 @@ class FamEngine:
         today = self.today().isoformat()
         self._set_fields(contact_id, {"last_deal_date": today, "deals_submitted": aff.deals_submitted + 1})
         self.ghl.remove_tags(contact_id, ["deal:incoming"])
+        for task in self.ghl.list_tasks(contact_id):
+            if not task.get("completed") and str(task.get("title", "")).startswith("CALL "):
+                self.ghl.complete_task(contact_id, task["id"])
         self._apply_lifecycle(aff, "aff:producing", "deal submitted")
         self.ghl.add_note(contact_id, f"Deal submitted {today}. {note}")
         self.vault.log("Deal recorded", f"- {self.vault.affiliate_link(aff.name, aff.id)} submitted a deal. {note}",
@@ -589,7 +602,8 @@ class FamEngine:
             values["next_touch_date"] = ""
             for task in self.ghl.list_tasks(aff.id):
                 due = cadence.parse_day(task.get("dueDate"))
-                if not task.get("completed") and due and due <= self.today():
+                if (not task.get("completed") and due and due <= self.today()
+                        and not str(task.get("title", "")).startswith(MANAGER_TASK_PREFIXES)):
                     self.ghl.complete_task(aff.id, task["id"])
         self._set_fields(aff.id, values)
 
