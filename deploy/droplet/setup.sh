@@ -47,8 +47,11 @@ if [ ! -d "$GHL_CLI_DIR/.git" ]; then
   git clone -q https://github.com/jbellsolutions/gohighlevel-agency-cli.git "$GHL_CLI_DIR" \
     || fail "could not clone gohighlevel-agency-cli (private repo: run 'gh auth login' or add a deploy key)"
 fi
-git -C "$GHL_CLI_DIR" fetch -q origin
-git -C "$GHL_CLI_DIR" checkout -q "$GHL_CLI_REF" && git -C "$GHL_CLI_DIR" pull -q --ff-only || true
+if git -C "$GHL_CLI_DIR" fetch -q origin 2>/dev/null; then
+  git -C "$GHL_CLI_DIR" checkout -q "$GHL_CLI_REF" && git -C "$GHL_CLI_DIR" pull -q --ff-only || true
+else
+  echo "  (no GitHub access from this box — using the existing checkout at $(git -C "$GHL_CLI_DIR" rev-parse --short HEAD))"
+fi
 [ -d "$GHL_CLI_DIR/.venv" ] || python3 -m venv "$GHL_CLI_DIR/.venv"
 "$GHL_CLI_DIR/.venv/bin/pip" install -q -e "$GHL_CLI_DIR" "mcp>=1.2" >/dev/null
 umask 077
@@ -99,6 +102,27 @@ for key in keys:
     if key == "BROWSER_BOX_URL" and not value:
         value = "http://127.0.0.1:9/mcp"  # unset → unreachable placeholder; the MCP shows as down
     text = text.replace(f"__{key}__", value.replace("\n", ""))
+def drop_server(text, name):
+    """Remove one `  name:` block under mcp_servers (2-space indent) through the next sibling."""
+    out, skipping = [], False
+    for line in text.splitlines():
+        if line.startswith(f"  {name}:"):
+            skipping = True
+            continue
+        if skipping and (line.startswith("  ") and not line.startswith("   ") and line.strip()) :
+            skipping = False
+        if not skipping:
+            out.append(line)
+    return "\n".join(out) + "\n"
+# servers without credentials are left out entirely (never half-configured)
+if not (env.get("ORGO_API_KEY") and env.get("ORGO_COMPUTER_ID")):
+    text = drop_server(text, "orgo")
+if not env.get("SUPER_BROWSER_TOKEN"):
+    text = drop_server(text, "super-browser")
+if not env.get("BROWSER_BOX_TOKEN"):
+    text = drop_server(text, "browser-box")
+if env.get("FAM_GHL_MODE") != "live":
+    text = drop_server(text, "ghl")
 left = [line for line in text.splitlines() if "__" in line and not line.lstrip().startswith("#")]
 if any(tok in l for l in left for tok in ("__PRIMARY", "__REPO_DIR", "__GHL_", "__ORGO_", "__FAM_")):
     sys.exit("unrendered placeholders remain: " + "; ".join(left[:3]))
