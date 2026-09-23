@@ -455,20 +455,26 @@ class FamEngine:
             aff = self.affiliate(contact_id)
             if aff.is_dnc:
                 raise FamError(f"{aff.name} is do-not-contact")
+            segments = 0
             if channel == "sms":
                 if not aff.phone:
                     raise FamError(f"{aff.name} has no phone for SMS")
+                body = cadence.sms_normalize(body)
                 if kind != "reply" and "stop" not in body.lower():
                     body = body.rstrip() + " Reply STOP to opt out."
                 if len(body) > 480:
                     raise FamError(f"{aff.name}: SMS longer than 480 characters")
+                segments = cadence.sms_segments(body)["segments"]
             if channel == "email" and not aff.email:
                 raise FamError(f"{aff.name} has no email")
             frozen.append({"contact_id": contact_id, "name": aff.name, "channel": channel, "kind": kind,
                            "subject": str(m.get("subject", ""))[:150], "body": body,
-                           "delivery": self._delivery_mode(aff)})
+                           "delivery": self._delivery_mode(aff), "segments": segments})
         real = sum(1 for m in frozen if m["delivery"] in {"live", "mock"})
         summary = f"{len(frozen)} {purpose} ({real} real, {len(frozen) - real} simulated)"
+        billed = sum(m["segments"] for m in frozen)
+        if billed:
+            summary += f" · {billed} SMS segment{'s' if billed != 1 else ''}"
         return self._freeze("send_messages", {"messages": frozen, "purpose": purpose}, len(frozen), summary)
 
     def prepare_enrollment(self, workflow_key: str, contact_ids: list[str] | None = None,

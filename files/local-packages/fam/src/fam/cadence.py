@@ -32,8 +32,32 @@ LIFECYCLE_TAGS = (
     "aff:reactivated",
 )
 DNC_TAG = "aff:dnc"
+
 TEST_CONTACT_TAG = "fam:test-contact"
 SOURCE_PREFIX = "src:"
+
+# SMS is billed per segment. One character outside the GSM-7 set (an em dash, a curly quote) switches the whole
+# message to UCS-2: 70 characters per segment instead of 160, so a 160-character text bills as 3 segments.
+_GSM7 = set("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            "ÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà")
+_GSM7_EXT = set("^{}\\[~]|€")  # allowed, but each counts as two characters
+_SMS_PLAIN = {"\u2014": "-", "\u2013": "-", "\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": '"',
+              "\u2026": "...", "\u00a0": " ", "\u2022": "-", "\u2032": "'", "\u2033": '"'}
+
+
+def sms_normalize(text: str) -> str:
+    """Swap the usual typographic characters for GSM-7 equivalents so a text bills at 160 chars/segment."""
+    return "".join(_SMS_PLAIN.get(ch, ch) for ch in text)
+
+
+def sms_segments(text: str) -> dict[str, Any]:
+    """Encoding and billed segment count for one SMS body."""
+    if all(ch in _GSM7 or ch in _GSM7_EXT for ch in text):
+        units = sum(2 if ch in _GSM7_EXT else 1 for ch in text)
+        return {"encoding": "GSM-7", "units": units, "segments": 1 if units <= 160 else -(-units // 153)}
+    units = len(text.encode("utf-16-le")) // 2
+    return {"encoding": "UCS-2", "units": units, "segments": 1 if units <= 70 else -(-units // 67)}
+
 
 # kind -> (mode, workflow key used for bulk enrollment, priority; lower runs first)
 ACTION_KINDS: dict[str, tuple[str, str, int]] = {

@@ -160,6 +160,14 @@ class EngineFlows(unittest.TestCase):
             self.engine.prepare_messages([{"contact_id": self.tester, "channel": "sms",
                                            "body": "Guaranteed approval, no credit check!"}])
 
+    def test_sms_is_normalized_to_gsm7_and_segments_counted(self):
+        action = self.engine.prepare_messages([{"contact_id": self.tester, "channel": "sms",
+                                                "body": "Hey Tess — how’s business? Anything I can help with?"}])
+        sms = action["preview"][0]["body"]
+        self.assertNotIn("—", sms)
+        self.assertEqual(cadence.sms_segments(sms), {"encoding": "GSM-7", "units": len(sms), "segments": 1})
+        self.assertEqual(cadence.sms_segments("—" + "x" * 100)["segments"], 2)  # UCS-2: 67 per part
+
     def test_stop_reply_sets_dnc_and_blocks_sends(self):
         out = self.engine.record_reply(self.synthetic, "STOP")
         self.assertEqual(out["intent"], "unsubscribe")
