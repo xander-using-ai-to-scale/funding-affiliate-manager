@@ -55,6 +55,12 @@ class CadenceRules(unittest.TestCase):
         a = aff(join_date=ago(400), last_reply_date=ago(100), last_deal_date=ago(5))
         self.assertEqual(cadence.target_lifecycle(a, TODAY, self.rules)[0], "aff:producing")
 
+    def test_producing_tag_lapses_after_deal_window(self):
+        a = aff(tags=["aff:producing"], join_date=ago(400), last_reply_date=ago(20), last_deal_date=ago(40))
+        self.assertEqual(cadence.target_lifecycle(a, TODAY, self.rules)[0], "aff:active")
+        a = aff(tags=["aff:producing"], join_date=ago(400), last_reply_date=ago(50), last_deal_date=ago(50))
+        self.assertEqual(cadence.target_lifecycle(a, TODAY, self.rules)[0], "aff:quiet")
+
     def test_sixty_day_silence_gets_personal_checkin(self):
         a = aff(join_date=ago(400), last_reply_date=ago(65), last_touch_date=ago(20))
         self.assertEqual(self.kinds(a), ["personal_checkin"])

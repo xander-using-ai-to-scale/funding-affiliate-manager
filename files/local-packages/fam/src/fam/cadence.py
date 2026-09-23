@@ -208,6 +208,8 @@ def target_lifecycle(aff: Affiliate, today: date, rules: dict[str, Any]) -> tupl
     last_deal = aff.day("last_deal_date")
     if last_deal and (today - last_deal).days <= 30:
         return "aff:producing", silent
+    if current == "aff:producing":
+        current = "aff:active"  # the 30-day deal window lapsed; judge them on silence like everyone else
     if silent is None:
         return current or "aff:active", None
     if silent >= rules["dead_after_days"]:

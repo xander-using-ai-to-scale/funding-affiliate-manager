@@ -38,9 +38,11 @@ The mock CRM holds 150 synthetic affiliates plus the test contact "Demo Tester".
 | 10 | "Turn on a standing approval for the bi-weekly touch: 100 a day for 30 days." → approve the prompt → `fam cadence run-standing` | Bulk cadence runs under a capped approval that expires. Show `fam status` → `standing_approvals`. |
 | 11 | `fam stop "demo"` → try to send → `fam resume --actor Justin` | Kill switch: everything outbound is frozen until a human resumes it. |
 | 12 | `ls ~/fam-vault/Daily ~/fam-vault/Affiliates \| head` | The Obsidian vault holds today's note, per-affiliate timelines, and campaign notes. |
-| 13 | Workflow map tab → Simulation | 30 days, 253 affiliates: 43 still producing vs 1, and 12 reactivated. |
+| 13 | Workflow map tab → Simulation | 30 days, 253 affiliates: 67 replies, 17 deals, and 13 reactivated. On day 30, 16 are producing vs 1 in a no-outreach baseline. |
 
-`act_45e61537a93e` (digest `8c416923727e3124`) is a real batch the agent prepared on the droplet. It's waiting for your approval, so you can use it for step 4.
+Step 3 always produces a fresh card. Approval requests expire after 12 hours (`approval_ttl_hours`), so don't reuse an old one from `fam actions`.
+
+The weekday crons are live against the mock CRM: reply triage runs hourly at :15 from 9 to 18 ET, and the sweep runs at 8am. Each run spends OpenRouter credits and can leave an approval card. To pause them before the demo, run `hermes cron list` and then `hermes cron pause <id>`.
 
 ### Reset between runs (Mode A)
 
