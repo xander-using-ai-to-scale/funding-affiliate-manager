@@ -26,6 +26,7 @@ WORKFLOWS = {"onboarding": "Onboarding drip", "biweekly_touch": "Bi-weekly touch
              "dormant_reactivation": "Dormant reactivation", "dead_reactivation": "Dead-lead campaign",
              "newsletter": "Newsletter", "event_invite": "Training invite", "new_offer": "New offer",
              "reply_router": "Reply router"}
+PACK_URL = "https://claude.ai/artifact/CN1vFC59fCQTNd8Txvb89w"
 DEMO_HEADER = re.compile(r"^\[SIMULATED (SMS|EMAIL) — demo mode, not delivered\]\n?")
 
 
@@ -116,7 +117,9 @@ def featured(rows: list[dict[str, Any]]) -> str:
 def proposal_body(path: Path) -> str:
     html = path.read_text()
     start = html.index('<div class="wrap">') + len('<div class="wrap">')
-    return html[start:html.rindex("</div>")].strip()
+    body = html[start:html.rindex("</div>")].strip()
+    # links from the proposal to a tab of this pack switch tabs instead of reloading the page
+    return re.sub(rf'href="{re.escape(PACK_URL)}#(\w+)"', r'href="#\1" data-go="\1"', body)
 
 
 def next_steps(recap: Path) -> list[str]:

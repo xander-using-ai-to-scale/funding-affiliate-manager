@@ -53,7 +53,7 @@ Gates:
 - Deals from replies are reaching the funding team and being counted by tier
 - AI spend is tracking the projection, well under the cap
 
-Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The texting number is registered for A2P 10DLC ($71.91 one time).
+Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The texting number is registered for A2P 10DLC ($71.91 one time). How many texts a day the carriers allow depends on the trust score they give 7FF's registration. A low score caps daily volume and makes each wave take longer; it doesn't change the cost.
 
 ## Scenarios
 
@@ -101,6 +101,7 @@ Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The
 - Jev: 900 tokens to ingest a record, 700 to check a draft, 1,000 to classify a reply.
 - Hermes agent: 12 sessions a day at 540,000 tokens each, priced uncached (a measured daily-loop session processed 539,187).
 - 5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.
+- The Hermes line ($21.01 of the $35.72 a month) assumes the agent's own loop also runs on Luna Pro. It runs on Claude today, and the switch is tested on the simulation before the pilot. If the loop stayed on a pricier model, this line would grow with that model's price, and the cap would stop the spend.
 - Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.
 - Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.
 - Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.

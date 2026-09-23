@@ -34,7 +34,7 @@ SMS = {"base_per_segment": 0.00747, "carrier_out": {"low": 0.003, "base": 0.0045
        "sources": ["https://help.gohighlevel.com/support/solutions/articles/48001223556-phone-system-pricing-billing-guide",
                    "https://help.gohighlevel.com/support/solutions/articles/155000005200-a2p-10dlc-messaging-fees-registration-monthly-and-carrier-costs"]}
 MEASURED = {"hermes_daily_loop_session": {"tokens_processed": 539_187, "output_tokens": 5_530, "tool_calls": 18,
-                                          "where": "droplet, `hermes insights`, 2026-09-23"},
+                                          "where": "the agent's server, `hermes insights`, 2026-09-23"},
             "hermes_fixed_prompt_bytes": 20_412 + 42_800,
             "jev_classification_call": {"input_tokens": 548, "cost_usd": 0.000023,
                                         "where": "jev-agent-kit evidence/jev-pilot-validation.json"}}
@@ -212,7 +212,9 @@ def build() -> dict[str, Any]:
                        "AI spend is tracking the projection, well under the cap"],
         "wave_notes": [f"Jev reads all {PARTNERS_TOTAL:,} records once at import (about "
                        f"{_usd(_jev(PARTNERS_TOTAL, SCENARIOS['base']['ingest_in']))}).",
-                       f"The texting number is registered for A2P 10DLC ({_usd(SMS['a2p_one_time'])} one time)."],
+                       f"The texting number is registered for A2P 10DLC ({_usd(SMS['a2p_one_time'])} one time).",
+                       "How many texts a day the carriers allow depends on the trust score they give 7FF's registration. "
+                       "A low score caps daily volume and makes each wave take longer; it doesn't change the cost."],
         "spec": SPEC, "flow": [{"step": a, "what": b} for a, b in FLOW],
         "models": MODELS, "sms": SMS, "measured": MEASURED,
         "population": {"partners_total": PARTNERS_TOTAL, "partners_active": PARTNERS_ACTIVE,
@@ -250,6 +252,10 @@ def assumption_notes(d: dict[str, Any]) -> list[str]:
         f"Hermes agent: {a['sessions_per_day']} sessions a day at {a['session_in']:,} tokens each, priced uncached "
         f"(a measured daily-loop session processed {d['measured']['hermes_daily_loop_session']['tokens_processed']:,}).",
         f"{a['fallback_share']:.0%} of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.",
+        f"The Hermes line ({_usd(d['scenarios']['base']['monthly']['ai_lines'][-1]['usd'])} of the "
+        f"{_usd(d['scenarios']['base']['monthly']['ai_usd'])} a month) assumes the agent's own loop also runs on Luna Pro. "
+        "It runs on Claude today, and the switch is tested on the simulation before the pilot. If the loop stayed on a "
+        "pricier model, this line would grow with that model's price, and the cap would stop the spend.",
         f"Texts are kept to one GSM-7 segment ({a['seg_out']} segment each in the base case). One em dash or curly "
         "quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
         f"Texting: ${a['sms_out_per_segment']} per outbound segment and ${a['sms_in_per_segment']} per inbound, "

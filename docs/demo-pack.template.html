@@ -372,10 +372,13 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <pre class="card" id="vault"></pre>
   <h2 style="margin-top:34px">Source and reruns</h2>
   <p>Every document in this pack, the cost model and the simulation report are in <a href="https://github.com/jbellsolutions/7ff-affiliate-manager">jbellsolutions/7ff-affiliate-manager</a> (private; access on request). The agent's own code lives in a separate private repository. Every number reruns from source: the cost model from published prices, the simulation from a fixed seed, so the same inputs give the same numbers.</p>
-  <pre class="card">python3 scripts/cost_model.py                      # AI and texting costs
+  <pre class="card"># the costs, from this pack's repository
+python3 scripts/cost_model.py
+
+# the simulation and this page, from the agent's repository
 fam sim seed --count 250 --start 2026-09-01 --out sim-output
 fam sim run  --days 30  --start 2026-09-01 --out sim-output
-python3 scripts/build_demo_pack.py --sim sim-output  # this page</pre>
+python3 scripts/build_demo_pack.py --sim sim-output</pre>
 </section>
 
 <footer class="page">Funding Affiliate Manager · built on Hermes, GoHighLevel, Orgo, Super Browser, Browser Box and Obsidian. Simulated data; nobody was contacted.</footer>
