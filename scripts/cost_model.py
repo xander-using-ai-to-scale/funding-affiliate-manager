@@ -50,8 +50,8 @@ SPEC = [
      "does": "Runs the same code against a synthetic CRM, as in this pack's simulation tab."},
     {"part": "GoHighLevel sub-account and texting number", "status": "Set up",
      "does": "Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out."},
-    {"part": "Models and a capped OpenRouter key", "status": "Set up",
-     "does": "The agent moves to GPT-6 Luna Pro with GLM 5.3 Flash as fallback (it runs on Claude today) and is re-run on the simulation before the pilot. Every call goes through one key with a hard monthly limit; going over needs 7FF's approval."},
+    {"part": "Models through OpenRouter", "status": "Set up",
+     "does": "The agent and the message worker run on GPT-6 Luna Pro, with GLM 5.3 Flash as the fallback. Luna Pro was tested driving the agent's own tools on September 23, 2026. Usage is reported to 7FF every month."},
     {"part": "Zoho to GoHighLevel partner import (read-only)", "status": "To build",
      "does": "Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are."},
     {"part": "Jev ingestion, checking and classifying", "status": "To build",
@@ -67,10 +67,10 @@ FLOW = [
     ("Import", "Partner records come over from Zoho, Jev cleans them, and each lands in GoHighLevel tagged with tier and status."),
     ("Gate", "Only partners with a mobile number and SMS consent get a text. STOP is final."),
     ("Draft", "The message worker writes one kickoff per partner from their record: name, tier, last deal, niche. Jev checks each draft."),
-    ("Approve", "In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily cap."),
-    ("Send", "GoHighLevel sends from the registered number, in daytime hours, under the daily cap."),
+    ("Approve", "In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily send limit."),
+    ("Send", "GoHighLevel sends from the registered number, in daytime hours, within the daily send limit."),
     ("Converse", "Jev labels each reply and the worker drafts the answer under the same approval rules. Deals, commission questions and anything sensitive go to a person as a task."),
-    ("Report", "A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the cap."),
+    ("Report", "A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the budget."),
 ]
 
 PARTNERS_TOTAL = 13_000
@@ -94,6 +94,7 @@ SCENARIOS: dict[str, dict[str, Any]] = {
                  seg_out=2, seg_in=1, tier="high"),
 }
 SHARED = dict(reply_share=0.85, touches_per_month=2, fallback_share=0.05, days_per_month=30)
+BUDGET_MULTIPLIER = 2  # plan AI spend at twice the base projection: a comfortable starting budget, not a limit
 TOKEN_KEYS = ("ingest_in", "draft_in", "draft_out", "qa_in", "classify_in", "reply_in", "reply_out",
               "session_in", "session_out")
 
@@ -190,10 +191,6 @@ def build() -> dict[str, Any]:
     luna = MODELS["luna"]
     batch_saving = _llm(REACTIVATION_AUDIENCE, batch["draft_in"], batch["draft_out"], SHARED["fallback_share"]) * (
         1 - luna["batch_in"] / luna["in"])  # batch halves both prices, so the saving is half the kickoff line
-    # The cap sits just above the realistic high case: if real usage runs hotter than that, spend stops and a
-    # person decides, rather than the cap quietly absorbing a 10x estimating error.
-    high_monthly_ai = scen["high"]["monthly"]["ai_usd"]
-    cap = next(c for c in (50, 100, 150, 250, 500, 1_000, 2_500) if c >= high_monthly_ai * 1.2)
     # Rollout in waves, each opened only when the one before it clears its gates (no dates)
     r = base["reactivation"]
     ai_per_partner = (r["ai_usd"] - _jev(PARTNERS_TOTAL, SCENARIOS["base"]["ingest_in"])) / REACTIVATION_AUDIENCE
@@ -209,7 +206,7 @@ def build() -> dict[str, Any]:
                        "No carrier filtering or spam flags on the number",
                        "7FF has read a sample of the conversations and is happy with the tone",
                        "Deals from replies are reaching the funding team and being counted by tier",
-                       "AI spend is tracking the projection, well under the cap"],
+                       "AI spend is tracking the projection, inside the starting budget"],
         "wave_notes": [f"Jev reads all {PARTNERS_TOTAL:,} records once at import (about "
                        f"{_usd(_jev(PARTNERS_TOTAL, SCENARIOS['base']['ingest_in']))}).",
                        f"The texting number is registered for A2P 10DLC ({_usd(SMS['a2p_one_time'])} one time).",
@@ -231,7 +228,9 @@ def build() -> dict[str, Any]:
             "reactivation_sms_usd": base["reactivation"]["sms_usd"],
             "monthly_sms_usd": base["monthly"]["sms_usd"],
             "kickoff_batch_saving_usd": round(batch_saving, 2),
-            "recommended_monthly_ai_cap_usd": cap,
+            "budget_multiplier": BUDGET_MULTIPLIER,
+            "reactivation_ai_budget_usd": round(base["reactivation"]["ai_usd"] * BUDGET_MULTIPLIER, 2),
+            "monthly_ai_budget_usd": round(base["monthly"]["ai_usd"] * BUDGET_MULTIPLIER, 2),
         },
     }
 
@@ -253,9 +252,9 @@ def assumption_notes(d: dict[str, Any]) -> list[str]:
         f"(a measured daily-loop session processed {d['measured']['hermes_daily_loop_session']['tokens_processed']:,}).",
         f"{a['fallback_share']:.0%} of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.",
         f"The Hermes line ({_usd(d['scenarios']['base']['monthly']['ai_lines'][-1]['usd'])} of the "
-        f"{_usd(d['scenarios']['base']['monthly']['ai_usd'])} a month) assumes the agent's own loop also runs on Luna Pro. "
-        "It runs on Claude today, and the switch is tested on the simulation before the pilot. If the loop stayed on a "
-        "pricier model, this line would grow with that model's price, and the cap would stop the spend.",
+        f"{_usd(d['scenarios']['base']['monthly']['ai_usd'])} a month) prices the agent's own loop on Luna Pro, uncached.",
+        f"The starting budget is {h['budget_multiplier']}x the base projection for AI: room for longer conversations and "
+        "more replies than expected. Texting is shown at its projection.",
         f"Texts are kept to one GSM-7 segment ({a['seg_out']} segment each in the base case). One em dash or curly "
         "quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
         f"Texting: ${a['sms_out_per_segment']} per outbound segment and ${a['sms_in_per_segment']} per inbound, "
@@ -284,9 +283,9 @@ def markdown(d: dict[str, Any]) -> str:
          f"- **Ongoing, per month:** about **{_usd(h['monthly_ai_usd'])} in AI** with all "
          f"{d['population']['partners_total']:,} partners on the two-week cadence (range "
          f"{_usd(h['monthly_ai_range_usd'][0])} to {_usd(h['monthly_ai_range_usd'][1])}).",
+         f"- **Starting budget for AI: {h['budget_multiplier']}x the projection,** "
+         f"{_usd(h['reactivation_ai_budget_usd'])} for the reactivation and {_usd(h['monthly_ai_budget_usd'])} a month.",
          f"- **If every token estimate is 10x too low:** {_usd(h['stress_monthly_ai_usd'])} a month.",
-         f"- **Hard cap:** the agent's OpenRouter key carries a monthly limit of "
-         f"${h['recommended_monthly_ai_cap_usd']:,}; going over needs 7FF's approval.",
          f"- **Texting is the bigger line, and it isn't AI:** about {_usd(h['reactivation_sms_usd'])} for the "
          f"reactivation and {_usd(h['monthly_sms_usd'])} a month ongoing, billed by HighLevel's phone system.",
          "",

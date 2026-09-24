@@ -21,7 +21,7 @@
 
 Re-engaged partners may also buy the Funding Machine, which is upside on top of their deals.
 
-**AI costs.** Ty asked for a projection so the program can't run up an unexpected AI bill. The agent runs on low-cost models (GPT-6 Luna Pro through OpenRouter, GLM 5.3 Flash as backup) with Jev classifying. The projection is in the demo pack: about $10 of AI for the whole reactivation, about $36 a month after, and a hard cap of $250 a month. Texting through HighLevel is the larger cost.
+**AI costs.** Ty asked for a projection so the program can't run up an unexpected AI bill. The agent runs on low-cost models (GPT-6 Luna Pro through OpenRouter, GLM 5.3 Flash as backup) with Jev classifying. The projection is in the demo pack: about $10 of AI for the whole reactivation and about $36 a month after, with twice that ($20 and $71 a month) as a good starting budget. Texting through HighLevel is the larger cost.
 
 **Data.** 7FF will send its NDA. Partner data must never be pushed out or resold.
 
@@ -50,7 +50,7 @@ Re-engaged partners may also buy the Funding Machine, which is upside on top of 
 ## Next steps
 
 1. Ty sends 7FF's NDA, and it is signed before any partner data moves.
-2. Justin sends the letter of intent, the proposal and the cost projection.
+2. Justin sends the proposal and agreement, and the cost projection.
 3. Technical session with Brock: read access to the Zoho partner data, which partners can move, the GoHighLevel sub-account, the texting number and SMS consent.
 4. Ty confirms the agent's name: Morgan, or a new one.
 5. Justin builds the Zoho import, the Jev layer and the message worker, and re-runs the simulation on the production models.

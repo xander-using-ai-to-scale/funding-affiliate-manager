@@ -28,7 +28,7 @@
     "No carrier filtering or spam flags on the number",
     "7FF has read a sample of the conversations and is happy with the tone",
     "Deals from replies are reaching the funding team and being counted by tier",
-    "AI spend is tracking the projection, well under the cap"
+    "AI spend is tracking the projection, inside the starting budget"
   ],
   "wave_notes": [
     "Jev reads all 13,000 records once at import (about $0.49).",
@@ -57,9 +57,9 @@
       "does": "Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out."
     },
     {
-      "part": "Models and a capped OpenRouter key",
+      "part": "Models through OpenRouter",
       "status": "Set up",
-      "does": "The agent moves to GPT-6 Luna Pro with GLM 5.3 Flash as fallback (it runs on Claude today) and is re-run on the simulation before the pilot. Every call goes through one key with a hard monthly limit; going over needs 7FF's approval."
+      "does": "The agent and the message worker run on GPT-6 Luna Pro, with GLM 5.3 Flash as the fallback. Luna Pro was tested driving the agent's own tools on September 23, 2026. Usage is reported to 7FF every month."
     },
     {
       "part": "Zoho to GoHighLevel partner import (read-only)",
@@ -102,11 +102,11 @@
     },
     {
       "step": "Approve",
-      "what": "In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily cap."
+      "what": "In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily send limit."
     },
     {
       "step": "Send",
-      "what": "GoHighLevel sends from the registered number, in daytime hours, under the daily cap."
+      "what": "GoHighLevel sends from the registered number, in daytime hours, within the daily send limit."
     },
     {
       "step": "Converse",
@@ -114,7 +114,7 @@
     },
     {
       "step": "Report",
-      "what": "A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the cap."
+      "what": "A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the budget."
     }
   ],
   "models": {
@@ -887,7 +887,9 @@
     "reactivation_sms_usd": 355.24,
     "monthly_sms_usd": 417.84,
     "kickoff_batch_saving_usd": 2.81,
-    "recommended_monthly_ai_cap_usd": 250
+    "budget_multiplier": 2,
+    "reactivation_ai_budget_usd": 20.1,
+    "monthly_ai_budget_usd": 71.44
   },
   "assumption_notes": [
     "Kickoff draft: 1,300 tokens in, 600 out (including Luna Pro's reasoning).",
@@ -896,7 +898,8 @@
     "Jev: 900 tokens to ingest a record, 700 to check a draft, 1,000 to classify a reply.",
     "Hermes agent: 12 sessions a day at 540,000 tokens each, priced uncached (a measured daily-loop session processed 539,187).",
     "5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.",
-    "The Hermes line ($21.01 of the $35.72 a month) assumes the agent's own loop also runs on Luna Pro. It runs on Claude today, and the switch is tested on the simulation before the pilot. If the loop stayed on a pricier model, this line would grow with that model's price, and the cap would stop the spend.",
+    "The Hermes line ($21.01 of the $35.72 a month) prices the agent's own loop on Luna Pro, uncached.",
+    "The starting budget is 2x the base projection for AI: room for longer conversations and more replies than expected. Texting is shown at its projection.",
     "Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
     "Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.",
     "Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.",

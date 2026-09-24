@@ -199,6 +199,8 @@ td.st{white-space:nowrap}
 .loi table{margin:8px 0 14px;border:1px solid var(--line);border-radius:10px;overflow:hidden}
 .loi .draftbar{display:inline-block;background:var(--fill);color:var(--fill-ink);border:1px solid var(--fill-line);padding:5px 9px;border-radius:999px;font:500 12px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;margin-bottom:12px}
 .loi hr{border:0;border-top:1px solid var(--line);margin:22px 0}
+.loi h3{font:600 16px/1.3 var(--body);margin:18px 0 6px}
+.loi .fill{background:var(--fill);color:var(--fill-ink);border-bottom:1px dashed var(--fill-line);padding:0 3px;border-radius:3px}
 footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-3)}
 </style>
 
@@ -206,7 +208,7 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
 <header class="top">
   <div class="eyebrow">7 Figures Funding · Funding Affiliate Manager</div>
   <h1>The affiliate manager, shown end to end</h1>
-  <p class="lede">An AI Funding Affiliate Manager to bring 7FF's 13,000 partners back into conversation and keep them sending deals, working in GoHighLevel with a human approving every message. This pack has what it costs to run, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the letter of intent, and how it's built.</p>
+  <p class="lede">An AI Funding Affiliate Manager to bring 7FF's 13,000 partners back into conversation and keep them sending deals, working in GoHighLevel with a human approving every message. This pack has what it costs to run, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the agreement, and how it's built.</p>
   <div class="facts"><span>Simulation <b id="f-pop">253 affiliates · 30 days</b></span><span>Engine <b>the production code</b></span><span>Data <b>synthetic, nobody contacted</b></span></div>
 </header>
 
@@ -216,7 +218,7 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <button role="tab" id="t-simulation" aria-controls="simulation" aria-selected="false">Simulation report</button>
   <button role="tab" id="t-crm" aria-controls="crm" aria-selected="false">Inside the CRM</button>
   <button role="tab" id="t-proposal" aria-controls="proposal" aria-selected="false">Partnership proposal</button>
-  <button role="tab" id="t-loi" aria-controls="loi" aria-selected="false">Letter of intent</button>
+  <button role="tab" id="t-agreement" aria-controls="agreement" aria-selected="false">Proposal &amp; agreement</button>
   <button role="tab" id="t-built" aria-controls="built" aria-selected="false">How it's built</button>
 </div></nav>
 
@@ -228,11 +230,11 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <h2 style="margin-top:34px">What's in this pack</h2>
   <p class="sub">Everything in one place. Each tab stands on its own.</p>
   <div class="grid2">
-    <button class="go" data-go="costs"><span class="k">AI costs</span><h3>What 13,000 partners cost to run</h3><span>The reactivation and the monthly run, priced on published model and texting rates, with the rollout in waves and a hard cap.</span></button>
+    <button class="go" data-go="costs"><span class="k">AI costs</span><h3>What 13,000 partners cost to run</h3><span>The reactivation and the monthly run, priced on published model and texting rates, with the rollout in waves and a starting budget.</span></button>
     <button class="go" data-go="simulation"><span class="k">Simulation report</span><h3>What the agent did, day by day</h3><span>Check-ins, follow-ups, replies, deals, the with/without comparison, and a projection to 10,000 affiliates.</span></button>
     <button class="go" data-go="crm"><span class="k">Inside the CRM</span><h3>Every affiliate's month, record by record</h3><span>Browse all 253 affiliates the way GoHighLevel will hold them: tags, fields, tasks, messages and replies.</span></button>
     <button class="go" data-go="proposal"><span class="k">Partnership proposal</span><h3>How we'd run it with 7FF</h3><span>The team, what's included, the Growth Kit, milestones, and what we need from you.</span></button>
-    <button class="go" data-go="loi"><span class="k">Letter of intent</span><h3>The terms from our call, in writing</h3><span>Pilot scope, the partner-tier shares, usage at cost under a cap, data protection. A draft for both sides to review.</span></button>
+    <button class="go" data-go="agreement"><span class="k">Proposal &amp; agreement</span><h3>The terms from our call, ready to sign</h3><span>What we run, how it's paid, the partner-tier shares, usage at cost, data protection, and signatures, in one document.</span></button>
     <button class="go" data-go="built"><span class="k">How it's built</span><h3>The agent, its computer, and its guardrails</h3><span>Where it runs, what it can touch, what always needs a human, and its memory.</span></button>
   </div>
   <h2 style="margin-top:34px">Next steps</h2>
@@ -342,8 +344,8 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <div class="proposal"><!--__PROPOSAL__--></div>
 </section>
 
-<section class="panel-tab" id="loi" role="tabpanel" aria-labelledby="t-loi" hidden>
-  <div class="loi"><!--__LOI__--></div>
+<section class="panel-tab" id="agreement" role="tabpanel" aria-labelledby="t-agreement" hidden>
+  <div class="loi"><!--__AGREEMENT__--></div>
 </section>
 
 <section class="panel-tab" id="built" role="tabpanel" aria-labelledby="t-built" hidden>
@@ -371,11 +373,8 @@ footer.page{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);fo
   <p class="sub" id="vault-sub"></p>
   <pre class="card" id="vault"></pre>
   <h2 style="margin-top:34px">Source and reruns</h2>
-  <p>Every document in this pack, the cost model and the simulation report are in <a href="https://github.com/jbellsolutions/7ff-affiliate-manager">jbellsolutions/7ff-affiliate-manager</a> (private; access on request). The agent's own code lives in a separate private repository. Every number reruns from source: the cost model from published prices, the simulation from a fixed seed, so the same inputs give the same numbers.</p>
-  <pre class="card"># the costs, from this pack's repository
-python3 scripts/cost_model.py
-
-# the simulation and this page, from the agent's repository
+  <p>Every number in this pack reruns from source: the costs from a cost model built on published prices, and the simulation from a fixed seed, so the same inputs always give the same numbers.</p>
+  <pre class="card">python3 scripts/cost_model.py
 fam sim seed --count 250 --start 2026-09-01 --out sim-output
 fam sim run  --days 30  --start 2026-09-01 --out sim-output
 python3 scripts/build_demo_pack.py --sim sim-output</pre>
@@ -431,8 +430,8 @@ const DATA = /*__DATA__*/null;
   const cstats = [
     [usd2(H.reactivation_ai_usd), `AI for the whole reactivation: ${fmt(pop.reactivation_audience)} kickoff texts and every conversation after (range ${usd2(H.reactivation_ai_range_usd[0])} to ${usd2(H.reactivation_ai_range_usd[1])})`, true],
     [`${usd2(H.monthly_ai_usd)}<small> /mo</small>`, `AI each month with all ${fmt(pop.partners_total)} partners on the two-week cadence (range ${usd2(H.monthly_ai_range_usd[0])} to ${usd2(H.monthly_ai_range_usd[1])})`],
+    [`${usd2(H.monthly_ai_budget_usd)}<small> /mo</small>`, `starting AI budget: ${H.budget_multiplier}x the projection, and ${usd2(H.reactivation_ai_budget_usd)} for the reactivation`],
     [`${usd(H.stress_monthly_ai_usd)}<small> /mo</small>`, 'AI each month if every token estimate here were 10 times too low'],
-    [`$${fmt(H.recommended_monthly_ai_cap_usd)}<small> /mo</small>`, 'hard cap on the agent\'s model key. Anything more needs 7FF\'s approval'],
   ];
   $('#cost-stats').innerHTML = cstats.map(([n,l,lead]) => `<div class="stat${lead?' lead':''}"><b>${n}</b><span>${esc(l)}</span></div>`).join('');
   const groups = [['Reactivation, one time', BASE.reactivation.ai_usd, BASE.reactivation.sms_usd], ['Every month', BASE.monthly.ai_usd, BASE.monthly.sms_usd]];

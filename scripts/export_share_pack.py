@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 FILES = [
     "docs/demo-pack.html", "docs/proposal-7ff.html", "docs/workflow-map.html",
     "docs/ai-cost-projection.md", "docs/cost-projection.json",
-    "docs/letter-of-intent-7ff.md", "docs/letter-of-intent-7ff.docx",
+    "docs/proposal-and-agreement-7ff.pdf", "docs/proposal-and-agreement-7ff.docx",
     "docs/call-recap-2026-09-23.md",
     "docs/simulation-report.md", "docs/simulation-report.json",
     "scripts/cost_model.py",
@@ -46,8 +46,8 @@ them sending deals, working in GoHighLevel with a person approving every message
 ## Start here
 
 Download [`docs/demo-pack.html`](docs/demo-pack.html) and open it in a browser. It has everything in one page:
-AI costs, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the letter of intent, and
-how the agent is built. (GitHub shows HTML files as source code, so open the file rather than viewing it here.)
+AI costs, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the agreement, and how the
+agent is built. (GitHub shows HTML files as source code, so open the file rather than viewing it here.)
 
 ## What it costs
 
@@ -55,7 +55,8 @@ how the agent is built. (GitHub shows HTML files as source code, so open the fil
   kickoff texts and every conversation after (range ${h['reactivation_ai_range_usd'][0]:,.2f} to
   ${h['reactivation_ai_range_usd'][1]:,.2f}).
 - **About ${h['monthly_ai_usd']:,.2f} of AI a month** after that, with every partner on a two-week cadence.
-- **A hard cap of ${h['recommended_monthly_ai_cap_usd']:,} a month** on the model key. More needs 7FF's approval.
+- **Starting budget: twice the projection,** ${h['reactivation_ai_budget_usd']:,.2f} for the reactivation and
+  ${h['monthly_ai_budget_usd']:,.2f} a month.
 - **Texting is the bigger line:** about ${h['reactivation_sms_usd']:,.2f} for the reactivation and
   ${h['monthly_sms_usd']:,.2f} a month, billed by HighLevel.
 
@@ -69,7 +70,7 @@ The full projection, with scenarios, rollout waves and every assumption, is in
 | `docs/demo-pack.html` | The whole pack in one page |
 | `docs/ai-cost-projection.md` | AI and texting cost projection (`cost-projection.json` alongside) |
 | `docs/proposal-7ff.html` | Partnership proposal, draft for discussion |
-| `docs/letter-of-intent-7ff.md` | Letter of intent, draft for review (`.docx` alongside for redlining) |
+| `docs/proposal-and-agreement-7ff.pdf` | The proposal and agreement to sign (`.docx` alongside) |
 | `docs/call-recap-2026-09-23.md` | Recap of our call: what we covered, what we agreed, next steps |
 | `docs/simulation-report.md` | The 30-day simulation on 253 synthetic affiliates (`.json` alongside) |
 | `docs/workflow-map.html` | The affiliate operating system: lifecycle, cadence, daily loop, guardrails |

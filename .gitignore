@@ -13,3 +13,6 @@ mock-ghl.json
 
 # local preview config
 .claude/
+
+# private business documents (never committed)
+private/

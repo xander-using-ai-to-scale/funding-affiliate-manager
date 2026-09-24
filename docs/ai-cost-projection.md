@@ -6,8 +6,8 @@ Priced 2026-09-23 from OpenRouter, TypeSafe (Jev) and HighLevel published rates.
 
 - **Reactivation, one time:** about **$10.05 in AI** to send 12,950 personal kickoff texts and run every conversation that follows (range $3.47 to $45.23).
 - **Ongoing, per month:** about **$35.72 in AI** with all 13,000 partners on the two-week cadence (range $11.90 to $161.00).
+- **Starting budget for AI: 2x the projection,** $20.10 for the reactivation and $71.44 a month.
 - **If every token estimate is 10x too low:** $357.19 a month.
-- **Hard cap:** the agent's OpenRouter key carries a monthly limit of $250; going over needs 7FF's approval.
 - **Texting is the bigger line, and it isn't AI:** about $355.24 for the reactivation and $417.84 a month ongoing, billed by HighLevel's phone system.
 
 ## What runs it
@@ -18,7 +18,7 @@ Priced 2026-09-23 from OpenRouter, TypeSafe (Jev) and HighLevel published rates.
 | Affiliate engine and GoHighLevel connector | Built | Cadence rules, lifecycle tags, notes, tasks, approvals, opt-out handling, and a guard that keeps every text to one segment. |
 | Simulation and reporting | Built | Runs the same code against a synthetic CRM, as in this pack's simulation tab. |
 | GoHighLevel sub-account and texting number | Set up | Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out. |
-| Models and a capped OpenRouter key | Set up | The agent moves to GPT-6 Luna Pro with GLM 5.3 Flash as fallback (it runs on Claude today) and is re-run on the simulation before the pilot. Every call goes through one key with a hard monthly limit; going over needs 7FF's approval. |
+| Models through OpenRouter | Set up | The agent and the message worker run on GPT-6 Luna Pro, with GLM 5.3 Flash as the fallback. Luna Pro was tested driving the agent's own tools on September 23, 2026. Usage is reported to 7FF every month. |
 | Zoho to GoHighLevel partner import (read-only) | To build | Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are. |
 | Jev ingestion, checking and classifying | To build | Cleans each partner record on the way in, checks every draft against the compliance rules, and labels every reply. |
 | Message worker | To build | Drafts each kickoff and reply on GPT-6 Luna Pro, falling back to GLM 5.3 Flash. Runs outside the agent so each text pays only for its own short prompt; the kickoff runs in batch mode. |
@@ -30,10 +30,10 @@ Priced 2026-09-23 from OpenRouter, TypeSafe (Jev) and HighLevel published rates.
 1. **Import.** Partner records come over from Zoho, Jev cleans them, and each lands in GoHighLevel tagged with tier and status.
 2. **Gate.** Only partners with a mobile number and SMS consent get a text. STOP is final.
 3. **Draft.** The message worker writes one kickoff per partner from their record: name, tier, last deal, niche. Jev checks each draft.
-4. **Approve.** In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily cap.
-5. **Send.** GoHighLevel sends from the registered number, in daytime hours, under the daily cap.
+4. **Approve.** In the pilot a person approves each text in Slack. Later waves go out as sampled batches under a standing approval with a daily send limit.
+5. **Send.** GoHighLevel sends from the registered number, in daytime hours, within the daily send limit.
 6. **Converse.** Jev labels each reply and the worker drafts the answer under the same approval rules. Deals, commission questions and anything sensitive go to a person as a task.
-7. **Report.** A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the cap.
+7. **Report.** A daily summary in Slack and a weekly scorecard: replies, opt-outs, deals by tier, and AI spend against the budget.
 
 ## Rollout in waves
 
@@ -51,7 +51,7 @@ Gates:
 - No carrier filtering or spam flags on the number
 - 7FF has read a sample of the conversations and is happy with the tone
 - Deals from replies are reaching the funding team and being counted by tier
-- AI spend is tracking the projection, well under the cap
+- AI spend is tracking the projection, inside the starting budget
 
 Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The texting number is registered for A2P 10DLC ($71.91 one time). How many texts a day the carriers allow depends on the trust score they give 7FF's registration. A low score caps daily volume and makes each wave take longer; it doesn't change the cost.
 
@@ -101,7 +101,8 @@ Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The
 - Jev: 900 tokens to ingest a record, 700 to check a draft, 1,000 to classify a reply.
 - Hermes agent: 12 sessions a day at 540,000 tokens each, priced uncached (a measured daily-loop session processed 539,187).
 - 5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.
-- The Hermes line ($21.01 of the $35.72 a month) assumes the agent's own loop also runs on Luna Pro. It runs on Claude today, and the switch is tested on the simulation before the pilot. If the loop stayed on a pricier model, this line would grow with that model's price, and the cap would stop the spend.
+- The Hermes line ($21.01 of the $35.72 a month) prices the agent's own loop on Luna Pro, uncached.
+- The starting budget is 2x the base projection for AI: room for longer conversations and more replies than expected. Texting is shown at its projection.
 - Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.
 - Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.
 - Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.
