@@ -30,7 +30,9 @@ BLOCK = [r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", r"fam@", r"/Users/", r"/home
 
 
 def scan(path: Path) -> list[str]:
-    text = path.read_text(errors="ignore") if path.suffix != ".docx" else ""
+    if path.suffix in (".pdf", ".docx"):  # binary renders: scan the markdown they were built from
+        path = path.with_suffix(".md")
+    text = path.read_text(errors="ignore")
     return [f"{path.relative_to(ROOT)}: {pat}" for pat in BLOCK if re.search(pat, text)]
 
 
