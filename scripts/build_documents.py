@@ -3,7 +3,7 @@
     python3 scripts/build_documents.py docs/proposal-and-agreement-7ff.md [more.md ...]
 
 Each FILE.md becomes FILE.pdf (headless Chrome, US Letter) and FILE.docx (pandoc) beside it.
-Bracketed blanks like [state] are highlighted in the PDF so they're easy to find and fill.
+Tables under a "Key terms" or "Signatures" heading render as fixed-height boxes for e-sign fields.
 """
 
 from __future__ import annotations
@@ -36,7 +36,8 @@ th { background: #eef2f0; font-weight: 600; }
 section.level2 { break-inside: avoid; }
 .fill { background: #fff4d6; border-bottom: 1px dashed #c9a94a; padding: 0 2px; }
 [data-sign] table { margin-top: 10px; }
-[data-sign] td { height: 34px; width: 50%; }
+[data-sign] td { height: 38px; width: 50%; }
+[data-sign] tr { break-inside: avoid; }
 """
 
 
@@ -48,7 +49,8 @@ def render(md: Path) -> tuple[Path, Path]:
     parts = [m.start() for m in re.finditer(r'<section id="[^"]*" class="level1"', body)]
     for pos in reversed(parts[1:]):  # each part after the first starts on a new page
         body = body[:pos] + '<section style="break-before:page"' + body[pos + len("<section"):]
-    body = re.sub(r'(<section id="signatures" class="level2")', r'\1 data-sign', body, flags=re.S)
+    # the key terms and signature tables become fixed-height boxes, ready for e-sign fields
+    body = re.sub(r'(<section id="(?:key-terms|signatures)" class="level2")', r'\1 data-sign', body)
     page = (f'<!doctype html><html><head><meta charset="utf-8"><title>{html.escape(meta.get("title", md.stem))}</title>'
             f"<style>{CSS}</style></head><body><header><p class=\"title\">{html.escape(meta.get('title', ''))}</p>"
             f"<p class=\"subtitle\">{html.escape(meta.get('subtitle', ''))}</p></header>{body}</body></html>")

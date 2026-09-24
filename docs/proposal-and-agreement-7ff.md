@@ -1,25 +1,39 @@
 ---
 title: Partnership Proposal and Agreement
-subtitle: AI Funding Affiliate Manager for the 7 Figures Funding partner program
+subtitle: Affiliate management for the 7 Figures Funding partner program
 ---
 
 **Prepared for** 7 Figures Funding · **Prepared by** Justin Bellware · **Date** September 23, 2026
 
 # Part 1: Proposal
 
-## What we'll do
+## The goal
 
-7 Figures Funding ("7FF") has more than 13,000 partners, most of them in Zoho. About 50 are active and sending deals, which leaves roughly 12,950 who signed up and went quiet. We will bring them back into conversation and keep them sending deals, using an AI Funding Affiliate Manager that works inside GoHighLevel with a person approving what it sends.
+7 Figures Funding ("7FF") has more than 13,000 partners, most of them in Zoho. About 50 are active and sending deals, which leaves roughly 12,950 who signed up and went quiet. The reactivation text is only the start. The goal is a lasting relationship with every partner:
 
-- **One personal text to every quiet partner.** Each kickoff is written for that partner from their own record (name, tier, last deal, niche), followed by a real back-and-forth with everyone who answers.
-- **Every partner kept warm.** A touch every two weeks, an offer once a month, a newsletter, and regular partner trainings.
-- **Follow-ups on the day promised.** "Check back with me" becomes a task on the right day. A partner with a deal gets a person on the phone the same day.
-- **Deals counted by tier.** Every re-engaged partner is tagged with their tier, so each deal they send is counted against the right share.
-- **A weekly scorecard.** Replies, opt-outs, deals by tier, and AI spend against the budget.
+1. **Open the door** to a real relationship with each partner.
+2. **Build a partner profile** for each one: tier, history, niche, goals, and every conversation.
+3. **Know each partner.** The agent learns each partner's specifics from their profile and every conversation, so every message fits that person.
+4. **Plan a revenue channel.** For every partner who engages, a plan for turning them into a steady source of deals.
+5. **Coach the community.** In time, offer affiliate coaching in the group, helping members grow their own affiliate and referral programs.
+
+## How it unfolds
+
+- **Phase 1: Reactivation kickoff, starting this month.** One personal text to each quiet partner, written from their own record, then a real back-and-forth with everyone who answers. It starts with a pilot of 250 partners, then 2,500, then the remaining 10,200. Each wave opens only when the one before it has worked: low opt-outs, a healthy texting number, conversations 7FF is happy with, deals counted by tier, and AI spend on track.
+- **Phase 2: The 90-day kickstart.** Relationships and replies take time. Over the first 90 days we build each partner's profile, learn each partner from every conversation, and put a revenue plan in place for every partner who engages. At day 90 we review the results together, with real data, and decide where to push.
+- **Phase 3: Ongoing affiliate management, over 6 to 12 months.** Every partner stays on a steady relationship cadence, and revenue compounds as more partners come back and keep sending deals. We refine the program together, then release it to the whole community in a controlled way.
+
+## What the affiliate manager does every month
+
+- **Keeps every partner warm.** A touch every two weeks, an offer once a month, a newsletter, and regular partner trainings.
+- **Follows up on the day promised.** "Check back with me" becomes a task on the right day. A partner with a deal gets a person on the phone the same day.
+- **Keeps every profile current.** Each conversation updates the partner's profile, so the next message builds on the last.
+- **Counts deals by tier.** Every re-engaged partner is tagged with their tier, so each deal they send is counted against the right share.
+- **Reports weekly.** Replies, opt-outs, deals by tier, and AI spend against the budget.
 
 ## How it's paid for: usage plus performance
 
-There is no monthly fee. 7FF pays the AI and texting usage at cost, with no markup. We earn a share of each deal from a partner we bring back, set by that partner's tier:
+There is no monthly fee. 7FF covers the AI and texting usage at cost, with no markup. We earn a share of each deal from a partner we bring back, set by that partner's tier, so our return grows only as 7FF's does:
 
 | Partner tier | Our share of that partner's deals |
 |---|---|
@@ -40,10 +54,6 @@ The agent runs on GPT-6 Luna Pro through OpenRouter, with GLM 5.3 Flash (open we
 
 The reactivation covers a personal kickoff text to each of the 12,950 inactive partners and every conversation that follows. The monthly figures keep all 13,000 partners on the two-week cadence. Texting is billed by HighLevel on 7FF's own sub-account.
 
-## How we roll it out
-
-In waves, each opened only when the one before it has worked: a pilot of 250 partners, then 2,500, then the remaining 10,200. Between waves we check that opt-outs are low, the texting number is in good standing with the carriers, 7FF is happy with the tone of the conversations, deals are being counted by tier, and AI spend is tracking the projection.
-
 ## What we need from 7FF
 
 - 7FF's NDA, signed before any partner data moves
@@ -56,15 +66,34 @@ In waves, each opened only when the one before it has worked: a pilot of 250 par
 
 # Part 2: Agreement
 
-This Agreement is between **[7FF legal entity name]**, a [state] [entity type] ("7FF"), and **[Provider legal entity name]**, a [state] [entity type] ("Provider"). It takes effect on the date of the last signature below (the "Effective Date").
+This Agreement is between the 7FF entity and the Provider entity named in the Key terms below. It takes effect on the date of the last signature below (the "Effective Date").
+
+## Key terms
+
+| Term | Entry |
+|---|---|
+| 7FF legal entity (name, state, entity type) | |
+| Provider legal entity (name, state, entity type) | |
+| The performance share is calculated on | |
+| Months a Re-engaged Partner's deals count after their first reply | |
+| Funding Machine purchases by Re-engaged Partners count at (%, or 0) | |
+| Governing law (state) | |
 
 ## 1. Services
 
-Provider will run a partner reactivation and relationship program for 7FF's inactive partners (the "Program"), as described in Part 1. This includes the AI Funding Affiliate Manager, the GoHighLevel build, the reactivation outreach, ongoing relationship touches, reply handling, and the weekly scorecard. Provider may use its own staff, contractors and software to deliver the Services.
+Provider will act as the affiliate manager for 7FF's partner program each month (the "Program"), as described in Part 1. The Services include:
+
+- Phase 1, the reactivation kickoff for 7FF's inactive partners;
+- a partner profile for each partner in 7FF's GoHighLevel, kept current;
+- an ongoing relationship cadence, reply handling and follow-ups, run by the AI Funding Affiliate Manager under human approval;
+- a revenue plan for each partner who engages; and
+- a weekly scorecard.
+
+Provider may use its own staff, contractors and software to deliver the Services.
 
 ## 2. Rollout
 
-The Program starts with a pilot of 250 partners and continues in waves. The parties will agree the pilot's measures of success in writing (email is enough) before it begins, and a new wave starts only when the previous wave meets them.
+The reactivation starts with a pilot of 250 partners and continues in waves. The parties will agree the pilot's measures of success in writing (email is enough) before it begins, and a new wave starts only when the previous wave meets them.
 
 ## 3. What 7FF provides
 
@@ -72,16 +101,14 @@ The Program starts with a pilot of 250 partners and continues in waves. The part
 
 ## 4. Usage costs
 
-7FF pays the costs of running the Program at cost, with no markup:
+7FF pays the usage costs of running the Program at cost, with no markup:
 
 - **AI usage.** Provider pays the model providers and bills 7FF monthly at cost, with a usage report.
 - **Texting.** HighLevel bills texting and A2P 10DLC registration fees to 7FF's GoHighLevel sub-account directly.
-- **Server and the agent's cloud computer:** [covered by Provider] or [billed at cost, up to $______ a month].
-- **Relationship manager:** [included in Provider's share] or [$______ a month].
 
 ## 5. Performance share
 
-For each deal submitted by a Re-engaged Partner, 7FF pays Provider a share of [basis, for example 7FF's revenue on the funded deal], set by that partner's tier on the date the deal is submitted:
+For each deal submitted by a Re-engaged Partner, 7FF pays Provider the share below of the amount named in the Key terms, set by that partner's tier on the date the deal is submitted:
 
 | Partner tier | Provider's share |
 |---|---|
@@ -90,7 +117,7 @@ For each deal submitted by a Re-engaged Partner, 7FF pays Provider a share of [b
 | Apprentice | 10% |
 | Free | 15% |
 
-A **Re-engaged Partner** is a partner who was inactive on the Effective Date and who replies to the Program's outreach. A deal counts if it is submitted within [______ months] of that partner's first reply. A Re-engaged Partner's purchase of the Funding Machine [counts at ______%] or [does not count].
+A **Re-engaged Partner** is a partner who was inactive on the Effective Date and who replies to the Program's outreach. A deal counts if it is submitted within the number of months in the Key terms after that partner's first reply. A Re-engaged Partner's purchase of the Funding Machine counts at the percentage in the Key terms.
 
 ## 6. Reporting and payment
 
@@ -111,27 +138,33 @@ A person approves every message, or a batch under a standing approval with a dai
 
 ## 9. Ownership
 
-Partner data and 7FF's content belong to 7FF. The workflows, fields, tags, pipelines and templates built in 7FF's GoHighLevel belong to 7FF and stay with it. Provider keeps its agent software, code, prompts and methods, including improvements made while delivering the Program.
+Partner data, partner profiles and 7FF's content belong to 7FF. The workflows, fields, tags, pipelines and templates built in 7FF's GoHighLevel belong to 7FF and stay with it. Provider keeps its agent software, code, prompts and methods, including improvements made while delivering the Program.
 
-## 10. Case study
+## 10. Community release and coaching
+
+By separate written agreement, the parties may extend the Program to the wider community, including affiliate coaching for group members and a controlled release of the system to the community.
+
+## 11. Case study
 
 With 7FF's written approval of the content, Provider may present the Program's results as a case study, including at Funding Machine Live and to other prospective clients.
 
-## 11. No guarantee of results
+## 12. No guarantee of results
 
 Provider will deliver the Services with care, but does not guarantee any number of replies, re-engaged partners or deals. Cost figures in Part 1 are projections from published rates, not fixed prices.
 
-## 12. Term and ending the Agreement
+## 13. Term and ending the Agreement
 
-This Agreement starts on the Effective Date and continues month to month. Either party may end it with 30 days' written notice, or immediately if the other party materially breaches it and does not fix the breach within 15 days of written notice. When it ends, Provider stops all outreach and handles partner data under section 8. Performance shares on deals submitted by Re-engaged Partners before the end date remain payable, as do usage costs incurred before the end date.
+The first 90 days after the Effective Date are the Kickstart. During the Kickstart, either party may end this Agreement only if the other materially breaches it and does not fix the breach within 15 days of written notice. At the end of the Kickstart the parties review the results together. The Agreement then continues month to month, and either party may end it with 30 days' written notice. The parties intend to run the Program for 6 to 12 months.
 
-## 13. Liability
+When the Agreement ends, Provider stops all outreach and handles partner data under section 8. Performance shares on deals submitted by Re-engaged Partners before the end date remain payable, as do usage costs incurred before the end date.
+
+## 14. Liability
 
 Neither party is liable to the other for indirect, incidental or consequential damages, or for lost profits. Except for breaches of section 8, each party's total liability under this Agreement is limited to the amounts paid or payable to Provider under it in the 12 months before the claim.
 
-## 14. General
+## 15. General
 
-The parties are independent contractors. Neither is the other's employee, partner or agent, and neither can bind the other. This Agreement, together with 7FF's NDA, is the parties' entire agreement on this subject, and changes must be in writing and signed by both. It is governed by the laws of [state]. It may be signed electronically and in counterparts.
+The parties are independent contractors. Neither is the other's employee, partner or agent, and neither can bind the other. This Agreement, together with 7FF's NDA, is the parties' entire agreement on this subject, and changes must be in writing and signed by both. It is governed by the laws of the state named in the Key terms. It may be signed electronically and in counterparts.
 
 ## Signatures
 
@@ -139,7 +172,6 @@ The parties sign this Agreement to show they agree to it.
 
 | 7 Figures Funding | Provider |
 |---|---|
-| Entity: | Entity: |
 | Name: | Name: Justin Bellware |
 | Title: | Title: |
 | Signature: | Signature: |
