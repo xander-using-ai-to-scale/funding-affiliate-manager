@@ -10,6 +10,17 @@ Priced 2026-09-23 from OpenRouter, TypeSafe (Jev) and HighLevel published rates.
 - **If every token estimate is 10x too low:** $357.19 a month.
 - **Texting is the bigger line, and it isn't AI:** about $355.24 for the reactivation and $417.84 a month ongoing, billed by HighLevel's phone system.
 
+## Planning figures
+
+The agreement quotes each line at 2x and 5x the base projection:
+
+| | 2x | 5x |
+|---|---:|---:|
+| AI, reactivation (one time) | $20.10 | $50.25 |
+| AI, every month | $71.44 | $178.60 |
+| Texting, reactivation (one time) | $710.48 | $1,776.20 |
+| Texting, every month | $835.68 | $2,089.20 |
+
 ## What runs it
 
 | Part | Status | What it does |

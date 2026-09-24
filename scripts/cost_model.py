@@ -95,6 +95,7 @@ SCENARIOS: dict[str, dict[str, Any]] = {
 }
 SHARED = dict(reply_share=0.85, touches_per_month=2, fallback_share=0.05, days_per_month=30)
 BUDGET_MULTIPLIER = 2  # plan AI spend at twice the base projection: a comfortable starting budget, not a limit
+PLANNING_MULTIPLES = (2, 5)  # the agreement quotes AI and texting at these multiples of the base projection
 TOKEN_KEYS = ("ingest_in", "draft_in", "draft_out", "qa_in", "classify_in", "reply_in", "reply_out",
               "session_in", "session_out")
 
@@ -228,6 +229,10 @@ def build() -> dict[str, Any]:
             "reactivation_sms_usd": base["reactivation"]["sms_usd"],
             "monthly_sms_usd": base["monthly"]["sms_usd"],
             "kickoff_batch_saving_usd": round(batch_saving, 2),
+            "multiples": {str(m): {k: round(base[part][f] * m, 2) for k, part, f in (
+                ("reactivation_ai_usd", "reactivation", "ai_usd"), ("monthly_ai_usd", "monthly", "ai_usd"),
+                ("reactivation_sms_usd", "reactivation", "sms_usd"), ("monthly_sms_usd", "monthly", "sms_usd"))}
+                for m in PLANNING_MULTIPLES},
             "budget_multiplier": BUDGET_MULTIPLIER,
             "reactivation_ai_budget_usd": round(base["reactivation"]["ai_usd"] * BUDGET_MULTIPLIER, 2),
             "monthly_ai_budget_usd": round(base["monthly"]["ai_usd"] * BUDGET_MULTIPLIER, 2),
@@ -288,6 +293,15 @@ def markdown(d: dict[str, Any]) -> str:
          f"- **If every token estimate is 10x too low:** {_usd(h['stress_monthly_ai_usd'])} a month.",
          f"- **Texting is the bigger line, and it isn't AI:** about {_usd(h['reactivation_sms_usd'])} for the "
          f"reactivation and {_usd(h['monthly_sms_usd'])} a month ongoing, billed by HighLevel's phone system.",
+         "",
+         "## Planning figures",
+         "",
+         "The agreement quotes each line at " + " and ".join(f"{m}x" for m in h["multiples"]) + " the base projection:",
+         "",
+         "| | " + " | ".join(f"{m}x" for m in h["multiples"]) + " |", "|---|" + "---:|" * len(h["multiples"]),
+         *[f"| {label} | " + " | ".join(_usd(v[key]) for v in h["multiples"].values()) + " |" for key, label in (
+             ("reactivation_ai_usd", "AI, reactivation (one time)"), ("monthly_ai_usd", "AI, every month"),
+             ("reactivation_sms_usd", "Texting, reactivation (one time)"), ("monthly_sms_usd", "Texting, every month"))],
          "",
          "## What runs it",
          "",

@@ -887,6 +887,20 @@
     "reactivation_sms_usd": 355.24,
     "monthly_sms_usd": 417.84,
     "kickoff_batch_saving_usd": 2.81,
+    "multiples": {
+      "2": {
+        "reactivation_ai_usd": 20.1,
+        "monthly_ai_usd": 71.44,
+        "reactivation_sms_usd": 710.48,
+        "monthly_sms_usd": 835.68
+      },
+      "5": {
+        "reactivation_ai_usd": 50.25,
+        "monthly_ai_usd": 178.6,
+        "reactivation_sms_usd": 1776.2,
+        "monthly_sms_usd": 2089.2
+      }
+    },
     "budget_multiplier": 2,
     "reactivation_ai_budget_usd": 20.1,
     "monthly_ai_budget_usd": 71.44

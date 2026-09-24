@@ -140,12 +140,13 @@ def agreement_html(md: Path) -> str:
     return f'<h1>{meta.get("title", "")}</h1><p class="muted" style="margin-top:0">{meta.get("subtitle", "")}</p>{body}'
 
 
-def check_figures(cost: dict[str, Any], *docs: Path) -> None:
+def check_figures(cost: dict[str, Any], proposal: Path, agreement: Path) -> None:
     """Fail the build if a cost figure quoted in the proposal or agreement no longer matches the model."""
     h = cost["headline"]
-    figures = [f"${h[k]:,.2f}" for k in ("reactivation_ai_usd", "monthly_ai_usd", "reactivation_ai_budget_usd",
-                                          "monthly_ai_budget_usd", "reactivation_sms_usd", "monthly_sms_usd")]
-    want = {doc: figures for doc in docs}
+    usd = lambda v: f"${v:,.2f}"
+    want = {proposal: [usd(h[k]) for k in ("reactivation_ai_usd", "monthly_ai_usd", "reactivation_ai_budget_usd",
+                                           "monthly_ai_budget_usd", "reactivation_sms_usd", "monthly_sms_usd")],
+            agreement: [usd(v) for m in h["multiples"].values() for v in m.values()]}
     missing = [f"{path.name}: {v}" for path, vals in want.items() for v in vals if v not in path.read_text()]
     if missing:
         raise SystemExit("Cost figures out of date (rerun scripts/cost_model.py, then fix): " + ", ".join(missing))

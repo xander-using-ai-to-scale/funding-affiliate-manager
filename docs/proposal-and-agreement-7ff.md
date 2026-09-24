@@ -3,7 +3,7 @@ title: Partnership Proposal and Agreement
 subtitle: Affiliate management for the 7 Figures Funding partner program
 ---
 
-**Prepared for** 7 Figures Funding · **Prepared by** Justin Bellware · **Date** September 23, 2026
+**Prepared for** 7 Figures Funding · **Prepared by** Justin Bellware · **Date** September 24, 2026
 
 # Part 1: Proposal
 
@@ -15,11 +15,10 @@ subtitle: Affiliate management for the 7 Figures Funding partner program
 2. **Build a partner profile** for each one: tier, history, niche, goals, and every conversation.
 3. **Know each partner.** The agent learns each partner's specifics from their profile and every conversation, so every message fits that person.
 4. **Plan a revenue channel.** For every partner who engages, a plan for turning them into a steady source of deals.
-5. **Coach the community.** In time, offer affiliate coaching in the group, helping members grow their own affiliate and referral programs.
 
 ## How it unfolds
 
-- **Phase 1: Reactivation kickoff, starting this month.** One personal text to each quiet partner, written from their own record, then a real back-and-forth with everyone who answers. It starts with a pilot of 250 partners, then 2,500, then the remaining 10,200. Each wave opens only when the one before it has worked: low opt-outs, a healthy texting number, conversations 7FF is happy with, deals counted by tier, and AI spend on track.
+- **Phase 1: Reactivation kickoff, starting this month.** One personal text to each quiet partner, written from their own record, then a real back-and-forth with everyone who answers.
 - **Phase 2: The 90-day kickstart.** Relationships and replies take time. Over the first 90 days we build each partner's profile, learn each partner from every conversation, and put a revenue plan in place for every partner who engages. At day 90 we review the results together, with real data, and decide where to push.
 - **Phase 3: Ongoing affiliate management, over 6 to 12 months.** Every partner stays on a steady relationship cadence, and revenue compounds as more partners come back and keep sending deals. We refine the program together, then release it to the whole community in a controlled way.
 
@@ -44,13 +43,14 @@ There is no monthly fee. 7FF covers the AI and texting usage at cost, with no ma
 
 ## What it costs to run
 
-The agent runs on GPT-6 Luna Pro through OpenRouter, with GLM 5.3 Flash (open weights) as the fallback, and Jev to read, check and classify. Priced on published OpenRouter, TypeSafe and HighLevel rates:
+The agent runs on GPT-6 Luna Pro through OpenRouter, with GLM 5.3 Flash (open weights) as the fallback, and Jev to read, check and classify. Projected from published OpenRouter, TypeSafe and HighLevel rates, at two and five times the base estimate:
 
 | | Reactivation, one time | Every month after |
 |---|---|---|
-| AI, projected | $10.05 | $35.72 |
-| **AI, starting budget (2x the projection)** | **$20.10** | **$71.44** |
-| Texting through HighLevel, projected | $355.24 | $417.84 |
+| AI, projected at 2x | $20.10 | $71.44 |
+| AI, projected at 5x | $50.25 | $178.60 |
+| Texting through HighLevel, projected at 2x | $710.48 | $835.68 |
+| Texting through HighLevel, projected at 5x | $1,776.20 | $2,089.20 |
 
 The reactivation covers a personal kickoff text to each of the 12,950 inactive partners and every conversation that follows. The monthly figures keep all 13,000 partners on the two-week cadence. Texting is billed by HighLevel on 7FF's own sub-account.
 
@@ -58,9 +58,7 @@ The reactivation covers a personal kickoff text to each of the 12,950 inactive p
 
 - 7FF's NDA, signed before any partner data moves
 - Read access to the Zoho partner records: name, tier, contact details, join date and deal history
-- A technical session with Brock on the integration
 - A GoHighLevel sub-account with API access, and an A2P 10DLC-registered texting number
-- SMS consent records for the partners in scope
 - A named partner lead who approves offers and program copy
 - The deal records used to calculate our share
 
@@ -75,9 +73,7 @@ This Agreement is between the 7FF entity and the Provider entity named in the Ke
 | 7FF legal entity (name, state, entity type) | |
 | Provider legal entity (name, state, entity type) | |
 | The performance share is calculated on | |
-| Months a Re-engaged Partner's deals count after their first reply | |
-| Funding Machine purchases by Re-engaged Partners count at (%, or 0) | |
-| Governing law (state) | |
+| Governing law (state) | Florida |
 
 ## 1. Services
 
@@ -93,7 +89,7 @@ Provider may use its own staff, contractors and software to deliver the Services
 
 ## 2. Rollout
 
-The reactivation starts with a pilot of 250 partners and continues in waves. The parties will agree the pilot's measures of success in writing (email is enough) before it begins, and a new wave starts only when the previous wave meets them.
+The reactivation kicks off in batches and will continue in waves.
 
 ## 3. What 7FF provides
 
@@ -117,7 +113,7 @@ For each deal submitted by a Re-engaged Partner, 7FF pays Provider the share bel
 | Apprentice | 10% |
 | Free | 15% |
 
-A **Re-engaged Partner** is a partner who was inactive on the Effective Date and who replies to the Program's outreach. A deal counts if it is submitted within the number of months in the Key terms after that partner's first reply. A Re-engaged Partner's purchase of the Funding Machine counts at the percentage in the Key terms.
+A **Re-engaged Partner** is a partner who was inactive on the Effective Date and who replies to the Program's outreach.
 
 ## 6. Reporting and payment
 
@@ -125,7 +121,7 @@ Provider sends a weekly scorecard. Within 10 days after each month ends, 7FF sen
 
 ## 7. Messaging rules
 
-A person approves every message, or a batch under a standing approval with a daily send limit. Texts go only to partners with SMS consent, from a registered number, in daytime hours, with opt-out language, and every STOP is honored permanently. No message promises approval, rates or income. 7FF approves offer copy and anything about program terms, and only 7FF sets commissions and payouts.
+A person on Provider's team approves every message.
 
 ## 8. Confidentiality and partner data
 
