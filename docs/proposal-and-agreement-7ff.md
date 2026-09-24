@@ -43,16 +43,14 @@ There is no monthly fee. 7FF covers the AI and texting usage at cost, with no ma
 
 ## What it costs to run
 
-The agent runs on GPT-6 Luna Pro through OpenRouter, with GLM 5.3 Flash (open weights) as the fallback, and Jev to read, check and classify. Projected from published OpenRouter, TypeSafe and HighLevel rates, at two and five times the base estimate:
+The agent runs on GPT-6 Luna Pro through OpenRouter, with GLM 5.3 Flash (open weights) as the fallback, and Jev to read, check and classify. Projected from published OpenRouter and TypeSafe rates, at two and five times the base estimate:
 
 | | Reactivation, one time | Every month after |
 |---|---|---|
 | AI, projected at 2x | $20.10 | $71.44 |
 | AI, projected at 5x | $50.25 | $178.60 |
-| Texting through HighLevel, projected at 2x | $710.48 | $835.68 |
-| Texting through HighLevel, projected at 5x | $1,776.20 | $2,089.20 |
 
-The reactivation covers a personal kickoff text to each of the 12,950 inactive partners and every conversation that follows. The monthly figures keep all 13,000 partners on the two-week cadence. Texting is billed by HighLevel on 7FF's own sub-account.
+The reactivation covers a personal kickoff text to each of the 12,950 inactive partners and every conversation that follows. The monthly figures keep all 13,000 partners on the two-week cadence.
 
 ## What we need from 7FF
 
@@ -73,7 +71,7 @@ This Agreement is between the 7FF entity and the Provider entity named in the Ke
 | 7FF legal entity (name, state, entity type) | |
 | Provider legal entity (name, state, entity type) | |
 | The performance share is calculated on | |
-| Governing law (state) | Florida |
+| Governing law (state) | |
 
 ## 1. Services
 
