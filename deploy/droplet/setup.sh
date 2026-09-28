@@ -94,13 +94,18 @@ src, dst = sys.argv[1], sys.argv[2]
 text = open(src).read()
 keys = ["PRIMARY_MODEL", "FALLBACK_MODEL", "REPO_DIR", "FAM_HOME", "VAULT_DIR", "HERMES_PYTHON", "GHL_CLI_DIR",
         "FAM_GHL_MODE", "FAM_DEMO_MODE", "GHL_API_KEY", "GHL_LOCATION_ID", "ORGO_MCP_VERSION", "ORGO_API_KEY",
-        "ORGO_COMPUTER_ID", "ORGO_EXCLUDED_TOOLS", "SUPER_BROWSER_TOKEN", "BROWSER_BOX_URL", "BROWSER_BOX_TOKEN",
+        "ORGO_COMPUTER_ID", "ORGO_EXCLUDED_TOOLS", "SUPER_BROWSER_URL", "SUPER_BROWSER_TOKEN", "BROWSER_BOX_URL", "BROWSER_BOX_TOKEN",
+        "DATABOX_URL", "DATABOX_TOKEN",
         "SLACK_ENABLED", "TELEGRAM_ENABLED", "SLACK_HOME_CHANNEL", "TELEGRAM_HOME_CHANNEL"]
 env = dict(os.environ, HERMES_PYTHON=os.environ["HERMES_PY"])
 for key in keys:
     value = env.get(key, "")
     if key == "BROWSER_BOX_URL" and not value:
         value = "http://127.0.0.1:9/mcp"  # unset → unreachable placeholder; the MCP shows as down
+    if key == "DATABOX_URL" and not value:
+        value = "http://127.0.0.1:9/mcp"
+    if key == "SUPER_BROWSER_URL" and not value:
+        value = "https://superbrowser.online/mcp/"
     text = text.replace(f"__{key}__", value.replace("\n", ""))
 def drop_server(text, name):
     """Remove one `  name:` block under mcp_servers (2-space indent) through the next sibling."""
@@ -121,6 +126,8 @@ if not env.get("SUPER_BROWSER_TOKEN"):
     text = drop_server(text, "super-browser")
 if not env.get("BROWSER_BOX_TOKEN"):
     text = drop_server(text, "browser-box")
+if not env.get("DATABOX_TOKEN"):
+    text = drop_server(text, "data-box")
 if env.get("FAM_GHL_MODE") != "live":
     text = drop_server(text, "ghl")
 left = [line for line in text.splitlines() if "__" in line and not line.lstrip().startswith("#")]

@@ -20,7 +20,7 @@
   "actions": {
     "affiliate.read_search_brief": {"tier": 0, "decision": "allow", "tools": ["fam_status", "fam_sweep", "fam_daily_queue", "fam_affiliate_brief", "fam_affiliate_search", "fam_reply_inbox", "fam_scorecard"]},
     "message.draft": {"tier": 0, "decision": "allow"},
-    "research.enrich_affiliate_profile": {"tier": 0, "decision": "allow", "notes": "Super Browser / Orgo browser / Browser Box only. No paid enrichment services."},
+    "research.enrich_affiliate_profile": {"tier": 0, "decision": "allow", "notes": "browser-box / data-box / Orgo browser / Super Browser only. No paid enrichment services."},
     "crm.lifecycle_tag": {"tier": 1, "decision": "allow-and-log", "tools": ["fam_sweep_apply_lifecycle", "fam_lifecycle_set"]},
     "crm.note_task_followup": {"tier": 1, "decision": "allow-and-log", "tools": ["fam_note_add", "fam_followup_schedule", "fam_reply_record", "fam_deal_record", "fam_growth_service_queue"]},
     "vault.write": {"tier": 1, "decision": "allow-and-log", "tools": ["fam_campaign_note_save"]},
