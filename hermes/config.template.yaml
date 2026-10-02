@@ -160,6 +160,10 @@ mcp_servers:
       FAM_DEMO_MODE: "__FAM_DEMO_MODE__"
       GHL_API_KEY: "__GHL_API_KEY__"
       GHL_LOCATION_ID: "__GHL_LOCATION_ID__"
+      OPENROUTER_API_KEY: "__OPENROUTER_API_KEY__"  # drafting and fact extraction (fam.llm); blank model = templates
+      FAM_DRAFT_MODEL: "__FAM_DRAFT_MODEL__"
+      FAM_FALLBACK_MODEL: "__FAM_FALLBACK_MODEL__"
+      FAM_CALL_INBOX: "__FAM_CALL_INBOX__"
     trust: full
     timeout: 900
     tools:

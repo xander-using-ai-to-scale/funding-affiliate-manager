@@ -1,0 +1,13 @@
+{
+  "_comment": "The reactivation kickoff: one personal text to each quiet partner, signed by their partner manager. A wave is drafted outside the agent loop (fam kickoff draft), reviewed message by message, approved, then sent inside the SMS window. Framework: knowledge/funding/07-kickoff-framework.md.",
+  "company": "7 Figures Funding",
+  "default_sender": "Justin",
+  "generic_manager_names": ["Funding Relationship Manager", "Partner Manager", ""],
+  "wave_size": 250,
+  "batch_max": 500,
+  "max_segments": 2,
+  "nudge_after_days": 5,
+  "variants": ["A", "B", "C"],
+  "calendar_link": "",
+  "send_pause_seconds": 1.0
+}

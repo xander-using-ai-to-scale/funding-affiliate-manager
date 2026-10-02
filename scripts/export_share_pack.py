@@ -22,6 +22,8 @@ FILES = [
     "docs/proposal-and-agreement-7ff.pdf", "docs/proposal-and-agreement-7ff.docx",
     "docs/call-recap-2026-09-23.md",
     "docs/simulation-report.md", "docs/simulation-report.json",
+    "docs/relationship-example.html", "docs/relationship-graph.md",
+    "docs/relationship-simulation.md", "docs/relationship-simulation.json",
     "scripts/cost_model.py",
 ]
 BLOCK = [r"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b", r"fam@", r"/Users/", r"/home/fam", r"droplet",
@@ -48,8 +50,8 @@ them sending deals, working in GoHighLevel with a person approving every message
 ## Start here
 
 Download [`docs/demo-pack.html`](docs/demo-pack.html) and open it in a browser. It has everything in one page:
-AI costs, the 30-day simulation, the CRM it leaves behind, the partnership proposal, the agreement, and how the
-agent is built. (GitHub shows HTML files as source code, so open the file rather than viewing it here.)
+AI costs, the 30-day simulation, the relationship graph, the CRM it leaves behind, the partnership proposal, the
+agreement, and how the agent is built. (GitHub shows HTML files as source code, so open the file rather than viewing it here.)
 
 ## What it costs
 
@@ -75,6 +77,9 @@ The full projection, with scenarios, rollout waves and every assumption, is in
 | `docs/proposal-and-agreement-7ff.pdf` | The proposal and agreement to sign (`.docx` alongside) |
 | `docs/call-recap-2026-09-23.md` | Recap of our call: what we covered, what we agreed, next steps |
 | `docs/simulation-report.md` | The 30-day simulation on 253 synthetic affiliates (`.json` alongside) |
+| `docs/relationship-example.html` | The relationship graph: one partner from record to revenue plan, and 250 partners over 30 days |
+| `docs/relationship-graph.md` | How the agent gets to know each partner: the profile, where it lives, calls, what it never stores |
+| `docs/relationship-simulation.md` | The relationship simulation report (`.json` alongside) |
 | `docs/workflow-map.html` | The affiliate operating system: lifecycle, cadence, daily loop, guardrails |
 | `scripts/cost_model.py` | The cost model behind every cost figure |
 

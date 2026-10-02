@@ -52,8 +52,12 @@ SPEC = [
      "does": "Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out."},
     {"part": "Models through OpenRouter", "status": "Set up",
      "does": "The agent and the message worker run on GPT-6 Luna Pro, with GLM 5.3 Flash as the fallback. Luna Pro was tested driving the agent's own tools on September 23, 2026. Usage is reported to 7FF every month."},
-    {"part": "Zoho to GoHighLevel partner import (read-only)", "status": "To build",
-     "does": "Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are."},
+    {"part": "Zoho to GoHighLevel partner import (read-only)", "status": "Built",
+     "does": "Copies partner name, tier, contact details and deal history into GoHighLevel and builds each partner's profile. Nothing is written back to Zoho, and partners with payroll integrations stay where they are. Tested on synthetic records; runs on 7FF's once read-only access is granted."},
+    {"part": "Relationship graph", "status": "Built",
+     "does": "A profile for every partner: an Obsidian note linked to their tier, niche, manager and the products their clients need, plus a searchable index. Every reply and recorded call adds to it, and every message is drafted from it."},
+    {"part": "Call transcripts (phone and video)", "status": "Built",
+     "does": "Reads GoHighLevel's call transcripts and any recorder's export (Read.ai, Fathom or others) dropped in the call inbox. Each call adds facts to the profile and turns promises into tasks. Needs call transcription switched on in GoHighLevel."},
     {"part": "Jev ingestion, checking and classifying", "status": "To build",
      "does": "Cleans each partner record on the way in, checks every draft against the compliance rules, and labels every reply."},
     {"part": "Message worker", "status": "To build",
@@ -83,16 +87,33 @@ SCENARIOS: dict[str, dict[str, Any]] = {
     "low": dict(ingest_in=600, draft_in=900, draft_out=200, qa_in=500, classify_in=700, reply_in=1_600,
                 reply_out=250, session_in=300_000, session_out=4_000, sessions_per_day=6,
                 reply_rate=0.05, inbound_per_responder=2, ongoing_reply_rate=0.03, ongoing_inbound=2,
-                seg_out=1, seg_in=1, tier="low"),
+                seg_out=1, seg_in=1, kick_seg=2, tier="low"),
     "base": dict(ingest_in=900, draft_in=1_300, draft_out=600, qa_in=700, classify_in=1_000, reply_in=2_400,
                  reply_out=700, session_in=540_000, session_out=6_000, sessions_per_day=12,
                  reply_rate=0.12, inbound_per_responder=4, ongoing_reply_rate=0.06, ongoing_inbound=3,
-                 seg_out=1, seg_in=1, tier="base"),
+                 seg_out=1, seg_in=1, kick_seg=2, tier="base"),
     "high": dict(ingest_in=1_500, draft_in=2_000, draft_out=1_500, qa_in=1_000, classify_in=1_600,
                  reply_in=4_000, reply_out=1_800, session_in=1_200_000, session_out=12_000, sessions_per_day=30,
                  reply_rate=0.25, inbound_per_responder=8, ongoing_reply_rate=0.12, ongoing_inbound=5,
-                 seg_out=2, seg_in=1, tier="high"),
+                 seg_out=2, seg_in=1, kick_seg=2, tier="high"),
 }
+# The relationship graph, priced on top of the scenarios above (it is not in the agreement's figures, which
+# is why build() asserts base + graph stays inside the agreement's 2x numbers). One extraction pass for each
+# partner whose record has real history, a fact extraction for each inbound reply, the profile added to each
+# drafting prompt, and one extraction plus a revenue plan for each recorded call. Pre-call briefs and the
+# partner notes are built from the profile with no model call.
+GRAPH: dict[str, dict[str, float]] = {
+    "low": dict(history_share=0.20, profile_in=800, profile_out=150, extract_in=400, extract_out=100, context_in=200,
+                call_rate=0.10, call_in=5_000, call_out=600, plan_in=1_200, plan_out=400, monthly_calls=20),
+    "base": dict(history_share=0.35, profile_in=1_500, profile_out=300, extract_in=600, extract_out=150,
+                 context_in=400, call_rate=0.20, call_in=8_000, call_out=1_000, plan_in=2_000, plan_out=600,
+                 monthly_calls=60),
+    "high": dict(history_share=0.60, profile_in=4_000, profile_out=800, extract_in=1_200, extract_out=400,
+                 context_in=1_000, call_rate=0.35, call_in=15_000, call_out=2_500, plan_in=3_500, plan_out=1_200,
+                 monthly_calls=200),
+}
+GRAPH_TOKEN_KEYS = ("profile_in", "profile_out", "extract_in", "extract_out", "context_in", "call_in", "call_out",
+                    "plan_in", "plan_out")
 SHARED = dict(reply_share=0.85, touches_per_month=2, fallback_share=0.05, days_per_month=30)
 BUDGET_MULTIPLIER = 2  # plan AI spend at twice the base projection: a comfortable starting budget, not a limit
 PLANNING_MULTIPLES = (2, 5)  # the agreement quotes AI and texting at these multiples of the base projection
@@ -112,8 +133,9 @@ def _jev(calls: float, tin: float) -> float:
     return calls * tin * MODELS["jev"]["in"] / 1e6
 
 
-def project(p: dict[str, Any], fallback: float) -> dict[str, Any]:
+def project(p: dict[str, Any], fallback: float, g: dict[str, float] | None = None) -> dict[str, Any]:
     s = {**SHARED, **p}
+    g = g or GRAPH["base"]
     out_rate = SMS["base_per_segment"] + SMS["carrier_out"][s["tier"]]
     in_rate = SMS["base_per_segment"] + SMS["carrier_in"][s["tier"]]
 
@@ -131,7 +153,8 @@ def project(p: dict[str, Any], fallback: float) -> dict[str, Any]:
     ]
     react_ai = sum(c for _, c, _ in react_lines)
     react_sms_lines = [
-        ("Outbound texts (kickoffs + replies)", (kickoffs + replies) * s["seg_out"] * out_rate, kickoffs + replies),
+        (f"Kickoff texts (up to {s['kick_seg']} segments each)", kickoffs * s["kick_seg"] * out_rate, kickoffs),
+        ("Conversation replies", replies * s["seg_out"] * out_rate, replies),
         ("Inbound texts", inbound * s["seg_in"] * in_rate, inbound),
         ("A2P 10DLC brand + campaign registration (one time)", SMS["a2p_one_time"], 1),
     ]
@@ -158,6 +181,31 @@ def project(p: dict[str, Any], fallback: float) -> dict[str, Any]:
     ]
     month_sms = sum(c for _, c, _ in month_sms_lines)
 
+    # The relationship graph (priced separately; see GRAPH)
+    calls = responders * g["call_rate"]
+    graph_react_lines = [
+        ("Luna Pro: build a profile from each record with real history",
+         _llm(kickoffs * g["history_share"], g["profile_in"], g["profile_out"], fallback), kickoffs * g["history_share"]),
+        ("Luna Pro: the partner's profile in every kickoff and reply prompt",
+         _llm(kickoffs + replies, g["context_in"], 0, fallback), kickoffs + replies),
+        ("Luna Pro: pull facts from every inbound reply", _llm(inbound, g["extract_in"], g["extract_out"], fallback),
+         inbound),
+        ("Luna Pro: read each recorded call (facts, commitments)", _llm(calls, g["call_in"], g["call_out"], fallback),
+         calls),
+        ("Luna Pro: draft a revenue plan after each call", _llm(calls, g["plan_in"], g["plan_out"], fallback), calls),
+    ]
+    graph_month_lines = [
+        ("Luna Pro: the partner's profile in every touch and reply prompt",
+         _llm(touches + m_replies, g["context_in"], 0, fallback), touches + m_replies),
+        ("Luna Pro: pull facts from every inbound reply", _llm(m_inbound, g["extract_in"], g["extract_out"], fallback),
+         m_inbound),
+        ("Luna Pro: read each recorded call", _llm(g["monthly_calls"], g["call_in"], g["call_out"], fallback),
+         g["monthly_calls"]),
+        ("Luna Pro: revenue plans", _llm(g["monthly_calls"], g["plan_in"], g["plan_out"], fallback), g["monthly_calls"]),
+    ]
+    graph_react = sum(c for _, c, _ in graph_react_lines)
+    graph_month = sum(c for _, c, _ in graph_month_lines)
+
     def rows(lines):
         return [{"item": i, "usd": round(c, 4), "volume": round(v)} for i, c, v in lines]
 
@@ -179,14 +227,20 @@ def project(p: dict[str, Any], fallback: float) -> dict[str, Any]:
                     "agent_sessions": sessions, "ai_lines": rows(month_lines), "ai_usd": round(month_ai, 2),
                     "sms_lines": rows(month_sms_lines), "sms_usd": round(month_sms, 2),
                     "total_usd": round(month_ai + month_sms, 2)},
+        "graph": {"assumptions": dict(g), "calls": round(calls),
+                  "reactivation": {"ai_lines": rows(graph_react_lines), "ai_usd": round(graph_react, 2),
+                                   "with_base_ai_usd": round(react_ai + graph_react, 2)},
+                  "monthly": {"ai_lines": rows(graph_month_lines), "ai_usd": round(graph_month, 2),
+                              "with_base_ai_usd": round(month_ai + graph_month, 2)}},
     }
 
 
 def build() -> dict[str, Any]:
-    scen = {name: project(p, SHARED["fallback_share"]) for name, p in SCENARIOS.items()}
+    scen = {name: project(p, SHARED["fallback_share"], GRAPH[name]) for name, p in SCENARIOS.items()}
     stress = {**SCENARIOS["base"], **{k: SCENARIOS["base"][k] * 10 for k in TOKEN_KEYS}}
-    scen["stress_10x_tokens"] = project(stress, SHARED["fallback_share"])
-    scen["all_on_glm_fallback"] = project(SCENARIOS["base"], 1.0)
+    stress_graph = {**GRAPH["base"], **{k: GRAPH["base"][k] * 10 for k in GRAPH_TOKEN_KEYS}}
+    scen["stress_10x_tokens"] = project(stress, SHARED["fallback_share"], stress_graph)
+    scen["all_on_glm_fallback"] = project(SCENARIOS["base"], 1.0, GRAPH["base"])
     batch = dict(SCENARIOS["base"])
     base = scen["base"]
     luna = MODELS["luna"]
@@ -197,6 +251,11 @@ def build() -> dict[str, Any]:
     ai_per_partner = (r["ai_usd"] - _jev(PARTNERS_TOTAL, SCENARIOS["base"]["ingest_in"])) / REACTIVATION_AUDIENCE
     sms_per_partner = (r["sms_usd"] - SMS["a2p_one_time"]) / REACTIVATION_AUDIENCE
     sizes = [("Pilot", 250), ("Wave 2", 2_500), ("Full base", REACTIVATION_AUDIENCE - 2_750)]
+    two_x = {k: round(base[part]["ai_usd"] * 2, 2) for k, part in (("reactivation", "reactivation"),
+                                                                    ("monthly", "monthly"))}
+    for part in ("reactivation", "monthly"):  # the graph must fit inside the agreement's 2x AI figure
+        with_graph = base["graph"][part]["with_base_ai_usd"]
+        assert with_graph <= two_x[part], f"{part}: base + relationship graph {with_graph} exceeds 2x {two_x[part]}"
     waves = [{"wave": name, "partners": n, "ai_usd": round(n * ai_per_partner, 2),
               "sms_usd": round(n * sms_per_partner, 2),
               "expected_replies": round(n * SCENARIOS["base"]["reply_rate"])} for name, n in sizes]
@@ -229,6 +288,14 @@ def build() -> dict[str, Any]:
             "reactivation_sms_usd": base["reactivation"]["sms_usd"],
             "monthly_sms_usd": base["monthly"]["sms_usd"],
             "kickoff_batch_saving_usd": round(batch_saving, 2),
+            "graph_reactivation_ai_usd": base["graph"]["reactivation"]["ai_usd"],
+            "graph_monthly_ai_usd": base["graph"]["monthly"]["ai_usd"],
+            "with_graph_reactivation_ai_usd": base["graph"]["reactivation"]["with_base_ai_usd"],
+            "with_graph_monthly_ai_usd": base["graph"]["monthly"]["with_base_ai_usd"],
+            "graph_range_reactivation_ai_usd": [scen["low"]["graph"]["reactivation"]["ai_usd"],
+                                                scen["high"]["graph"]["reactivation"]["ai_usd"]],
+            "graph_range_monthly_ai_usd": [scen["low"]["graph"]["monthly"]["ai_usd"],
+                                           scen["high"]["graph"]["monthly"]["ai_usd"]],
             "multiples": {str(m): {k: round(base[part][f] * m, 2) for k, part, f in (
                 ("reactivation_ai_usd", "reactivation", "ai_usd"), ("monthly_ai_usd", "monthly", "ai_usd"),
                 ("reactivation_sms_usd", "reactivation", "sms_usd"), ("monthly_sms_usd", "monthly", "sms_usd"))}
@@ -260,8 +327,13 @@ def assumption_notes(d: dict[str, Any]) -> list[str]:
         f"{_usd(d['scenarios']['base']['monthly']['ai_usd'])} a month) prices the agent's own loop on Luna Pro, uncached.",
         f"The starting budget is {h['budget_multiplier']}x the base projection for AI: room for longer conversations and "
         "more replies than expected. Texting is shown at its projection.",
-        f"Texts are kept to one GSM-7 segment ({a['seg_out']} segment each in the base case). One em dash or curly "
-        "quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
+        f"Kickoff texts run up to {a['kick_seg']} GSM-7 segments, leaving room for one line from the partner's own "
+        f"record; every other text is kept to {a['seg_out']}. One em dash or curly quote would switch a text to UCS-2 "
+        "and bill more segments; the agent strips them before sending, and refuses a kickoff over 2 segments.",
+        f"The relationship graph adds about {_usd(h['graph_reactivation_ai_usd'])} to the reactivation and "
+        f"{_usd(h['graph_monthly_ai_usd'])} a month (profiles, reply facts, call reading, revenue plans). With it, AI "
+        f"comes to {_usd(h['with_graph_reactivation_ai_usd'])} and {_usd(h['with_graph_monthly_ai_usd'])} a month, "
+        "inside the starting budget.",
         f"Texting: ${a['sms_out_per_segment']} per outbound segment and ${a['sms_in_per_segment']} per inbound, "
         "HighLevel base rate plus carrier fees.",
         "Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.",
@@ -337,6 +409,22 @@ def markdown(d: dict[str, Any]) -> str:
          "| **Monthly AI** | " + " | ".join(f"**{_usd(sc[k]['monthly']['ai_usd'])}**" for k, _ in names) + " |",
          "| Monthly texting | " + " | ".join(_usd(sc[k]['monthly']['sms_usd']) for k, _ in names) + " |",
          "| AI per re-engaged partner | " + " | ".join(_usd(sc[k]['reactivation']['ai_per_reengaged_partner_usd']) for k, _ in names) + " |",
+         "",
+         "## The relationship graph",
+         "",
+         "Every partner gets a profile (an Obsidian note linked to their tier, niche, manager and the products their "
+         "clients need), built from their record, then from every reply and recorded call. It is priced here on top "
+         "of the figures above, and stays inside the starting budget.",
+         "",
+         "| | Low | Base | High |", "|---|---:|---:|---:|",
+         "| Reactivation (one time) | " + " | ".join(_usd(sc[k]["graph"]["reactivation"]["ai_usd"]) for k in ("low", "base", "high")) + " |",
+         "| Every month | " + " | ".join(_usd(sc[k]["graph"]["monthly"]["ai_usd"]) for k in ("low", "base", "high")) + " |",
+         "",
+         "| Base case | Volume | Cost |", "|---|---:|---:|",
+         *[f"| {r['item']} | {r['volume']:,} | {_usd(r['usd'])} |" for r in sc["base"]["graph"]["reactivation"]["ai_lines"]],
+         f"| **Reactivation total, AI with the graph** | | **{_usd(h['with_graph_reactivation_ai_usd'])}** (budget {_usd(h['reactivation_ai_budget_usd'])}) |",
+         *[f"| {r['item']} (monthly) | {r['volume']:,} | {_usd(r['usd'])} |" for r in sc["base"]["graph"]["monthly"]["ai_lines"]],
+         f"| **Monthly total, AI with the graph** | | **{_usd(h['with_graph_monthly_ai_usd'])}** (budget {_usd(h['monthly_ai_budget_usd'])}) |",
          "",
          "## Base case, line by line",
          "",

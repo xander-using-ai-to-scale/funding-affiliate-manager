@@ -8,7 +8,7 @@ Priced 2026-09-23 from OpenRouter, TypeSafe (Jev) and HighLevel published rates.
 - **Ongoing, per month:** about **$35.72 in AI** with all 13,000 partners on the two-week cadence (range $11.90 to $161.00).
 - **Starting budget for AI: 2x the projection,** $20.10 for the reactivation and $71.44 a month.
 - **If every token estimate is 10x too low:** $357.19 a month.
-- **Texting is the bigger line, and it isn't AI:** about $355.24 for the reactivation and $417.84 a month ongoing, billed by HighLevel's phone system.
+- **Texting is the bigger line, and it isn't AI:** about $510.26 for the reactivation and $417.84 a month ongoing, billed by HighLevel's phone system.
 
 ## Planning figures
 
@@ -18,7 +18,7 @@ The agreement quotes each line at 2x and 5x the base projection:
 |---|---:|---:|
 | AI, reactivation (one time) | $20.10 | $50.25 |
 | AI, every month | $71.44 | $178.60 |
-| Texting, reactivation (one time) | $710.48 | $1,776.20 |
+| Texting, reactivation (one time) | $1,020.52 | $2,551.30 |
 | Texting, every month | $835.68 | $2,089.20 |
 
 ## What runs it
@@ -30,7 +30,9 @@ The agreement quotes each line at 2x and 5x the base projection:
 | Simulation and reporting | Built | Runs the same code against a synthetic CRM, as in this pack's simulation tab. |
 | GoHighLevel sub-account and texting number | Set up | Holds the reactivation contacts, tags and conversations. The number is registered for A2P 10DLC before any text goes out. |
 | Models through OpenRouter | Set up | The agent and the message worker run on GPT-6 Luna Pro, with GLM 5.3 Flash as the fallback. Luna Pro was tested driving the agent's own tools on September 23, 2026. Usage is reported to 7FF every month. |
-| Zoho to GoHighLevel partner import (read-only) | To build | Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are. |
+| Zoho to GoHighLevel partner import (read-only) | Built | Copies partner name, tier, contact details and deal history into GoHighLevel and builds each partner's profile. Nothing is written back to Zoho, and partners with payroll integrations stay where they are. Tested on synthetic records; runs on 7FF's once read-only access is granted. |
+| Relationship graph | Built | A profile for every partner: an Obsidian note linked to their tier, niche, manager and the products their clients need, plus a searchable index. Every reply and recorded call adds to it, and every message is drafted from it. |
+| Call transcripts (phone and video) | Built | Reads GoHighLevel's call transcripts and any recorder's export (Read.ai, Fathom or others) dropped in the call inbox. Each call adds facts to the profile and turns promises into tasks. Needs call transcription switched on in GoHighLevel. |
 | Jev ingestion, checking and classifying | To build | Cleans each partner record on the way in, checks every draft against the compliance rules, and labels every reply. |
 | Message worker | To build | Drafts each kickoff and reply on GPT-6 Luna Pro, falling back to GLM 5.3 Flash. Runs outside the agent so each text pays only for its own short prompt; the kickoff runs in batch mode. |
 | Consent gate | To build | Texts only partners with a mobile number and SMS consent on file. Everyone else gets email and the newsletter. |
@@ -52,9 +54,9 @@ Each wave opens only when the one before it clears every gate. Costs are the bas
 
 | Wave | Partners | Expected replies | AI | Texting |
 |---|---:|---:|---:|---:|
-| Pilot | 250 | 30 | $0.18 | $5.47 |
-| Wave 2 | 2,500 | 300 | $1.85 | $54.70 |
-| Full base | 10,200 | 1,224 | $7.53 | $223.17 |
+| Pilot | 250 | 30 | $0.18 | $8.46 |
+| Wave 2 | 2,500 | 300 | $1.85 | $84.62 |
+| Full base | 10,200 | 1,224 | $7.53 | $345.27 |
 
 Gates:
 
@@ -73,10 +75,33 @@ Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The
 | Reply rate to the kickoff | 5% | 12% | 25% | 12% | 12% |
 | Partners who reply | 648 | 1,554 | 3,238 | 1,554 | 1,554 |
 | **Reactivation AI (one time)** | **$3.47** | **$10.05** | **$45.23** | **$100.48** | **$11.45** |
-| Reactivation texting (one time) | $228.69 | $355.24 | $1,215.11 | $355.24 | $355.24 |
+| Reactivation texting (one time) | $364.28 | $510.26 | $1,215.11 | $510.26 | $510.26 |
 | **Monthly AI** | **$11.90** | **$35.72** | **$161.00** | **$357.19** | **$47.01** |
 | Monthly texting | $307.76 | $417.84 | $1,152.48 | $417.84 | $417.84 |
 | AI per re-engaged partner | $0.0054 | $0.0065 | $0.01 | $0.06 | $0.0074 |
+
+## The relationship graph
+
+Every partner gets a profile (an Obsidian note linked to their tier, niche, manager and the products their clients need), built from their record, then from every reply and recorded call. It is priced here on top of the figures above, and stays inside the starting budget.
+
+| | Low | Base | High |
+|---|---:|---:|---:|
+| Reactivation (one time) | $0.89 | $3.54 | $22.49 |
+| Every month | $0.72 | $1.98 | $9.81 |
+
+| Base case | Volume | Cost |
+|---|---:|---:|
+| Luna Pro: build a profile from each record with real history | 4,532 | $1.38 |
+| Luna Pro: the partner's profile in every kickoff and reply prompt | 18,234 | $0.75 |
+| Luna Pro: pull facts from every inbound reply | 6,216 | $0.85 |
+| Luna Pro: read each recorded call (facts, commitments) | 311 | $0.41 |
+| Luna Pro: draft a revenue plan after each call | 311 | $0.16 |
+| **Reactivation total, AI with the graph** | | **$13.59** (budget $20.10) |
+| Luna Pro: the partner's profile in every touch and reply prompt (monthly) | 29,978 | $1.23 |
+| Luna Pro: pull facts from every inbound reply (monthly) | 4,680 | $0.64 |
+| Luna Pro: read each recorded call (monthly) | 60 | $0.08 |
+| Luna Pro: revenue plans (monthly) | 60 | $0.03 |
+| **Monthly total, AI with the graph** | | **$37.70** (budget $71.44) |
 
 ## Base case, line by line
 
@@ -88,7 +113,8 @@ Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The
 | Jev: classify every inbound reply | 6,216 | $0.26 |
 | Luna Pro: draft each conversation reply | 5,284 | $3.15 |
 | **AI total** | | **$10.05** |
-| Outbound texts (kickoffs + replies) | 18,234 | $218.26 |
+| Kickoff texts (up to 2 segments each) | 12,950 | $310.02 |
+| Conversation replies | 5,284 | $63.24 |
 | Inbound texts | 6,216 | $65.08 |
 | A2P 10DLC brand + campaign registration (one time) | 1 | $71.91 |
 
@@ -114,7 +140,8 @@ Before the pilot: Jev reads all 13,000 records once at import (about $0.49). The
 - 5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.
 - The Hermes line ($21.01 of the $35.72 a month) prices the agent's own loop on Luna Pro, uncached.
 - The starting budget is 2x the base projection for AI: room for longer conversations and more replies than expected. Texting is shown at its projection.
-- Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.
+- Kickoff texts run up to 2 GSM-7 segments, leaving room for one line from the partner's own record; every other text is kept to 1. One em dash or curly quote would switch a text to UCS-2 and bill more segments; the agent strips them before sending, and refuses a kickoff over 2 segments.
+- The relationship graph adds about $3.54 to the reactivation and $1.98 a month (profiles, reply facts, call reading, revenue plans). With it, AI comes to $13.59 and $37.70 a month, inside the starting budget.
 - Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.
 - Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.
 - The monthly line keeps all partners on the two-week text cadence. Moving partners who never re-engage to email and the newsletter cuts the texting line sharply.

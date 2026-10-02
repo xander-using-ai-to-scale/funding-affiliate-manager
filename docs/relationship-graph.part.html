@@ -1,0 +1,463 @@
+<!-- The relationship graph, worked example + simulation. One component, two homes: the standalone page
+     (scripts/build_relationship_example.py) and the demo pack's "Relationship graph" tab (build_demo_pack.py).
+     It uses the demo pack's color and type tokens; the data comes from examples/partner-journey/steps.json
+     and docs/relationship-simulation.json. Do not edit figures here: rerun the example and the simulation. -->
+<style>
+.rel{display:grid;gap:44px}
+.rel h3.sec{font:700 24px/1.15 var(--display);letter-spacing:-.01em;margin:0 0 6px;text-wrap:balance}
+.rel .intro{color:var(--ink-2);margin:0 0 18px;max-width:72ch}
+.rel .k{font:500 11px/1.2 var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3)}
+.rel .chip{display:inline-flex;align-items:center;gap:5px;font:500 12px/1 var(--mono);padding:5px 8px;border-radius:999px;background:var(--chip);color:var(--ink-2);white-space:nowrap}
+.rel .chip.ok{background:var(--accent-soft);color:var(--accent)}
+.rel .chip.warn{background:var(--fill);color:var(--fill-ink)}
+.rel .chip.hot{background:var(--hot-soft);color:var(--hot)}
+.rel .chips{display:flex;flex-wrap:wrap;gap:6px}
+/* the journey */
+.rel .steps{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin-bottom:10px}
+.rel .steps button{display:grid;gap:3px;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 10px;cursor:pointer;min-width:0}
+.rel .steps button:hover{border-color:var(--accent)}
+.rel .steps button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.rel .steps button[aria-pressed="true"] .k{color:var(--ground);opacity:.75}
+.rel .steps .t{font-size:13px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.rel .slider{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.rel .slider input{flex:1;accent-color:var(--accent)}
+.rel .slider label{font:500 12px var(--mono);color:var(--ink-3);white-space:nowrap}
+.rel .stage{display:grid;gap:16px}
+.rel .graphbox{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 14px 10px;display:grid;gap:10px;min-width:0}
+.rel .gscroll{overflow-x:auto}
+.rel .gscroll svg{display:block;width:100%;min-width:640px;height:auto}
+.rel svg text{font-family:var(--body);fill:var(--ink)}
+.rel .meter{display:grid;gap:6px;max-width:560px}
+.rel .meter .row{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.rel .meter .row b{font:700 30px/1 var(--display);font-variant-numeric:tabular-nums;color:var(--accent)}
+.rel .meter .next b{font-weight:600}
+.rel .meter .bar{height:10px;border-radius:5px;background:var(--chip);overflow:hidden}
+.rel .meter .bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .5s ease}
+.rel .meter .next{font-size:13px;color:var(--ink-2)}
+.rel .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12.5px;color:var(--ink-2)}
+.rel .legend span{display:inline-flex;align-items:center;gap:6px}
+.rel .legend svg{width:12px;height:12px}
+.rel .detail{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:14px;align-items:start;min-width:0}
+.rel .detail > :first-child,.rel .detail > .card:nth-child(2):last-child{grid-column:1/-1}
+.rel .detail h4{font:700 20px/1.2 var(--display);margin:0;text-wrap:balance}
+.rel .detail .day{font:500 12px var(--mono);color:var(--ink-3)}
+.rel .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;min-width:0}
+.rel .card > .k{display:block;margin-bottom:8px}
+.rel .bubble{max-width:92%;padding:10px 13px;border-radius:16px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.rel .bubble.in{background:var(--chip);border-bottom-left-radius:4px;justify-self:start}
+.rel .bubble.out{background:var(--accent);color:var(--ground);border-bottom-right-radius:4px;justify-self:end}
+.rel .thread{display:grid;gap:8px}
+.rel .who{font:500 11px var(--mono);color:var(--ink-3)}
+.rel .who.r{justify-self:end}
+.rel .kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px 16px}
+.rel .kv div span{display:block;font:500 11px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.rel .kv div b{font-weight:500;font-variant-numeric:tabular-nums}
+.rel ul.plain{list-style:none;margin:0;padding:0;display:grid;gap:7px}
+.rel ul.plain li{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:baseline;font-size:14px}
+.rel ul.plain .src{font:500 11px var(--mono);color:var(--ink-3);white-space:nowrap}
+.rel .new{background:var(--accent-soft);border-radius:4px;padding:0 4px;margin:0 -4px}
+.rel .transcript{max-height:300px;overflow-y:auto;display:grid;gap:8px;font-size:14px}
+.rel .transcript p{margin:0}
+.rel .transcript b{font-weight:600}
+.rel .md{font-size:14px;line-height:1.6;overflow-wrap:anywhere}
+.rel .md h1{font:700 22px/1.2 var(--display);margin:4px 0 10px}
+.rel .md h2{font:700 16px/1.3 var(--body);margin:16px 0 6px;padding-top:10px;border-top:1px solid var(--line)}
+.rel .md h3{font:600 14px/1.3 var(--body);margin:12px 0 4px}
+.rel .md p{margin:0 0 8px}
+.rel .md ul,.rel .md ol{margin:0 0 8px;padding-left:20px}
+.rel .md li{margin:2px 0}
+.rel .md li.task{list-style:none;margin-left:-18px}
+.rel .md li.task::before{content:"☐ ";color:var(--ink-3)}
+.rel .md blockquote{margin:0 0 8px;padding:8px 12px;border-left:3px solid var(--line);background:var(--chip);border-radius:0 6px 6px 0}
+.rel .md code{font:12.5px var(--mono);background:var(--chip);padding:1px 4px;border-radius:4px}
+.rel .md .wl{color:var(--accent);font-weight:500}
+.rel .md .fm{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:4px 14px;font:12px/1.5 var(--mono);color:var(--ink-3);background:var(--chip);border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.rel .md .fm b{color:var(--ink-2);font-weight:500}
+.rel .md em{color:var(--ink-3);font-style:normal;font-size:.92em}
+.rel details.note{background:var(--panel);border:1px solid var(--line);border-radius:10px;margin-top:16px}
+.rel details.note summary{cursor:pointer;padding:12px 16px;font-weight:600}
+.rel details.note .md{padding:0 16px 16px;max-height:640px;overflow-y:auto}
+/* the program */
+.rel .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.rel .stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.rel .stat b{display:block;font:700 30px/1.05 var(--display);font-variant-numeric:tabular-nums}
+.rel .stat span{display:block;margin-top:6px;font-size:13px;color:var(--ink-2);line-height:1.4}
+.rel .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px}
+.rel .chart{position:relative}
+.rel .chart svg{display:block;width:100%;height:auto;overflow:visible}
+.rel .tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--ground);font:12.5px/1.45 var(--body);padding:6px 9px;border-radius:6px;white-space:nowrap;transform:translate(-50%,-110%);opacity:0;transition:opacity .12s;z-index:3}
+.rel .tablebox{overflow-x:auto}
+.rel table{border-collapse:collapse;width:100%;font-size:14px}
+.rel th,.rel td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.rel th{font:500 11px/1.3 var(--mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-3)}
+.rel td.n,.rel th.n{text-align:right;font-variant-numeric:tabular-nums}
+.rel .seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-bottom:12px}
+.rel .seg button{border:0;background:var(--panel);padding:7px 12px;font-size:13px;font-weight:500;cursor:pointer;color:var(--ink-2)}
+.rel .seg button[aria-pressed="true"]{background:var(--ink);color:var(--ground)}
+.rel .caveat{font-size:13px;color:var(--ink-3);margin:10px 0 0}
+.rel .layers{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.rel .layers p{margin:0;font-size:14px;color:var(--ink-2)}
+.rel .layers h4{font:600 15px/1.3 var(--body);margin:2px 0 6px}
+.rel .rules{margin:0;padding-left:20px;display:grid;gap:6px;max-width:80ch}
+@keyframes rel-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:none}}
+.rel .pop{transform-box:fill-box;transform-origin:center;animation:rel-pop .45s ease both}
+@media (max-width:860px){.rel .steps{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (max-width:460px){.rel .steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:reduce){.rel .pop{animation:none}.rel .meter .bar i{transition:none}}
+</style>
+
+<div class="rel" id="rel">
+  <section aria-labelledby="rel-journey-h">
+    <h3 class="sec" id="rel-journey-h">One partner, start to plan</h3>
+    <p class="intro" id="rel-journey-intro"></p>
+    <div class="steps" id="rel-steps" aria-label="Steps"></div>
+    <div class="slider">
+      <label for="rel-slider">Step</label>
+      <input type="range" id="rel-slider" min="1" max="7" value="7" step="1">
+      <label for="rel-slider" id="rel-slider-v"></label>
+    </div>
+    <div class="stage">
+      <div class="graphbox">
+        <div class="meter" aria-live="polite">
+          <div class="row"><span class="k">Profile complete</span><b id="rel-pct"></b></div>
+          <div class="bar"><i id="rel-bar"></i></div>
+          <div class="next" id="rel-next"></div>
+        </div>
+        <div class="gscroll"><svg id="rel-graph" role="img" aria-label="Dana's part of the relationship graph"></svg></div>
+        <div class="legend" id="rel-legend"></div>
+      </div>
+      <div class="detail" id="rel-detail"></div>
+    </div>
+    <details class="note">
+      <summary id="rel-note-sum">Her note in Obsidian at this step</summary>
+      <div class="md" id="rel-note"></div>
+    </details>
+  </section>
+
+  <section aria-labelledby="rel-prog-h">
+    <h3 class="sec" id="rel-prog-h"></h3>
+    <p class="intro" id="rel-prog-intro"></p>
+    <div class="stats" id="rel-stats"></div>
+    <div class="two">
+      <div class="card">
+        <span class="k">Average profile completeness, by day</span>
+        <div class="chart" id="rel-chart"></div>
+        <div class="legend" id="rel-chart-legend"></div>
+      </div>
+      <div class="card">
+        <span class="k">What partners said, and what reached their profile</span>
+        <div class="tablebox"><table id="rel-acc"></table></div>
+        <p class="caveat" id="rel-acc-note"></p>
+      </div>
+    </div>
+    <div class="two" style="margin-top:16px">
+      <div class="card">
+        <span class="k">Kickoff openers</span>
+        <div class="tablebox"><table id="rel-var"></table></div>
+        <p class="caveat" id="rel-var-note"></p>
+      </div>
+      <div class="card">
+        <span class="k">Kickoffs from the waves (one per opener and hook)</span>
+        <div class="thread" id="rel-kicks"></div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <span class="k" id="rel-sample-k"></span>
+      <div class="seg" role="group" aria-label="Day">
+        <button type="button" id="rel-sb" aria-pressed="false">Day 0: the record</button>
+        <button type="button" id="rel-sa" aria-pressed="true">Day 30</button>
+      </div>
+      <div class="md" id="rel-sample" style="max-height:560px;overflow-y:auto"></div>
+    </div>
+    <p class="caveat" id="rel-assume"></p>
+  </section>
+
+  <section aria-labelledby="rel-how-h">
+    <h3 class="sec" id="rel-how-h">Where it lives</h3>
+    <p class="intro">Three layers, each with one job. 7FF's partner data stays in 7FF's vault and CRM: no graph database and no outside service holds it.</p>
+    <div class="layers">
+      <div class="card"><span class="k">Memory you can open</span><h4>Obsidian vault</h4><p>One note per partner, linked to their tier, what they do, their manager, where they came from, and the products their clients need. Obsidian's graph view is the relationship graph. Calls, review files and a daily log sit alongside.</p></div>
+      <div class="card"><span class="k">Answers questions</span><h4>The index</h4><p>Every fact with its source and date, every interaction, every hub link. It orders the kickoff waves and answers questions like "Executive partners whose clients need equipment financing." It can be rebuilt from the notes at any time.</p></div>
+      <div class="card"><span class="k">What the team sees</span><h4>GoHighLevel fields</h4><p>Tier, a short profile summary, how complete the profile is, the next step, and a link to the note, on every contact, so the team works from the same picture.</p></div>
+    </div>
+    <div class="card" style="margin-top:12px">
+      <span class="k">Rules the code enforces</span>
+      <ul class="rules">
+        <li>A person reads and approves every message. Each batch has a review file listing every text in full, and any of them can be held back.</li>
+        <li>Texts go out in the partner manager's name and voice. They never mention AI, and "is this a bot?" is never answered by the agent: the manager gets a task and replies personally.</li>
+        <li>Kickoffs stay within two SMS segments, ask exactly one question, and never guilt anyone for being quiet. STOP in any form is final.</li>
+        <li>Calls come in from any recorder: GoHighLevel phone calls by transcript, video calls by the recorder's export. Every recorded call opens with a recording notice.</li>
+        <li>No health details, religion, politics, account or ID numbers, or passwords ever enter a profile.</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  const R = /*__REL_DATA__*/null;
+  if (!R) return;
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const fmt = n => Number(n).toLocaleString('en-US');
+  const dayFmt = d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  const SRC = {zoho:'Zoho record', zoho_history:'Zoho notes', reply:'text reply', call:'call', manual:'manager', record:'record'};
+  const INTENT = {general_reply:'conversation', has_deal:'has a deal', check_back_later:'check back later',
+    wants_service:'wants help', question:'question', commission_question:'commission question',
+    identity_question:'asked who is texting', unsubscribe:'opted out', event_interest:'event interest'};
+  const MOVE = {discover:'asks the next question', call_ask:'asks for a call', book:'sends the booking link',
+    acknowledge:'acknowledges', has_deal:'gets the deal moving'};
+
+  // ── tiny markdown renderer for Obsidian notes (frontmatter, headings, lists, tasks, quotes, wiki-links) ──
+  function inline(t){
+    t = esc(t);
+    t = t.replace(/\[\[([^|\]]+)\|([^\]]+)\]\]/g, '<span class="wl">$2</span>').replace(/\[\[([^\]]+)\]\]/g, (m, p) => '<span class="wl">' + p.split('/').pop() + '</span>');
+    t = t.replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>').replace(/(^|[\s(])_([^_]+)_(?=[\s).,;:]|$)/g, '$1<em>$2</em>');
+    return t;
+  }
+  function md(src){
+    let text = String(src || '').replace(/%%[^%]*%%/g, '').replace(/\r/g, '');
+    let out = '';
+    const fm = text.match(/^---\n([\s\S]*?)\n---\n/);
+    if (fm){
+      const rows = fm[1].split('\n').map(l => l.match(/^([\w_]+):\s*(.*)$/)).filter(Boolean)
+        .filter(m => !['type','ghl_contact_id','updated'].includes(m[1]) && m[2] && m[2] !== '""');
+      out += '<div class="fm">' + rows.map(m => '<span><b>' + esc(m[1].replace(/_/g,' ')) + '</b> ' + inline(m[2].replace(/^"|"$/g,'')) + '</span>').join('') + '</div>';
+      text = text.slice(fm[0].length);
+    }
+    let list = null;
+    const close = () => { if (list){ out += '</' + list + '>'; list = null; } };
+    for (const raw of text.split('\n')){
+      const line = raw.trimEnd();
+      let m;
+      if (!line.trim()){ close(); continue; }
+      if ((m = line.match(/^(#{1,3})\s+(.*)$/))){ close(); const h = m[1].length; out += `<h${h}>${inline(m[2])}</h${h}>`; continue; }
+      if ((m = line.match(/^\s*- \[ \] (.*)$/))){ if (list !== 'ul'){ close(); out += '<ul>'; list = 'ul'; } out += '<li class="task">' + inline(m[1]) + '</li>'; continue; }
+      if ((m = line.match(/^\s*- (.*)$/))){ if (list !== 'ul'){ close(); out += '<ul>'; list = 'ul'; } out += '<li>' + inline(m[1]) + '</li>'; continue; }
+      if ((m = line.match(/^\s*\d+\. (.*)$/))){ if (list !== 'ol'){ close(); out += '<ol>'; list = 'ol'; } out += '<li>' + inline(m[1]) + '</li>'; continue; }
+      if ((m = line.match(/^> ?(.*)$/))){ close(); out += '<blockquote>' + inline(m[1]) + '</blockquote>'; continue; }
+      close(); out += '<p>' + inline(line) + '</p>';
+    }
+    close();
+    return out;
+  }
+
+  // ── the journey ──
+  const E = R.example, steps = E.steps;
+  const TYPES = [
+    {key:'hub', label:'Hub note (tier, niche, manager, source, product)', test: t => t.startsWith('hub-')},
+    {key:'fact', label:'Fact, with its source', test: t => t === 'fact'},
+    {key:'loop', label:'Open loop (a promise)', test: t => t === 'loop'},
+    {key:'call', label:'Call', test: t => t === 'call'},
+  ];
+  const kindOf = t => (TYPES.find(x => x.test(t)) || TYPES[1]).key;
+  function shape(kind, x, y, cls){
+    if (kind === 'hub') return `<circle class="${cls}" cx="${x}" cy="${y}" r="7" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/>`;
+    if (kind === 'loop') return `<rect class="${cls}" x="${x-5.5}" y="${y-5.5}" width="11" height="11" rx="2" fill="var(--fill)" stroke="var(--fill-ink)" stroke-width="1.6"/>`;
+    if (kind === 'call') return `<path class="${cls}" d="M${x} ${y-7}L${x+7} ${y}L${x} ${y+7}L${x-7} ${y}Z" fill="var(--hot-soft)" stroke="var(--hot)" stroke-width="1.6"/>`;
+    return `<circle class="${cls}" cx="${x}" cy="${y}" r="5" fill="var(--s-with)"/>`;
+  }
+  $('rel-legend').innerHTML = TYPES.map(t => `<span><svg viewBox="-8 -8 16 16" aria-hidden="true">${shape(t.key,0,0,'')}</svg>${esc(t.label)}</span>`).join('')
+    + '<span><svg viewBox="-8 -8 16 16" aria-hidden="true"><circle r="6" fill="none" stroke="var(--accent)" stroke-width="2"/></svg>New at this step</span>';
+  const ROW = 28, W = 900, PX = 350, HX = 190, RX = 500;
+  // facts are grouped one row per profile slot; open loops and calls get a row each
+  function items(i){
+    const s = steps[i], prev = i ? new Set(steps[i-1].graph.nodes.map(n => n.id)) : new Set();
+    const fresh = n => i > 0 && !prev.has(n.id);
+    const hubs = s.graph.nodes.filter(n => n.type.startsWith('hub-')).map(n => ({n, fresh: fresh(n)}));
+    const slots = new Map(), rest = [];
+    for (const n of s.graph.nodes){
+      if (n.type === 'fact'){
+        if (!slots.has(n.slot)) slots.set(n.slot, {kind:'fact', slot:n.slot, values:[]});
+        slots.get(n.slot).values.push({n, fresh: fresh(n)});
+      } else if (n.type === 'loop' || n.type === 'call') rest.push({kind:n.type, n, fresh: fresh(n)});
+    }
+    const right = [...slots.values()].map(x => ({...x, fresh: x.values.some(v => v.fresh)}));
+    right.push(...rest.filter(x => x.kind === 'loop'), ...rest.filter(x => x.kind === 'call'));
+    return {hubs, right};
+  }
+  const maxRows = Math.max(...steps.map((s, i) => { const it = items(i); return Math.max(it.hubs.length, it.right.length); }));
+  const H = Math.max(maxRows * ROW + 48, 220);
+  const clip = (t, n) => t.length > n ? t.slice(0, n - 1) + '…' : t;
+  const ring = (x, y) => `<circle class="pop" cx="${x}" cy="${y}" r="11" fill="none" stroke="var(--accent)" stroke-width="2"/>`;
+  function drawGraph(i){
+    const s = steps[i], {hubs, right} = items(i), py = H / 2;
+    const at = (list, k) => py + (k - (list.length - 1) / 2) * ROW;
+    let g = '';
+    hubs.forEach((h, k) => { const y = at(hubs, k), mx = (PX + HX) / 2;
+      g += `<path d="M${PX} ${py}C${mx} ${py} ${mx} ${y} ${HX} ${y}" fill="none" stroke="${h.fresh ? 'var(--accent)' : 'var(--line)'}" stroke-width="${h.fresh ? 1.8 : 1.2}"/>`; });
+    right.forEach((r, k) => { const y = at(right, k), mx = (PX + RX) / 2;
+      g += `<path d="M${PX} ${py}C${mx} ${py} ${mx} ${y} ${RX} ${y}" fill="none" stroke="${r.fresh ? 'var(--accent)' : 'var(--line)'}" stroke-width="${r.fresh ? 1.8 : 1.2}"/>`; });
+    hubs.forEach((h, k) => { const y = at(hubs, k);
+      g += `<g>${h.fresh ? ring(HX, y) : ''}${shape('hub', HX, y, h.fresh ? 'pop' : '')}<text x="${HX - 16}" y="${y + 4}" text-anchor="end" font-size="13">`
+        + `<tspan ${h.fresh ? 'font-weight="600"' : ''}>${esc(clip(h.n.label, 24))}</tspan><tspan style="fill:var(--ink-3)" font-size="11"> · ${esc(h.n.type.slice(4))}</tspan></text><title>${esc(h.n.label)}</title></g>`; });
+    right.forEach((r, k) => { const y = at(right, k);
+      let label, title;
+      if (r.kind === 'fact'){
+        let budget = 46 - r.slot.length;
+        const vals = [];  // what's new at this step first, then the rest while it fits; "+N" for the remainder
+        for (const v of [...r.values.filter(v => v.fresh), ...r.values.filter(v => !v.fresh)]){
+          if (vals.length && budget < 12) break;
+          const t = clip(v.n.label, Math.max(budget, 12)); budget -= t.length + 3; vals.push({t, v});
+        }
+        const more = r.values.length - vals.length;
+        label = `<tspan style="fill:var(--ink-3)">${esc(r.slot)}: </tspan>` + vals.map(({t, v}, j) => `${j ? '<tspan style="fill:var(--ink-3)"> · </tspan>' : ''}<tspan ${v.fresh ? 'font-weight="600" style="fill:var(--accent)"' : ''}>${esc(t)}</tspan>`).join('')
+          + (more ? `<tspan style="fill:var(--ink-3)"> +${more}</tspan>` : '');
+        title = r.slot + ': ' + r.values.map(v => v.n.label + ' (' + (SRC[v.n.source] || v.n.source) + ')').join('; ');
+      } else {
+        label = `<tspan ${r.fresh ? 'font-weight="600"' : ''}>${esc(clip(r.n.label, 50))}</tspan>`;
+        title = r.n.label;
+      }
+      g += `<g>${r.fresh ? ring(RX, y) : ''}${shape(r.kind, RX, y, r.fresh ? 'pop' : '')}<text x="${RX + 16}" y="${y + 4}" font-size="13">${label}</text><title>${esc(title)}</title></g>`; });
+    const name = s.graph.nodes[0].label;
+    g += `<circle cx="${PX}" cy="${py}" r="26" fill="var(--ink)"/><text x="${PX}" y="${py + 5}" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--ground)">${esc(name.split(' ').map(w => w[0]).join(''))}</text>`
+      + `<text x="${PX}" y="${py + 46}" text-anchor="middle" font-size="13" font-weight="600">${esc(name)}</text>`;
+    const svg = $('rel-graph');
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = g;
+    const box = svg.parentElement;  // on a phone, open on the partner and what we know; the hubs are a swipe left
+    if (box.scrollWidth > box.clientWidth && !box.dataset.moved) box.scrollLeft = box.scrollWidth * (PX - 50) / W;
+  }
+  $('rel-graph').parentElement.addEventListener('scroll', e => { e.currentTarget.dataset.moved = '1'; }, {passive: true});
+
+  const factsOf = s => s.graph.nodes.filter(n => n.type === 'fact');
+  function newNodes(i){ const prev = i ? new Set(steps[i-1].graph.nodes.map(n => n.id)) : new Set(); return steps[i].graph.nodes.filter(n => !prev.has(n.id) && n.type !== 'partner'); }
+  function factList(list){
+    if (!list.length) return '<p class="muted" style="margin:0">Nothing new about her this step.</p>';
+    return '<ul class="plain">' + list.map(n => `<li><span class="src">${esc(n.type === 'fact' ? (SRC[n.source] || n.source) : n.type.replace('hub-',''))}</span><span>${n.type === 'fact' ? '<b>' + esc(n.slot) + ':</b> ' : ''}${esc(n.label)}</span></li>`).join('') + '</ul>';
+  }
+  const bubble = (who, text, out) => `<span class="who${out ? ' r' : ''}">${esc(who)}</span><div class="bubble ${out ? 'out' : 'in'}">${esc(text)}</div>`;
+  const first = E.meta.partner.split(' ')[0];
+  const sender = (steps[1].output.draft.body.match(/(?:it's|It's) (\w+)|^Hi \w+, (\w+) here/) || []).slice(1).find(Boolean) || 'Manager';
+
+  function detail(i){
+    const s = steps[i], o = s.output || {}, inp = s.input || {};
+    let h = `<div><span class="day">Step ${s.n} · ${dayFmt(s.day)}</span><h4>${esc(s.title)}</h4></div>`;
+    if (s.n === 1){
+      const f = inp.record.fields;
+      h += `<div class="card"><span class="k">Before: her record in Zoho (synthetic)</span><div class="kv">`
+        + [['Tier', f.tier], ['Plan', f.plan], ['Joined', f.join_date], ['Came from', f.source], ['What she does', f.niche], ['Deals sent', f.deals_submitted], ['Last deal', f.last_deal_date], ['Last contact', f.last_contact_date]]
+          .map(([k, v]) => `<div><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('') + '</div>'
+        + '<ul class="plain" style="margin-top:12px">' + inp.record.history.map(x => `<li><span class="src">${esc(x.date)}</span><span>${esc(x.text)}</span></li>`).join('') + '</ul></div>'
+        + `<div class="card"><span class="k">After: the profile the agent writes</span><p style="margin:0 0 10px">${esc(s.profile.summary)}</p>${factList(newNodes(i).filter(n => n.type === 'fact'))}</div>`;
+    } else if (s.n === 2){
+      const d = o.draft;
+      h += `<div class="card thread"><span class="k">The kickoff text</span>${bubble(sender + ' (via GoHighLevel)', d.body + ' Reply STOP to opt out.', true)}`
+        + `<div class="chips"><span class="chip">opener ${esc(d.variant)}</span><span class="chip">hook: ${esc(d.hook)}</span><span class="chip ok">${d.segments} SMS segments</span><span class="chip">${esc(d.drafter === 'model' ? 'drafted by the model, checked' : 'framework template')}</span></div></div>`
+        + `<div class="card"><span class="k">What the manager approves</span><div class="md">${md(o.review_file)}</div></div>`;
+    } else if (s.n >= 3 && s.n <= 5){
+      const t = o.triage;
+      h += `<div class="card thread"><span class="k">The conversation</span>${bubble(first, inp.text, false)}`
+        + (o.reply && o.reply.body ? bubble(sender + ' (approved, then sent)', o.reply.body, true) : '') + '</div>'
+        + `<div class="card"><span class="k">What the agent did with her reply</span><div class="chips" style="margin-bottom:10px"><span class="chip ok">${esc(INTENT[t.intent] || t.intent)}</span>`
+        + (o.reply ? `<span class="chip">our reply ${esc(MOVE[o.reply.move] || o.reply.move)}</span>` : '') + '</div>'
+        + factList(newNodes(i).filter(n => n.type === 'fact')) + '</div>';
+      if (o.pre_call_brief) h += `<div class="card"><span class="k">Pre-call brief, posted to the manager</span><div class="md">${md(o.pre_call_brief)}</div></div>`;
+    } else if (s.n === 6){
+      const blocks = inp.transcript || [];
+      h += `<div class="card"><span class="k">The recording (${esc(inp.recorder || 'recorder export')})</span><div class="transcript">`
+        + blocks.map(b => `<p><b>${esc(b.speaker.name)}:</b> ${esc(b.words)}</p>`).join('') + '</div></div>'
+        + `<div class="card"><span class="k">What the call added</span>${factList(newNodes(i).filter(n => n.type === 'fact'))}</div>`
+        + `<div class="card"><span class="k">Promises, now open loops and tasks</span><ul class="plain">`
+        + o.ingest.commitments.map(c => `<li><span class="chip ${c.owner === 'us' ? 'warn' : ''}">${c.owner === 'us' ? 'task for ' + esc(sender) : esc(first)}</span><span>${esc(c.what)} <span class="src">due ${esc(dayFmt(c.due))}</span></span></li>`).join('') + '</ul></div>';
+    } else {
+      h += `<div class="card"><span class="k">Her revenue plan, in her note</span><div class="md">${md(o.plan)}</div></div>`;
+    }
+    return h;
+  }
+
+  const stepBox = $('rel-steps');
+  stepBox.innerHTML = steps.map((s, i) => `<button type="button" data-i="${i}" aria-pressed="false"><span class="k">${dayFmt(s.day)}</span><span class="t">${esc(s.title)}</span></button>`).join('');
+  function show(i){
+    const s = steps[i];
+    stepBox.querySelectorAll('button').forEach((b, k) => b.setAttribute('aria-pressed', k === i));
+    $('rel-slider').value = i + 1;
+    $('rel-slider-v').textContent = `${i + 1} of ${steps.length}`;
+    $('rel-pct').textContent = s.profile.completeness + '%';
+    $('rel-bar').style.width = s.profile.completeness + '%';
+    $('rel-next').innerHTML = s.profile.next_step ? '<b>Next step:</b> ' + esc(s.profile.next_step) : '';
+    drawGraph(i);
+    $('rel-detail').innerHTML = detail(i);
+    $('rel-note-sum').textContent = `Her note in Obsidian after step ${s.n}`;
+    $('rel-note').innerHTML = md(s.note);
+  }
+  stepBox.addEventListener('click', e => { const b = e.target.closest('button'); if (b) show(+b.dataset.i); });
+  $('rel-slider').addEventListener('input', e => show(+e.target.value - 1));
+  const pcts = steps.map(s => s.profile.completeness);
+  $('rel-journey-intro').textContent = `${E.meta.partner.replace(' (fictional)', '')} is a fictional partner, run through the real code: her record becomes a profile, `
+    + `one personal text starts a conversation, her replies and a recorded call fill in the picture, and it ends with a plan to get her sending deals again. `
+    + `Her profile goes from ${pcts[0]}% to ${pcts[pcts.length - 1]}% complete. Move the slider to watch her part of the graph grow.`
+    + (E.meta.drafter === 'model' ? ` Our texts were drafted, and her replies and the call read, by ${E.meta.model_label || E.meta.model}, inside the framework and its checks; a person approved every text.`
+                                   : ' Drafted with the framework templates and keyword rules; the live agent uses the model.');
+  show(steps.length - 1);
+
+  // ── the program ──
+  const S = R.sim, T = S.totals, last = S.timeline[S.timeline.length - 1];
+  $('rel-prog-h').textContent = `Across ${fmt(S.meta.partners)} quiet partners`;
+  $('rel-prog-intro').textContent = `The same code on ${fmt(S.meta.partners)} synthetic partners for ${S.meta.days} days: Zoho-style records imported, kickoffs in reviewed waves of ${S.meta.wave_size}, `
+    + `one nudge after ${S.meta.nudge_after_days} days, then every reply, call and plan. A simulated manager approved every batch. Nobody was contacted.`;
+  const stats = [
+    [fmt(T.kickoffs_sent), `kickoff texts, each from the partner's own record (${T.kickoffs_held_back} held back by the reviewer and sent with the next wave)`],
+    [fmt(last.talking), `partners wrote back; their profiles average ${last.avg_completeness_talking}% complete`],
+    [fmt(T.calls_held), `calls held and read into the graph (${T.calls_phone} by phone, ${T.calls_video} by video)`],
+    [fmt(T.revenue_plans), 'revenue plans written after a call'],
+    [fmt(T.opt_outs), 'opt-outs honored, in every form of STOP'],
+    [fmt(T.identity_escalations), `asked "is this a bot?"; each went to the manager to answer personally`],
+  ];
+  $('rel-stats').innerHTML = stats.map(([b, t]) => `<div class="stat"><b>${b}</b><span>${esc(t)}</span></div>`).join('');
+
+  // chart: average completeness by day, two series
+  (function chart(){
+    const tl = S.timeline, w = 560, h = 260, m = {l:40, r:118, t:12, b:28};
+    const x = i => m.l + i * (w - m.l - m.r) / Math.max(tl.length - 1, 1);
+    const y = v => m.t + (100 - v) * (h - m.t - m.b) / 100;
+    const series = [
+      {key:'avg_completeness_talking', label:'Partners who wrote back', color:'var(--s-with)'},
+      {key:'avg_completeness', label:`All ${fmt(S.meta.partners)} partners`, color:'var(--s-without)'},
+    ];
+    let g = '';
+    for (const v of [0, 25, 50, 75, 100]) g += `<line x1="${m.l}" x2="${w - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/><text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end" font-size="11" style="fill:var(--ink-3)">${v}%</text>`;
+    [0, 9, 19, tl.length - 1].forEach(i => { g += `<text x="${x(i)}" y="${h - 8}" text-anchor="middle" font-size="11" style="fill:var(--ink-3)">${dayFmt(tl[i].day)}</text>`; });
+    for (const sr of series){
+      const pts = tl.map((d, i) => [x(i), y(d[sr.key])]).filter((p, i) => sr.key !== 'avg_completeness_talking' || tl[i].talking > 0);
+      g += `<path d="M${pts.map(p => p.join(' ')).join('L')}" fill="none" stroke="${sr.color}" stroke-width="2" stroke-linejoin="round"/>`;
+      const e = pts[pts.length - 1];
+      g += `<circle cx="${e[0]}" cy="${e[1]}" r="4" fill="${sr.color}" stroke="var(--panel)" stroke-width="2"/><text x="${e[0] + 8}" y="${e[1] + 4}" font-size="12" font-weight="600">${tl[tl.length - 1][sr.key]}%</text>`;
+    }
+    g += `<line id="rel-x" y1="${m.t}" y2="${h - m.b}" stroke="var(--ink-3)" stroke-dasharray="3 3" opacity="0"/>`;
+    const box = $('rel-chart');
+    box.innerHTML = `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Average profile completeness by day">${g}<rect x="${m.l}" y="${m.t}" width="${w - m.l - m.r}" height="${h - m.t - m.b}" fill="transparent" id="rel-hit"/></svg><div class="tip" id="rel-tip"></div>`;
+    $('rel-chart-legend').innerHTML = series.map(sr => `<span><svg viewBox="0 0 12 12" aria-hidden="true"><rect width="12" height="12" rx="2" fill="${sr.color}"/></svg>${esc(sr.label)}</span>`).join('');
+    const svg = box.querySelector('svg'), tip = $('rel-tip'), line = $('rel-x');
+    function move(ev){
+      const r = svg.getBoundingClientRect(), sx = (ev.clientX - r.left) * w / r.width;
+      const i = Math.max(0, Math.min(tl.length - 1, Math.round((sx - m.l) / ((w - m.l - m.r) / (tl.length - 1)))));
+      const d = tl[i];
+      line.setAttribute('x1', x(i)); line.setAttribute('x2', x(i)); line.setAttribute('opacity', 1);
+      tip.innerHTML = `<b>${dayFmt(d.day)}</b><br>Wrote back: ${d.talking ? d.avg_completeness_talking + '% (' + d.talking + ')' : 'none yet'}<br>All partners: ${d.avg_completeness}%<br>Calls so far: ${d.calls}`;
+      tip.style.left = (x(i) * r.width / w) + 'px'; tip.style.top = (m.t * r.height / h + 8) + 'px'; tip.style.opacity = 1;
+    }
+    $('rel-hit').addEventListener('pointermove', move);
+    $('rel-hit').addEventListener('pointerleave', () => { tip.style.opacity = 0; line.setAttribute('opacity', 0); });
+  })();
+
+  const A = S.accuracy, SLOT = {client_types:'Clients', deal_types:'What their clients need', deal_size:'Deal size', regions:'Where they work',
+    goals:'Goals', needs:'What would help', channel:'Best way to reach', best_time:'Best time', blockers:"What's in the way"};
+  $('rel-acc').innerHTML = '<thead><tr><th>Slot</th><th class="n">Said</th><th class="n">In profile</th><th class="n">Correct</th></tr></thead><tbody>'
+    + Object.entries(A.by_slot).map(([k, v]) => `<tr><td>${esc(SLOT[k] || k)}</td><td class="n">${v.said}</td><td class="n">${v.captured}</td><td class="n">${v.correct}</td></tr>`).join('')
+    + `<tr><td><b>All</b></td><td class="n"><b>${A.total.said}</b></td><td class="n"><b>${A.total.captured}</b></td><td class="n"><b>${A.total.correct}</b></td></tr></tbody>`;
+  $('rel-acc-note').textContent = `Keyword rules alone, no model: ${Math.round(A.capture_rate * 100)}% of what partners said reached their profile, ${Math.round(A.correct_rate * 100)}% correctly. `
+    + 'Some replies were written in phrasings the rules miss on purpose, so this is a floor. The live agent reads replies and calls with the model.';
+  $('rel-var').innerHTML = '<thead><tr><th>Opener</th><th class="n">Sent</th><th class="n">Replied</th><th class="n">Calls</th><th class="n">Reply rate</th></tr></thead><tbody>'
+    + Object.entries(S.variants).map(([k, v]) => `<tr><td>${esc(k)}</td><td class="n">${v.sent}</td><td class="n">${v.replied}</td><td class="n">${v.calls}</td><td class="n">${Math.round(v.reply_rate * 100)}%</td></tr>`).join('') + '</tbody>';
+  $('rel-var-note').textContent = "In the simulation a partner's reply doesn't depend on the wording, so this shows the tracking works, not which opener wins. Real replies decide that.";
+  $('rel-kicks').innerHTML = S.kickoffs.slice(0, 4).map(k => `<span class="who r">opener ${esc(k.variant)} · hook: ${esc(k.hook)} · ${k.segments} segments</span><div class="bubble out">${esc(k.body)}</div>`).join('');
+  const sp = S.sample;
+  $('rel-sample-k').textContent = `One partner from the simulation: ${sp.name}'s note, before and after`;
+  function sample(after){ $('rel-sb').setAttribute('aria-pressed', !after); $('rel-sa').setAttribute('aria-pressed', after); $('rel-sample').innerHTML = md(after ? sp.after : sp.before); }
+  $('rel-sb').addEventListener('click', () => sample(false));
+  $('rel-sa').addEventListener('click', () => sample(true));
+  sample(true);
+  $('rel-assume').textContent = 'Simulation assumptions: ' + Object.entries(S.assumptions).filter(([k]) => k !== 'variants').map(([k, v]) => `${k}: ${v}`).join('; ') + '.';
+})();
+</script>

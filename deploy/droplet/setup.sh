@@ -68,7 +68,7 @@ umask 022
 
 say "3/8 Installing the fam core into the Hermes venv"
 "$HERMES_PY" -c "import mcp" 2>/dev/null || fail "the Hermes venv has no mcp package"
-mkdir -p "$FAM_HOME/state" "$HERMES_HOME/scripts"
+mkdir -p "$FAM_HOME/state" "$HERMES_HOME/scripts" "${FAM_CALL_INBOX:-$HOME/fam-inbox/calls}"
 PYTHONPATH="$REPO_DIR/files/local-packages/fam/src" "$HERMES_PY" -m unittest discover -s "$REPO_DIR/tests" >/dev/null 2>&1 \
   || fail "unit tests failed — run: PYTHONPATH=files/local-packages/fam/src $HERMES_PY -m unittest discover -s tests -v"
 cat > "$HOME/.local/bin/fam" <<SH
@@ -95,7 +95,8 @@ text = open(src).read()
 keys = ["PRIMARY_MODEL", "FALLBACK_MODEL", "REPO_DIR", "FAM_HOME", "VAULT_DIR", "HERMES_PYTHON", "GHL_CLI_DIR",
         "FAM_GHL_MODE", "FAM_DEMO_MODE", "GHL_API_KEY", "GHL_LOCATION_ID", "ORGO_MCP_VERSION", "ORGO_API_KEY",
         "ORGO_COMPUTER_ID", "ORGO_EXCLUDED_TOOLS", "SUPER_BROWSER_TOKEN", "BROWSER_BOX_URL", "BROWSER_BOX_TOKEN",
-        "SLACK_ENABLED", "TELEGRAM_ENABLED", "SLACK_HOME_CHANNEL", "TELEGRAM_HOME_CHANNEL"]
+        "SLACK_ENABLED", "TELEGRAM_ENABLED", "SLACK_HOME_CHANNEL", "TELEGRAM_HOME_CHANNEL", "OPENROUTER_API_KEY",
+        "FAM_DRAFT_MODEL", "FAM_FALLBACK_MODEL", "FAM_CALL_INBOX"]
 env = dict(os.environ, HERMES_PYTHON=os.environ["HERMES_PY"])
 for key in keys:
     value = env.get(key, "")
@@ -171,6 +172,7 @@ add_job() { # name schedule prompt-file skills...
 }
 add_job "FAM daily tasks + sweep" "0 8 * * 1-5" daily-tasks-and-sweep.prompt affiliate-cadence ghl-affiliate-ops obsidian-memory
 add_job "FAM reply triage" "15 9-18 * * 1-5" reply-triage.prompt affiliate-reply-triage
+add_job "FAM call ingest" "45 9-19 * * 1-5" call-ingest.prompt obsidian-memory
 add_job "FAM bi-weekly newsletter" "0 10 1,15 * *" biweekly-newsletter.prompt affiliate-newsletter
 add_job "FAM monthly offer" "30 9 3 * *" monthly-offer.prompt affiliate-offers
 add_job "FAM weekly scorecard" "0 16 * * 5" weekly-scorecard.prompt ghl-affiliate-ops

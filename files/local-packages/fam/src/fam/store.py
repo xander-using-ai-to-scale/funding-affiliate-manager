@@ -87,6 +87,10 @@ class Store:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as conn:
             conn.executescript(SCHEMA)
+            try:  # approvals made before approve-with-exceptions existed
+                conn.execute("ALTER TABLE approvals ADD COLUMN excluded_json TEXT NOT NULL DEFAULT '[]'")
+            except sqlite3.OperationalError:
+                pass
 
     @contextlib.contextmanager
     def connection(self) -> Iterator[sqlite3.Connection]:
@@ -184,10 +188,10 @@ class Store:
     def insert_approval(self, row: dict[str, Any]) -> None:
         with self.connection() as conn:
             conn.execute(
-                "INSERT INTO approvals(approval_id, action_id, digest, approver, created_at, expires_at) "
-                "VALUES(?,?,?,?,?,?)",
+                "INSERT INTO approvals(approval_id, action_id, digest, approver, created_at, expires_at, excluded_json) "
+                "VALUES(?,?,?,?,?,?,?)",
                 (row["approval_id"], row["action_id"], row["digest"], row["approver"], row["created_at"],
-                 row["expires_at"]),
+                 row["expires_at"], row.get("excluded_json", "[]")),
             )
 
     def get_approval(self, approval_id: str) -> dict[str, Any] | None:

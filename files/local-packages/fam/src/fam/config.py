@@ -37,6 +37,11 @@ CUSTOM_FIELD_KEYS = (
     "products_of_interest",
     "services_offered",
     "obsidian_note",
+    "tier",
+    "plan",
+    "profile_summary",
+    "profile_completeness",
+    "next_step",
 )
 
 DEFAULT_CADENCE: dict[str, Any] = {
@@ -55,6 +60,19 @@ DEFAULT_CADENCE: dict[str, Any] = {
     "batch_approval_max": 100,
     "approval_ttl_hours": 12,
     "timezone": "America/New_York",
+}
+
+DEFAULT_KICKOFF: dict[str, Any] = {
+    "company": "7 Figures Funding",
+    "default_sender": "Justin",
+    "generic_manager_names": ["Funding Relationship Manager", "Partner Manager", ""],
+    "wave_size": 250,
+    "batch_max": 500,
+    "max_segments": 2,
+    "nudge_after_days": 5,
+    "variants": ["A", "B", "C"],
+    "calendar_link": "",
+    "send_pause_seconds": 1.0,
 }
 
 
@@ -84,6 +102,8 @@ class Settings:
     ghl_map: dict[str, Any] = field(default_factory=dict)
     cadence: dict[str, Any] = field(default_factory=dict)
     policy: dict[str, Any] = field(default_factory=dict)
+    kickoff: dict[str, Any] = field(default_factory=dict)
+    profile_schema: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def load(cls) -> "Settings":
@@ -99,6 +119,9 @@ class Settings:
         cadence = dict(DEFAULT_CADENCE)
         cadence.update(_read_json(config_dir / "cadence.json", {}))
         policy = _read_json(policy_path, {})
+        kickoff = dict(DEFAULT_KICKOFF)
+        kickoff.update({k: v for k, v in _read_json(config_dir / "kickoff.json", {}).items() if not k.startswith("_")})
+        profile_schema = _read_json(config_dir / "profile-schema.json", {"slots": [], "sections": {}})
         profile = os.getenv("FAM_GHL_PROFILE", "").strip() or str(ghl_map.get("profile", ""))
         state_dir.mkdir(parents=True, exist_ok=True)
         return cls(
@@ -112,6 +135,8 @@ class Settings:
             ghl_map=ghl_map,
             cadence=cadence,
             policy=policy,
+            kickoff=kickoff,
+            profile_schema=profile_schema,
         )
 
     # ── GHL map helpers ────────────────────────────────────────────────────

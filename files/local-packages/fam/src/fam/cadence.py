@@ -12,11 +12,14 @@ Cadence (config/cadence.json, defaults in config.DEFAULT_CADENCE):
   * silent >= 180 days -> `aff:dead` + the dead-lead campaign every 90 days
   * a conversation that says "check back with me on X" sets next_touch_date,
     which beats every other rule on that day
+  * a partner waiting on their reactivation kickoff (`fam:kickoff-pending`) or on a reply to it
+    (`fam:kickoff-sent`) gets no bulk cadence: the kickoff is their next touch
 "Silent" means no reply and no deal since max(last_reply_date, last_deal_date, join_date).
 """
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, date, datetime
 from typing import Any
@@ -35,6 +38,10 @@ DNC_TAG = "aff:dnc"
 
 TEST_CONTACT_TAG = "fam:test-contact"
 SOURCE_PREFIX = "src:"
+KICKOFF_PENDING = "fam:kickoff-pending"
+KICKOFF_SENT = "fam:kickoff-sent"
+KICKOFF_DONE = "fam:kickoff-done"
+TIERS = ("CEO", "Executive", "Apprentice", "Free")
 
 # SMS is billed per segment. One character outside the GSM-7 set (an em dash, a curly quote) switches the whole
 # message to UCS-2: 70 characters per segment instead of 160, so a 160-character text bills as 3 segments.
@@ -61,6 +68,7 @@ def sms_segments(text: str) -> dict[str, Any]:
 
 # kind -> (mode, workflow key used for bulk enrollment, priority; lower runs first)
 ACTION_KINDS: dict[str, tuple[str, str, int]] = {
+    "kickoff": ("kickoff", "", 5),
     "scheduled_followup": ("personal", "", 10),
     "personal_checkin": ("personal", "", 20),
     "onboarding": ("bulk", "onboarding", 25),
@@ -120,6 +128,16 @@ class Affiliate:
     @property
     def is_test_contact(self) -> bool:
         return TEST_CONTACT_TAG in self.tags
+
+    @property
+    def tier(self) -> str:
+        value = str(self.fields.get("tier") or "").strip()
+        if value:
+            return value
+        for tag in self.tags:
+            if tag.startswith("tier:"):
+                return next((t for t in TIERS if t.lower() == tag[5:]), tag[5:].title())
+        return ""
 
     def day(self, key: str) -> date | None:
         return parse_day(self.fields.get(key))
@@ -264,6 +282,15 @@ def evaluate(aff: Affiliate, today: date, rules: dict[str, Any]) -> Evaluation:
 
     touched_recently = since_touch is not None and since_touch < rules["biweekly_touch_days"]
     next_touch = aff.day("next_touch_date")
+    if KICKOFF_PENDING in aff.tags or KICKOFF_SENT in aff.tags:
+        # the kickoff track owns this partner until they reply or get their one nudge (fam.kickoff)
+        if next_touch and next_touch <= today:
+            add("scheduled_followup", f"asked us to follow up on {next_touch.isoformat()}",
+                cadence_note=aff.fields.get("cadence_note") or "")
+        elif KICKOFF_PENDING in aff.tags:
+            add("kickoff", "first personal text from their partner manager")
+        due.sort(key=lambda item: item.priority)
+        return Evaluation(aff, lifecycle, silent, since_touch, due)
     if next_touch and next_touch <= today:
         add("scheduled_followup", f"asked us to follow up on {next_touch.isoformat()}",
             cadence_note=aff.fields.get("cadence_note") or "")
@@ -293,6 +320,7 @@ def sweep(affiliates: list[Affiliate], today: date, rules: dict[str, Any]) -> di
     """Evaluate every affiliate and roll the results into a daily plan."""
     evaluations = [evaluate(a, today, rules) for a in affiliates]
     personal: list[DueItem] = []
+    kickoff: list[DueItem] = []
     bulk: dict[str, list[DueItem]] = {}
     lifecycle_changes: list[dict[str, Any]] = []
     cohorts: dict[str, int] = {}
@@ -305,6 +333,8 @@ def sweep(affiliates: list[Affiliate], today: date, rules: dict[str, Any]) -> di
         for item in ev.due:
             if item.mode == "personal":
                 personal.append(item)
+            elif item.mode == "kickoff":
+                kickoff.append(item)
             else:
                 bulk.setdefault(item.kind, []).append(item)
 
@@ -323,17 +353,52 @@ def sweep(affiliates: list[Affiliate], today: date, rules: dict[str, Any]) -> di
         "lifecycle_changes": lifecycle_changes,
         "personal_queue": [i.to_dict() for i in personal[:cap]],
         "personal_overflow": max(0, len(personal) - cap),
+        "kickoff_due": len(kickoff),
         "bulk_queue": {kind: [i.to_dict() for i in items] for kind, items in sorted(bulk.items())},
         "bulk_counts": {kind: len(items) for kind, items in sorted(bulk.items())},
     }
+
+
+# Carrier opt-out keywords (CTIA): a reply that is just one of these, in any case or punctuation, is an opt-out.
+OPT_OUT_WORDS = {"stop", "stopall", "stop all", "unsubscribe", "cancel", "end", "quit", "revoke", "optout",
+                 "opt out", "stop please", "please stop", "remove", "remove me"}
+OPT_OUT_PHRASES = (" unsubscrib", " remove me ", " do not contact ", " don't text ", " dont text ", " opt out ",
+                   " opt me out ", " stop texting ", " stop messaging ", " stop contacting ", " stop sending ",
+                   " stopall ", " stop all ")
+# "Is this a bot?" and the like. The agent never answers these: the named manager replies personally.
+IDENTITY_PHRASES = (" is this a bot ", " are you a bot ", " is this a robot ", " are you a robot ", " is this ai ",
+                    " are you ai ", " is this an ai ", " are you an ai ", " is this automated ", " is this an automated ",
+                    " is this a real person ", " are you a real person ", " are you real ", " is this real ",
+                    " am i talking to a ", " am i texting a ", " are you human ", " is this a human ",
+                    " is this really ", " is this chatgpt ", " is this a computer ", " is this an auto ",
+                    " real person or ", " a bot or ", " automated message ", " auto generated ", " autogenerated ")
+
+
+def _plain(text: str) -> str:
+    """Lowercase words only, padded with spaces, so "STOP." / "Stop!" / "is this a bot??" match cleanly."""
+    return " " + re.sub(r"[^a-z0-9$']+", " ", (text or "").lower().replace("\u2019", "'")).strip() + " "
+
+
+def is_opt_out(text: str) -> bool:
+    plain = _plain(text)
+    if plain.strip() in OPT_OUT_WORDS or any(k in plain for k in OPT_OUT_PHRASES):
+        return True
+    return " stop " in plain and len(plain.split()) <= 3  # "STOP please", "stop it"; not "I can stop by Friday"
+
+
+def is_identity_question(text: str) -> bool:
+    plain = _plain(text)
+    return any(k in plain for k in IDENTITY_PHRASES)
 
 
 def classify_reply(text: str) -> dict[str, Any]:
     """Keyword baseline for reply triage. The agent's model refines this; the
     baseline guarantees STOP/DNC is never missed and gives the sim a deterministic path."""
     t = " " + (text or "").lower() + " "
-    if any(k in t for k in (" stop ", " unsubscribe", "remove me", "do not contact", "don't text")):
+    if is_opt_out(text):
         return {"intent": "unsubscribe", "urgency": "high"}
+    if is_identity_question(text):
+        return {"intent": "identity_question", "urgency": "high"}
     # Offering a deal, not merely mentioning one: "when do I get paid on funded deals?" is a commission
     # question and "how do I submit a deal?" is a question — neither is new deal flow.
     if any(k in t for k in ("deal for you", "have a deal", "got a deal", "deal to send", "deal to submit",

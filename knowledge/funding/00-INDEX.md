@@ -14,6 +14,7 @@ growth services. It never underwrites, quotes, or submits deals.
 | `05-conversation-playbook.md` | Voice rules and draft SMS/email message frameworks for every touch type (bi-weekly, monthly offer, 60–90-day check-in, reactivation, new offer, event invite, growth-service offer) plus responses to common replies. All drafts pending human approval. |
 | `06-compliance-guardrails.md` | What the agent must never say, TCPA/quiet-hours, CAN-SPAM, A2P 10DLC, STOP/DNC, FTC affiliate disclosure, and data-handling rules. Operational guidance, not legal advice. |
 | `07-faq-for-affiliates.md` | 20 likely affiliate questions with answer frameworks, placeholders where 7FF-specific facts are unconfirmed. |
+| `08-kickoff-framework.md` | The reactivation kickoff: four parts (greeting, who and why now, one hook from their record, one question), the three openers, the nudge, what happens after a reply, waves. |
 
 ## Open items — confirm with 7FF before this agent operates externally
 
