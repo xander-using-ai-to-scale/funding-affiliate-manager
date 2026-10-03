@@ -19,8 +19,9 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
                                         ├─ fam-approvals MCP human-only approvals (untrusted surface)
                                         ├─ ghl MCP           full GoHighLevel CLI (demo location only)
                                         ├─ orgo MCP          its own Orgo cloud desktop (GHL UI, LinkedIn, Skool)
-                                        ├─ super-browser     research + many browsers
-                                        └─ browser-box       one self-hosted browser
+                                        ├─ browser-box       read pages in one self-hosted browser
+                                        ├─ data-box          page data (scrape); paid rungs need approval
+                                        └─ super-browser     bulk lead lists + approval-gated writes (being retired)
                                       Memory: Obsidian vault (Partners / Calls / Reviews / Daily / hub notes …)
 ```
 

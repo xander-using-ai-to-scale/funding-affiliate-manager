@@ -6,6 +6,9 @@ allowed-tools: Bash, Read
 ---
 > **In the Funding Affiliate Manager:** Super Browser is already attached as the `super-browser` MCP (hosted, `SUPER_BROWSER_TOKEN`). Use it for affiliate research and profile enrichment (LinkedIn/company/website lookups), and whenever you need several browsers at once. It is a tool, not the job: never use it to send or post on someone's behalf without a manager approval card. No paid enrichment services — this *is* the enrichment.
 
+> **Being retired.** Read pages with `browser-box` and get page data with `data-box` first. Use Super Browser only
+> for bulk lead lists and approval-gated writes until data-box's paid sources land.
+
 # Super Browser — one live server, two ways in
 
 Super Browser is a **single deployed server** at `https://167.71.241.147.nip.io`. It has the real hands:

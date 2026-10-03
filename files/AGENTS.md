@@ -8,7 +8,7 @@
 | CRM | GoHighLevel demo location (`mfm-demo`) | `fam-core` MCP (primary), `ghl` MCP (raw CLI, every write prompts) |
 | Approvals | human-only tools | `fam-approvals` MCP (Hermes asks the human) |
 | Your computer | your own Orgo cloud desktop: Chrome logged into GHL, LinkedIn, Skool | `orgo` MCP — see skill `orgo-computer` |
-| Browsers | Super Browser (hosted, many browsers) and Browser Box (one self-hosted browser) | `super-browser`, `browser-box` MCPs |
+| Browsers | browser-box (read pages), data-box (page data); Super Browser only for bulk lead lists and approval-gated writes | `browser-box`, `data-box`, `super-browser` MCPs |
 | Memory | Obsidian vault `~/fam-vault`: Partners/ (one profile note per partner), Calls/, Reviews/, Daily/, hub notes (Tiers/, Niches/, Managers/, Sources/, Products/), Campaigns/, Newsletters/, Events/, Reports/ | `fam_*` tools write to it; `fam_profile_get` reads a partner; you can read files directly |
 | Relationship graph | the vault plus an index in `fam.sqlite3` (facts, interactions, hub links) | `fam_profile_get`, `fam_graph_query`, `fam_facts_record`, `fam_kickoff_status` |
 | Knowledge | `knowledge/funding/*.md` (company, products, economics, segments, playbook, compliance, FAQ, kickoff framework) | read before drafting |
