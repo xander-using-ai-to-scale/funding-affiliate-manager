@@ -85,6 +85,10 @@ compliance concern, wrong person, human takeover requested).
 
 ### T5 — Dead-lead reactivation (signed up, never sent a deal, long-lapsed)
 
+**For the 7FF reactivation, use the kickoff in `08-kickoff-framework.md` instead:** one text from the
+partner's named manager with one hook from their record, then the reply sequence. The copy below is for
+partners outside the kickoff (for example, someone who joined after it ran).
+
 **SMS:**
 > Hey {{first_name}}, {{sender_name}} here from 7 Figures Funding. You signed
 > up a while back — still open to sending an occasional funding referral if

@@ -1,0 +1,805 @@
+{
+  "meta": {
+    "partners": 250,
+    "days": 30,
+    "start": "2026-10-05",
+    "seed": 21,
+    "sender": "Justin",
+    "wave_size": 40,
+    "drafter": "template",
+    "extractor": "rules",
+    "nudge_after_days": 5
+  },
+  "import": {
+    "records": 250,
+    "created": 250,
+    "updated": 0,
+    "kickoff_pending": 250,
+    "with_history": 84,
+    "facts": 624
+  },
+  "graph_start": {
+    "partners": 250,
+    "avg_completeness": 25.0,
+    "facts": 624,
+    "facts_by_source": {
+      "zoho": 500,
+      "zoho_history": 124
+    },
+    "hubs": {
+      "manager": 1,
+      "niche": 11,
+      "product": 7,
+      "source": 8,
+      "tier": 4
+    },
+    "hub_links": 1040,
+    "completeness_buckets": {
+      "0-29": 166,
+      "30-49": 84
+    },
+    "calls": 0,
+    "revenue_plans": 0
+  },
+  "graph_end": {
+    "partners": 250,
+    "avg_completeness": 28.7,
+    "facts": 761,
+    "facts_by_source": {
+      "call": 56,
+      "reply": 81,
+      "zoho": 500,
+      "zoho_history": 124
+    },
+    "hubs": {
+      "manager": 1,
+      "niche": 11,
+      "product": 8,
+      "source": 8,
+      "tier": 4
+    },
+    "hub_links": 1060,
+    "completeness_buckets": {
+      "0-29": 144,
+      "30-49": 89,
+      "50-79": 10,
+      "80-100": 7
+    },
+    "calls": 8,
+    "revenue_plans": 8
+  },
+  "totals": {
+    "kickoffs_sent": 250,
+    "kickoffs_held_back": 1,
+    "nudges_sent": 205,
+    "replies_in": 100,
+    "texts_in": 108,
+    "replies_sent": 85,
+    "discovery_questions": 42,
+    "call_asks": 20,
+    "calls_booked": 8,
+    "calls_held": 8,
+    "calls_phone": 4,
+    "calls_video": 4,
+    "commitments": 12,
+    "manager_tasks": 17,
+    "revenue_plans": 8,
+    "deals": 8,
+    "opt_outs": 10,
+    "identity_escalations": 5,
+    "duplicates_skipped": 0,
+    "drafts_blocked": 0,
+    "relisted": 13,
+    "triaged_twice": 0
+  },
+  "variants": {
+    "A": {
+      "sent": 86,
+      "replied": 20,
+      "calls": 1,
+      "reply_rate": 0.233
+    },
+    "B": {
+      "sent": 85,
+      "replied": 16,
+      "calls": 3,
+      "reply_rate": 0.188
+    },
+    "C": {
+      "sent": 79,
+      "replied": 22,
+      "calls": 4,
+      "reply_rate": 0.278
+    }
+  },
+  "accuracy": {
+    "by_slot": {
+      "best_time": {
+        "said": 8,
+        "captured": 8,
+        "correct": 8
+      },
+      "blockers": {
+        "said": 8,
+        "captured": 8,
+        "correct": 8
+      },
+      "channel": {
+        "said": 3,
+        "captured": 3,
+        "correct": 3
+      },
+      "client_types": {
+        "said": 24,
+        "captured": 16,
+        "correct": 16
+      },
+      "deal_size": {
+        "said": 15,
+        "captured": 15,
+        "correct": 15
+      },
+      "deal_types": {
+        "said": 13,
+        "captured": 13,
+        "correct": 13
+      },
+      "goals": {
+        "said": 22,
+        "captured": 17,
+        "correct": 17
+      },
+      "needs": {
+        "said": 8,
+        "captured": 6,
+        "correct": 6
+      },
+      "regions": {
+        "said": 9,
+        "captured": 9,
+        "correct": 9
+      }
+    },
+    "total": {
+      "said": 110,
+      "captured": 95,
+      "correct": 95
+    },
+    "capture_rate": 0.864,
+    "correct_rate": 0.864
+  },
+  "kickoff_status": {
+    "partners": {
+      "pending": 0,
+      "sent": 10,
+      "done": 240
+    },
+    "nudges_due": 0,
+    "variants": {
+      "A": {
+        "sent": 86,
+        "replied": 20,
+        "calls": 1,
+        "reply_rate": 0.233
+      },
+      "B": {
+        "sent": 85,
+        "replied": 16,
+        "calls": 3,
+        "reply_rate": 0.188
+      },
+      "C": {
+        "sent": 79,
+        "replied": 22,
+        "calls": 4,
+        "reply_rate": 0.278
+      }
+    }
+  },
+  "personas": {
+    "engaged": 9,
+    "has_deal": 5,
+    "identity": 5,
+    "later": 9,
+    "nudge": 5,
+    "silent": 189,
+    "stop": 10,
+    "warm": 18
+  },
+  "sample_partner": {
+    "name": "Sofia Long",
+    "contact_id": "c_05c428902323",
+    "persona": "engaged",
+    "before": "---\ntype: partner\nghl_contact_id: c_05c428902323\ntier: Free\nplan: Free partner\nniche: business coach\njoined: 2023-10-03\ntenure_months: 36\nlifecycle: \"\"\nsource: referral\ndeals: 4\nlast_deal: 2024-03-01\nlast_reply: 2024-04-30\npreferred_channel: \"\"\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 40\nkickoff: kickoff-pending\nkickoff_variant: \"\"\nnext_step: \"Ask: What are you working toward this year?\"\nupdated: 2026-10-05\n---\n\n# Sofia Long\n\n**Tier** [[Tiers/Free|Free]] \u00b7 **Does** [[Niches/Business coach|Business coach]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/Referral|Referral]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]]\n\n## Profile\nA business coach on the Free tier, partner since October 2023. Has sent 4 deals, the last in March 2024. Works mostly with agency owners; their clients usually need equipment financing.\n\nProfile 40% complete. Next question to ask: _What are you working toward this year?_\n\n## What they want\n_Nothing yet._\n\n## How they work\n- **Tier:** Free _(Zoho, 2026-10-05)_\n- **What they do:** business coach _(Zoho, 2026-10-05)_\n- **Clients:** agency owners _(Zoho notes, 2024-03-01)_\n- **What their clients need:** equipment financing _(Zoho notes, 2024-03-01)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n**From their record:**\n- 2024-03-01 Zoho deal: Equipment financing for a client (funded)\n- 2023-10-05 Zoho note: Onboarding call. Business coach. Said most of my clients are agency owners.\n\n## Facts\n- Clients: agency owners _(Zoho notes, 2024-03-01)_ %%client_types zoho_history ZX-20196%%\n- What their clients need: equipment financing _(Zoho notes, 2024-03-01)_ %%deal_types zoho_history ZX-20196%%\n- Tier: Free _(Zoho, 2026-10-05)_ %%tier zoho ZX-20196%%\n- What they do: business coach _(Zoho, 2026-10-05)_ %%niche zoho ZX-20196%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 2 history items, 4 facts, 40% complete\n",
+    "after": "---\ntype: partner\nghl_contact_id: c_05c428902323\ntier: Free\nplan: Free partner\nniche: business coach\njoined: 2023-10-03\ntenure_months: 36\nlifecycle: reactivated\nsource: referral\ndeals: 4\nlast_deal: 2024-03-01\nlast_reply: 2026-10-09\npreferred_channel: email\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 90\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16)\"\nupdated: 2026-10-09\n---\n\n# Sofia Long\n\n**Tier** [[Tiers/Free|Free]] \u00b7 **Does** [[Niches/Business coach|Business coach]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/Referral|Referral]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]]\n\n## Profile\nA business coach on the Free tier, partner since October 2023. Has sent 4 deals, the last in March 2024. Works mostly with agency owners; their clients usually need equipment financing (around $50k). Working toward: close two deals a month by the end of the year. Best reached by email, evenings. 1 open loop.\n\nProfile 90% complete. Next question to ask: _What would make this partnership worth your time?_\n\n## What they want\n- **Goals:** close two deals a month by the end of the year _(call, 2026-10-09)_\n- **What's gotten in the way:** I lost the submission link _(call, 2026-10-09)_\n\n## How they work\n- **Tier:** Free _(Zoho, 2026-10-05)_\n- **What they do:** business coach _(Zoho, 2026-10-05)_\n- **Clients:** agency owners _(Zoho notes, 2024-03-01)_\n- **What their clients need:** equipment financing _(Zoho notes, 2024-03-01)_\n- **Best way to reach them:** email _(text reply, 2026-10-07)_\n- **Typical deal size:** around $50k _(call, 2026-10-09)_\n- **Where they work:** California _(call, 2026-10-09)_\n- **Where they work:** Florida _(call, 2026-10-09)_\n- **Best time to reach them:** evenings _(call, 2026-10-09)_\n\n## Open loops\n- [ ] We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16) _(since 2026-10-09)_\n\n## Revenue plan\n**Who they serve:** agency owners (California, Florida)\n**What their clients need:** equipment financing, around $50k\n**7FF programs to lead with:** Business Term Loan, Short-Term Business Loan\n**Their goal:** close two deals a month by the end of the year\n**Next 30 days:**\n1. We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16)\n2. Next check-in, ask: \"What would make this partnership worth your time?\"\n**How we'll know it's working:** deals submitted by Sofia, counted by month.\n\n## Background\n**From their record:**\n- 2024-03-01 Zoho deal: Equipment financing for a client (funded)\n- 2023-10-05 Zoho note: Onboarding call. Business coach. Said most of my clients are agency owners.\n\n## Facts\n- Clients: agency owners _(Zoho notes, 2024-03-01)_ %%client_types zoho_history ZX-20196%%\n- What their clients need: equipment financing _(Zoho notes, 2024-03-01)_ %%deal_types zoho_history ZX-20196%%\n- Tier: Free _(Zoho, 2026-10-05)_ %%tier zoho ZX-20196%%\n- What they do: business coach _(Zoho, 2026-10-05)_ %%niche zoho ZX-20196%%\n- Best way to reach them: email _(text reply, 2026-10-07)_ %%channel reply m_eb4d3ae4ac62%%\n- Typical deal size: around $50k _(call, 2026-10-09)_ %%deal_size call ghl_phone:m_91b7ac5bd431%%\n- Goals: close two deals a month by the end of the year _(call, 2026-10-09)_ %%goals call ghl_phone:m_91b7ac5bd431%%\n- What's gotten in the way: I lost the submission link _(call, 2026-10-09)_ %%blockers call ghl_phone:m_91b7ac5bd431%%\n- Best time to reach them: evenings _(call, 2026-10-09)_ %%best_time call ghl_phone:m_91b7ac5bd431%%\n- Where they work: California _(call, 2026-10-09)_ %%regions call ghl_phone:m_91b7ac5bd431%%\n- Where they work: Florida _(call, 2026-10-09)_ %%regions call ghl_phone:m_91b7ac5bd431%%\n- Open loop: We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16) _(call, 2026-10-09)_ %%open_loop call ghl_phone:m_91b7ac5bd431%%\n\n## Calls\n- 2026-10-09 [[Calls/2026-10-09 Sofia Long|Phone call]] \u2014 19-minute call with Sofia. Learned: best time, blockers, deal size, deal types, goals, regions. 1 follow-up agreed.\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 2 history items, 4 facts, 40% complete\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (kickoff): Hey Sofia! It's Justin at 7 Figures Funding. You've sent us 4 deals since 2023, and I'm your new partner manager. I want to get to know your\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): Hi Justin, thanks for reaching out. They always seem to need new equipment. Email me, I'm in meetings all day.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): Perfect. Grab any time that works for you here: https://example.com/book/justin\n- 2026-10-09 [[Daily/2026-10-09]] \u2014 follow-up set for [[Daily/2026-10-16]] \u2014 From the call on 2026-10-09: send Sofia the submission link and a one-page program summary by Friday\n- 2026-10-09 [[Daily/2026-10-09]] \u2014 call: [[Calls/2026-10-09 Sofia Long|Phone call]]\n",
+    "conversation": [
+      {
+        "cid": "c_05c428902323",
+        "day": "2026-10-07",
+        "in": "Hi Justin, thanks for reaching out. They always seem to need new equipment. Email me, I'm in meetings all day.",
+        "intent": "general_reply",
+        "facts": [
+          {
+            "slot": "channel",
+            "value": "email"
+          }
+        ],
+        "move": "book",
+        "out": "Perfect. Grab any time that works for you here: https://example.com/book/justin"
+      }
+    ]
+  },
+  "samples": {
+    "kickoffs": {
+      "A/deals": {
+        "variant": "A",
+        "hook": "deals",
+        "body": "Hey Tanya, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week?",
+        "segments": 2
+      },
+      "C/deals": {
+        "variant": "C",
+        "hook": "deals",
+        "body": "Hey Keisha! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2023, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work?",
+        "segments": 2
+      },
+      "B/deals": {
+        "variant": "B",
+        "hook": "deals",
+        "body": "Hi Tiffany, Justin here from 7 Figures Funding. You've sent us 11 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week?",
+        "segments": 2
+      },
+      "A/tier": {
+        "variant": "A",
+        "hook": "tier",
+        "body": "Hey Jamal, it's Justin with 7 Figures Funding. You're one of our CEO partners, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week?",
+        "segments": 2
+      },
+      "C/tier": {
+        "variant": "C",
+        "hook": "tier",
+        "body": "Hey Priya! It's Justin at 7 Figures Funding. You're one of our Executive partners, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work?",
+        "segments": 2
+      },
+      "B/tier": {
+        "variant": "B",
+        "hook": "tier",
+        "body": "Hi Nadia, Justin here from 7 Figures Funding. You're one of our Executive partners, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week?",
+        "segments": 2
+      },
+      "C/tenure": {
+        "variant": "C",
+        "hook": "tenure",
+        "body": "Hey Andre! It's Justin at 7 Figures Funding. You've been a partner with us since 2025, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work?",
+        "segments": 2
+      },
+      "B/tenure": {
+        "variant": "B",
+        "hook": "tenure",
+        "body": "Hi Jenna, Justin here from 7 Figures Funding. You've been a partner with us since 2025, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week?",
+        "segments": 2
+      },
+      "A/tenure": {
+        "variant": "A",
+        "hook": "tenure",
+        "body": "Hey Victor, it's Justin with 7 Figures Funding. You've been a partner with us since 2025, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week?",
+        "segments": 2
+      }
+    },
+    "nudge": "Hey Tiffany, Justin again from 7 Figures Funding. No rush at all, I just didn't want my last text to get buried. Is there a better time to connect?",
+    "review_file": "---\ntype: review\ndate: 2026-10-05\naction_id: act_4f94ec6e01fe\nmessages: 40\n---\n\n# Review: kickoff wave 1\n\n40 kickoff wave 1 (40 real, 0 simulated) \u00b7 80 SMS segments\n\nApprove all with `approve act_4f94ec6e01fe`, or hold some back with `approve act_4f94ec6e01fe except 4, 17` (the numbers below).\n\n### 1. [[Partners/Tanya Nguyen (5e8339)|Tanya Nguyen]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Tanya, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 2. [[Partners/Omar Foster (858e21)|Omar Foster]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Omar, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 3. [[Partners/Tiffany Perry (0ca7f4)|Tiffany Perry]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Tiffany, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 4. [[Partners/Keisha Coleman (5f2d02)|Keisha Coleman]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Keisha! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2023, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 5. [[Partners/Keisha Foster (9d17a3)|Keisha Foster]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Keisha! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2023, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 6. [[Partners/Tiffany Myers (069f34)|Tiffany Myers]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Tiffany, Justin here from 7 Figures Funding. You've sent us 11 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 7. [[Partners/Brittany Foster (1903a6)|Brittany Foster]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Brittany, Justin here from 7 Figures Funding. You've sent us 11 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 8. [[Partners/Grant Perry (7f6965)|Grant Perry]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Grant! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 9. [[Partners/Jamal Russell (0a8c22)|Jamal Russell]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Jamal, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 10. [[Partners/Brandon Hughes (2c2e0e)|Brandon Hughes]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Brandon, Justin here from 7 Figures Funding. You've sent us 11 deals since 2023, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 11. [[Partners/Luis Ward (b701be)|Luis Ward]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Luis, Justin here from 7 Figures Funding. You've sent us 7 deals since 2025, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 12. [[Partners/Brittany Foster (30eb64)|Brittany Foster]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Brittany! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2025, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 13. [[Partners/Lena Ross (8a1c66)|Lena Ross]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Lena, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 14. [[Partners/Camila Myers (84aa14)|Camila Myers]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Camila, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 15. [[Partners/Priya Jenkins (f5459c)|Priya Jenkins]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Priya, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 16. [[Partners/Kevin Long (601b0e)|Kevin Long]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Kevin, Justin here from 7 Figures Funding. You've sent us 7 deals since 2023, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 17. [[Partners/Priya Vance (bdb1cb)|Priya Vance]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Priya! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 18. [[Partners/Luis Nguyen (6875f2)|Luis Nguyen]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Luis, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 19. [[Partners/Jamal Ward (7fba50)|Jamal Ward]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Jamal, Justin here from 7 Figures Funding. You've sent us 7 deals since 2024, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 20. [[Partners/Grant Brooks (d3c23c)|Grant Brooks]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Grant, Justin here from 7 Figures Funding. You've sent us 7 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 21. [[Partners/Gina Ward (2ad0b2)|Gina Ward]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Gina, Justin here from 7 Figures Funding. You've sent us 7 deals since 2024, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 22. [[Partners/Omar Diaz (74750b)|Omar Diaz]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Omar, Justin here from 7 Figures Funding. You've sent us 7 deals since 2023, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 23. [[Partners/Yolanda Nguyen (9e3d28)|Yolanda Nguyen]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Yolanda, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 24. [[Partners/Malik Nguyen (397433)|Malik Nguyen]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Malik, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 25. [[Partners/Marcus Perry (e8e2e7)|Marcus Perry]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Marcus! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2021, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 26. [[Partners/Marcus Myers (8b4f9d)|Marcus Myers]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Marcus, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 27. [[Partners/Grant Jenkins (e86892)|Grant Jenkins]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Grant, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2025, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 28. [[Partners/Brandon Hughes (d379f4)|Brandon Hughes]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Brandon, Justin here from 7 Figures Funding. You've sent us 7 deals since 2024, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 29. [[Partners/Monique Long (66b632)|Monique Long]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Monique, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 30. [[Partners/Grant Foster (f3975e)|Grant Foster]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Grant, it's Justin with 7 Figures Funding. You've sent us 7 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 31. [[Partners/Terrence Hughes (161688)|Terrence Hughes]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Terrence! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 32. [[Partners/Tiffany Bennett (4c579f)|Tiffany Bennett]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Tiffany! It's Justin at 7 Figures Funding. You've sent us 4 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 33. [[Partners/Priya Ortiz (871373)|Priya Ortiz]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Priya, Justin here from 7 Figures Funding. You've sent us 4 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 34. [[Partners/Camila Perry (691085)|Camila Perry]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Camila, it's Justin with 7 Figures Funding. You've sent us 4 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 35. [[Partners/Monique Coleman (8e071f)|Monique Coleman]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant B_\n\n> Hi Monique, Justin here from 7 Figures Funding. You've sent us 4 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see where we can help. Got time for a quick call this week? Reply STOP to opt out.\n\n### 36. [[Partners/Luis Sanders (024d52)|Luis Sanders]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Luis, it's Justin with 7 Figures Funding. You've sent us 4 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 37. [[Partners/Yolanda Jenkins (ae006a)|Yolanda Jenkins]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Yolanda! It's Justin at 7 Figures Funding. You've sent us 4 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n\n### 38. [[Partners/Heather Hughes (b2ee35)|Heather Hughes]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Heather, it's Justin with 7 Figures Funding. You've sent us 4 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 39. [[Partners/Ethan Vance (961ff6)|Ethan Vance]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant A_\n\n> Hey Ethan, it's Justin with 7 Figures Funding. You've sent us 4 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help you close more deals. Open to a quick call this week? Reply STOP to opt out.\n\n### 40. [[Partners/Yolanda Vance (99af0c)|Yolanda Vance]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Yolanda! It's Justin at 7 Figures Funding. You've sent us 4 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n",
+    "approval_card": "*Approval needed* \u2014 40 kickoff wave 1 (40 real, 0 simulated) \u00b7 80 SMS segments\naction `act_4f94ec6e01fe` \u00b7 digest `7e8de4f74b548683` \u00b7 demo mode: False\nEvery message in full: `Reviews/2026-10-05 kickoff wave 1 (act_4f94ec6e01fe).md` (40 messages; read them there)\n1. Tanya Nguyen (sms, mock): Hey Tanya, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2024, and I'm now your partner manager. I'd love to learn what you're working toward and how we can hel\n2. Omar Foster (sms, mock): Hey Omar, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2022, and I'm now your partner manager. I'd love to learn what you're working toward and how we can help\n3. Tiffany Perry (sms, mock): Hey Tiffany, it's Justin with 7 Figures Funding. You've sent us 11 deals since 2023, and I'm now your partner manager. I'd love to learn what you're working toward and how we can h\n4. Keisha Coleman (sms, mock): Hey Keisha! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2023, and I'm your new partner manager. I want to get to know your business and how we can help you clos\n5. Keisha Foster (sms, mock): Hey Keisha! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2023, and I'm your new partner manager. I want to get to know your business and how we can help you clos\n6. Tiffany Myers (sms, mock): Hi Tiffany, Justin here from 7 Figures Funding. You've sent us 11 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see \n7. Brittany Foster (sms, mock): Hi Brittany, Justin here from 7 Figures Funding. You've sent us 11 deals since 2022, and I just became your partner manager. I'm reaching out personally to learn your goals and see\n8. Grant Perry (sms, mock): Hey Grant! It's Justin at 7 Figures Funding. You've sent us 11 deals since 2024, and I'm your new partner manager. I want to get to know your business and how we can help you close\nReply *approve act_4f94ec6e01fe* to send, *approve act_4f94ec6e01fe except 4, 17* to hold some back, or tell me what to change.",
+    "call_note": "---\ntype: call\ndate: 2026-10-09\npartner: \"[[Partners/Sofia Long (902323)|Sofia Long]]\"\nghl_contact_id: c_05c428902323\nsource: ghl_phone\nexternal_id: m_91b7ac5bd431\nduration_min: 19.0\nrecording: \"mock:recording/m_91b7ac5bd431\"\nparticipants: \"Justin, Sofia Long\"\n---\n\n# Call with Sofia Long (2026-10-09)\n\n## Summary\n19-minute call with Sofia. Learned: best time, blockers, deal size, deal types, goals, regions. 1 follow-up agreed.\n\n## What we learned\n- **What their clients need:** equipment financing\n- **Typical deal size:** around $50k\n- **Goals:** close two deals a month by the end of the year\n- **What's gotten in the way:** I lost the submission link\n- **Best time to reach them:** evenings\n- **Where they work:** California\n- **Where they work:** Florida\n\n## Commitments\n- [ ] We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16)\n\n## Transcript\n**Justin:** Hey Sofia, thanks for making time. Quick heads up, I record my calls so I don't lose track of what we talk about. That okay?\n**Sofia Long:** Totally fine.\n**Justin:** Tell me about your clients and what they usually need.\n**Sofia Long:** These days it's a lot of agency owners. They always seem to need new equipment. Anywhere from $25k to $100k, usually about $50k.\n**Justin:** Where are most of them?\n**Sofia Long:** Most of them are in Florida and California.\n**Justin:** What's gotten in the way of sending deals?\n**Sofia Long:** Honestly I haven't sent anything because I lost the submission link. Honestly I'd love to close two deals a month by the end of the year.\n**Justin:** What would make this worth your time?\n**Sofia Long:** Honestly a simple page I can send my clients to would make a big difference.\n**Justin:** Done. I'll send you the submission link and a one-page program summary by Friday, and I'll check in next week.\n**Sofia Long:** Evenings are best to reach me.\n",
+    "brief": "- **Partner:** Sofia Long, business coach. Came from referral. Joined 2023-10-03. Tier: Free\n- **Lifecycle:** reactivated. Last reply 2026-10-07, last deal 2024-03-01, deals sent 4\n- **Who they are:** A business coach on the Free tier, partner since October 2023. Has sent 4 deals, the last in March 2024. Works mostly with agency owners; their clients usually need equipment financing. Best reached by email.\n- **What they told us last:** Hi Justin, thanks for reaching out. They always seem to need new equipment. Email me, I'm in meetings all day.\n- **What they want:** ask\n- **Open loops / tasks:** none\n- **Why this call:** first call since the kickoff\n- **Recommended outcome:** a first deal or a date for one, and the next check-in on the calendar\n- **Programs that fit their clients:** Business Term Loan, Short-Term Business Loan\n- **Ask if it doesn't come up:** What are you working toward this year?\n- **Do NOT promise:** approvals, rates, timelines, commission changes, or payout dates\n- **Recording:** say at the start that the call is recorded so you remember what you talked about",
+    "plan": "**Who they serve:** agency owners (California, Florida)\n**What their clients need:** equipment financing, around $50k\n**7FF programs to lead with:** Business Term Loan, Short-Term Business Loan\n**Their goal:** close two deals a month by the end of the year\n**Next 30 days:**\n1. We: send Sofia the submission link and a one-page program summary by Friday (by 2026-10-16)\n2. Next check-in, ask: \"What would make this partnership worth your time?\"\n**How we'll know it's working:** deals submitted by Sofia, counted by month.",
+    "identity": {
+      "text": "Am I talking to a bot?",
+      "alert": "Yolanda Vance asked if they're texting with a real person. Please reply to them yourself; I won't draft anything to them until your task is done.",
+      "actions": [
+        "last_reply_date=today",
+        "lifecycle \u2192 aff:reactivated",
+        "kickoff conversation started",
+        "personal reply task for the manager"
+      ],
+      "draft": "none (manager replies)",
+      "manager_replied": "2026-10-06"
+    },
+    "stop": [
+      "UNSUBSCRIBE",
+      "please stop texting me",
+      "Remove me",
+      "Remove me",
+      "UNSUBSCRIBE",
+      "STOP",
+      "STOP",
+      "STOP",
+      "Remove me",
+      "STOP"
+    ]
+  },
+  "timeline": [
+    {
+      "day": "2026-10-05",
+      "kickoffs": 39,
+      "avg_completeness": 25.0,
+      "facts": 624,
+      "calls": 0,
+      "plans": 0,
+      "buckets": {
+        "0-29": 166,
+        "30-49": 84
+      },
+      "talking": 1,
+      "avg_completeness_talking": 20.0
+    },
+    {
+      "day": "2026-10-06",
+      "kickoffs": 40,
+      "replies_sent": 5,
+      "avg_completeness": 25.1,
+      "facts": 632,
+      "calls": 0,
+      "plans": 0,
+      "buckets": {
+        "0-29": 164,
+        "30-49": 85,
+        "50-79": 1
+      },
+      "talking": 8,
+      "avg_completeness_talking": 27.5
+    },
+    {
+      "day": "2026-10-07",
+      "kickoffs": 40,
+      "replies_sent": 4,
+      "avg_completeness": 25.3,
+      "facts": 637,
+      "calls": 0,
+      "plans": 0,
+      "buckets": {
+        "0-29": 163,
+        "30-49": 85,
+        "50-79": 2
+      },
+      "talking": 10,
+      "avg_completeness_talking": 32.0
+    },
+    {
+      "day": "2026-10-08",
+      "kickoffs": 40,
+      "replies_sent": 8,
+      "avg_completeness": 25.6,
+      "facts": 646,
+      "calls": 0,
+      "plans": 0,
+      "buckets": {
+        "0-29": 160,
+        "30-49": 86,
+        "50-79": 4
+      },
+      "talking": 16,
+      "avg_completeness_talking": 32.5
+    },
+    {
+      "day": "2026-10-09",
+      "kickoffs": 40,
+      "replies_sent": 12,
+      "avg_completeness": 26.3,
+      "facts": 671,
+      "calls": 1,
+      "plans": 1,
+      "buckets": {
+        "0-29": 155,
+        "30-49": 88,
+        "50-79": 6,
+        "80-100": 1
+      },
+      "talking": 24,
+      "avg_completeness_talking": 37.9
+    },
+    {
+      "day": "2026-10-10",
+      "kickoffs": 40,
+      "nudges": 27,
+      "replies_sent": 9,
+      "avg_completeness": 26.6,
+      "facts": 683,
+      "calls": 2,
+      "plans": 2,
+      "buckets": {
+        "0-29": 155,
+        "30-49": 86,
+        "50-79": 7,
+        "80-100": 2
+      },
+      "talking": 29,
+      "avg_completeness_talking": 38.6
+    },
+    {
+      "day": "2026-10-11",
+      "kickoffs": 11,
+      "nudges": 36,
+      "replies_sent": 12,
+      "avg_completeness": 26.9,
+      "facts": 689,
+      "calls": 2,
+      "plans": 2,
+      "buckets": {
+        "0-29": 150,
+        "30-49": 91,
+        "50-79": 7,
+        "80-100": 2
+      },
+      "talking": 36,
+      "avg_completeness_talking": 37.8
+    },
+    {
+      "day": "2026-10-12",
+      "nudges": 32,
+      "replies_sent": 11,
+      "avg_completeness": 27.2,
+      "facts": 702,
+      "calls": 3,
+      "plans": 3,
+      "buckets": {
+        "0-29": 148,
+        "30-49": 91,
+        "50-79": 9,
+        "80-100": 2
+      },
+      "talking": 41,
+      "avg_completeness_talking": 38.3
+    },
+    {
+      "day": "2026-10-13",
+      "nudges": 34,
+      "replies_sent": 7,
+      "avg_completeness": 27.6,
+      "facts": 716,
+      "calls": 4,
+      "plans": 4,
+      "buckets": {
+        "0-29": 147,
+        "30-49": 91,
+        "50-79": 9,
+        "80-100": 3
+      },
+      "talking": 42,
+      "avg_completeness_talking": 40.5
+    },
+    {
+      "day": "2026-10-14",
+      "nudges": 31,
+      "replies_sent": 4,
+      "avg_completeness": 27.7,
+      "facts": 722,
+      "calls": 4,
+      "plans": 4,
+      "buckets": {
+        "0-29": 147,
+        "30-49": 90,
+        "50-79": 9,
+        "80-100": 4
+      },
+      "talking": 43,
+      "avg_completeness_talking": 40.9
+    },
+    {
+      "day": "2026-10-15",
+      "nudges": 36,
+      "replies_sent": 3,
+      "avg_completeness": 27.9,
+      "facts": 728,
+      "calls": 5,
+      "plans": 5,
+      "buckets": {
+        "0-29": 147,
+        "30-49": 89,
+        "50-79": 9,
+        "80-100": 5
+      },
+      "talking": 45,
+      "avg_completeness_talking": 41.3
+    },
+    {
+      "day": "2026-10-16",
+      "nudges": 9,
+      "replies_sent": 3,
+      "avg_completeness": 28.4,
+      "facts": 748,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 145,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 6
+      },
+      "talking": 47,
+      "avg_completeness_talking": 42.8
+    },
+    {
+      "day": "2026-10-17",
+      "replies_sent": 3,
+      "avg_completeness": 28.4,
+      "facts": 750,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 90,
+        "50-79": 10,
+        "80-100": 6
+      },
+      "talking": 48,
+      "avg_completeness_talking": 42.7
+    },
+    {
+      "day": "2026-10-18",
+      "replies_sent": 1,
+      "avg_completeness": 28.5,
+      "facts": 751,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 90,
+        "50-79": 10,
+        "80-100": 6
+      },
+      "talking": 48,
+      "avg_completeness_talking": 42.9
+    },
+    {
+      "day": "2026-10-19",
+      "replies_sent": 1,
+      "avg_completeness": 28.5,
+      "facts": 752,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 11,
+        "80-100": 6
+      },
+      "talking": 48,
+      "avg_completeness_talking": 43.1
+    },
+    {
+      "day": "2026-10-20",
+      "replies_sent": 1,
+      "avg_completeness": 28.6,
+      "facts": 755,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 11,
+        "80-100": 6
+      },
+      "talking": 48,
+      "avg_completeness_talking": 43.3
+    },
+    {
+      "day": "2026-10-21",
+      "replies_sent": 1,
+      "avg_completeness": 28.6,
+      "facts": 754,
+      "calls": 7,
+      "plans": 7,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 11,
+        "80-100": 6
+      },
+      "talking": 48,
+      "avg_completeness_talking": 43.3
+    },
+    {
+      "day": "2026-10-22",
+      "avg_completeness": 28.7,
+      "facts": 762,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-23",
+      "avg_completeness": 28.7,
+      "facts": 762,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-24",
+      "avg_completeness": 28.7,
+      "facts": 762,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-25",
+      "avg_completeness": 28.7,
+      "facts": 762,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-26",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-27",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-28",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-29",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-30",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-10-31",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-11-01",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-11-02",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    },
+    {
+      "day": "2026-11-03",
+      "avg_completeness": 28.7,
+      "facts": 761,
+      "calls": 8,
+      "plans": 8,
+      "buckets": {
+        "0-29": 144,
+        "30-49": 89,
+        "50-79": 10,
+        "80-100": 7
+      },
+      "talking": 48,
+      "avg_completeness_talking": 44.2
+    }
+  ],
+  "assumptions": {
+    "personas (share of partners)": "engaged 6%, warm 8%, nudge 5%, later 4%, has_deal 2%, silent 70%, stop 3%, identity 2%",
+    "replies": "written from each partner's hidden truth; some phrasings are ones the keyword rules miss",
+    "drafting": "framework templates and keyword rules (no model); the live agent drafts with the model",
+    "manager": "approves every batch (simulated); holds one kickoff back in wave 1 to edit it",
+    "calls": "every booked call happens 1-3 days later; odd calls by phone, even calls by video recorder",
+    "variants": "a synthetic partner's reply does not depend on the kickoff wording, so the variant table shows the tracking works, not which copy wins; real replies decide that"
+  }
+}

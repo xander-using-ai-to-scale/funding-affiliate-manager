@@ -5,21 +5,21 @@
       "wave": "Pilot",
       "partners": 250,
       "ai_usd": 0.18,
-      "sms_usd": 5.47,
+      "sms_usd": 8.46,
       "expected_replies": 30
     },
     {
       "wave": "Wave 2",
       "partners": 2500,
       "ai_usd": 1.85,
-      "sms_usd": 54.7,
+      "sms_usd": 84.62,
       "expected_replies": 300
     },
     {
       "wave": "Full base",
       "partners": 10200,
       "ai_usd": 7.53,
-      "sms_usd": 223.17,
+      "sms_usd": 345.27,
       "expected_replies": 1224
     }
   ],
@@ -63,8 +63,18 @@
     },
     {
       "part": "Zoho to GoHighLevel partner import (read-only)",
-      "status": "To build",
-      "does": "Copies partner name, tier, contact details and deal history into GoHighLevel. Nothing is written back to Zoho, and partners with payroll integrations stay where they are."
+      "status": "Built",
+      "does": "Copies partner name, tier, contact details and deal history into GoHighLevel and builds each partner's profile. Nothing is written back to Zoho, and partners with payroll integrations stay where they are. Tested on synthetic records; runs on 7FF's once read-only access is granted."
+    },
+    {
+      "part": "Relationship graph",
+      "status": "Built",
+      "does": "A profile for every partner: an Obsidian note linked to their tier, niche, manager and the products their clients need, plus a searchable index. Every reply and recorded call adds to it, and every message is drafted from it."
+    },
+    {
+      "part": "Call transcripts (phone and video)",
+      "status": "Built",
+      "does": "Reads GoHighLevel's call transcripts and any recorder's export (Read.ai, Fathom or others) dropped in the call inbox. Each call adds facts to the profile and turns promises into tasks. Needs call transcription switched on in GoHighLevel."
     },
     {
       "part": "Jev ingestion, checking and classifying",
@@ -217,6 +227,7 @@
         "ongoing_inbound": 2,
         "seg_out": 1,
         "seg_in": 1,
+        "kick_seg": 2,
         "sms_out_per_segment": 0.01047,
         "sms_in_per_segment": 0.00747
       },
@@ -255,9 +266,14 @@
         "ai_usd": 3.47,
         "sms_lines": [
           {
-            "item": "Outbound texts (kickoffs + replies)",
-            "usd": 147.1114,
-            "volume": 14051
+            "item": "Kickoff texts (up to 2 segments each)",
+            "usd": 271.173,
+            "volume": 12950
+          },
+          {
+            "item": "Conversation replies",
+            "usd": 11.5249,
+            "volume": 1101
           },
           {
             "item": "Inbound texts",
@@ -270,8 +286,8 @@
             "volume": 1
           }
         ],
-        "sms_usd": 228.69,
-        "total_usd": 232.16,
+        "sms_usd": 364.28,
+        "total_usd": 367.75,
         "ai_per_1000_kickoffs_usd": 0.213,
         "ai_per_conversation_usd": 0.00059,
         "ai_per_reengaged_partner_usd": 0.0054
@@ -328,6 +344,80 @@
         ],
         "sms_usd": 307.76,
         "total_usd": 319.65
+      },
+      "graph": {
+        "assumptions": {
+          "history_share": 0.2,
+          "profile_in": 800,
+          "profile_out": 150,
+          "extract_in": 400,
+          "extract_out": 100,
+          "context_in": 200,
+          "call_rate": 0.1,
+          "call_in": 5000,
+          "call_out": 600,
+          "plan_in": 1200,
+          "plan_out": 400,
+          "monthly_calls": 20
+        },
+        "calls": 65,
+        "reactivation": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: build a profile from each record with real history",
+              "usd": 0.4066,
+              "volume": 2590
+            },
+            {
+              "item": "Luna Pro: the partner's profile in every kickoff and reply prompt",
+              "usd": 0.288,
+              "volume": 14051
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 0.1178,
+              "volume": 1295
+            },
+            {
+              "item": "Luna Pro: read each recorded call (facts, commitments)",
+              "usd": 0.0526,
+              "volume": 65
+            },
+            {
+              "item": "Luna Pro: draft a revenue plan after each call",
+              "usd": 0.0209,
+              "volume": 65
+            }
+          ],
+          "ai_usd": 0.89,
+          "with_base_ai_usd": 4.35
+        },
+        "monthly": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: the partner's profile in every touch and reply prompt",
+              "usd": 0.5602,
+              "volume": 27326
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 0.142,
+              "volume": 1560
+            },
+            {
+              "item": "Luna Pro: read each recorded call",
+              "usd": 0.0163,
+              "volume": 20
+            },
+            {
+              "item": "Luna Pro: revenue plans",
+              "usd": 0.0065,
+              "volume": 20
+            }
+          ],
+          "ai_usd": 0.72,
+          "with_base_ai_usd": 12.62
+        }
       }
     },
     "base": {
@@ -352,6 +442,7 @@
         "ongoing_inbound": 3,
         "seg_out": 1,
         "seg_in": 1,
+        "kick_seg": 2,
         "sms_out_per_segment": 0.01197,
         "sms_in_per_segment": 0.01047
       },
@@ -390,9 +481,14 @@
         "ai_usd": 10.05,
         "sms_lines": [
           {
-            "item": "Outbound texts (kickoffs + replies)",
-            "usd": 218.2562,
-            "volume": 18234
+            "item": "Kickoff texts (up to 2 segments each)",
+            "usd": 310.023,
+            "volume": 12950
+          },
+          {
+            "item": "Conversation replies",
+            "usd": 63.2447,
+            "volume": 5284
           },
           {
             "item": "Inbound texts",
@@ -405,8 +501,8 @@
             "volume": 1
           }
         ],
-        "sms_usd": 355.24,
-        "total_usd": 365.29,
+        "sms_usd": 510.26,
+        "total_usd": 520.3,
         "ai_per_1000_kickoffs_usd": 0.463,
         "ai_per_conversation_usd": 0.00229,
         "ai_per_reengaged_partner_usd": 0.0065
@@ -463,6 +559,80 @@
         ],
         "sms_usd": 417.84,
         "total_usd": 453.56
+      },
+      "graph": {
+        "assumptions": {
+          "history_share": 0.35,
+          "profile_in": 1500,
+          "profile_out": 300,
+          "extract_in": 600,
+          "extract_out": 150,
+          "context_in": 400,
+          "call_rate": 0.2,
+          "call_in": 8000,
+          "call_out": 1000,
+          "plan_in": 2000,
+          "plan_out": 600,
+          "monthly_calls": 60
+        },
+        "calls": 311,
+        "reactivation": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: build a profile from each record with real history",
+              "usd": 1.3767,
+              "volume": 4532
+            },
+            {
+              "item": "Luna Pro: the partner's profile in every kickoff and reply prompt",
+              "usd": 0.7476,
+              "volume": 18234
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 0.8485,
+              "volume": 6216
+            },
+            {
+              "item": "Luna Pro: read each recorded call (facts, commitments)",
+              "usd": 0.4103,
+              "volume": 311
+            },
+            {
+              "item": "Luna Pro: draft a revenue plan after each call",
+              "usd": 0.157,
+              "volume": 311
+            }
+          ],
+          "ai_usd": 3.54,
+          "with_base_ai_usd": 13.59
+        },
+        "monthly": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: the partner's profile in every touch and reply prompt",
+              "usd": 1.2291,
+              "volume": 29978
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 0.6388,
+              "volume": 4680
+            },
+            {
+              "item": "Luna Pro: read each recorded call",
+              "usd": 0.0792,
+              "volume": 60
+            },
+            {
+              "item": "Luna Pro: revenue plans",
+              "usd": 0.0303,
+              "volume": 60
+            }
+          ],
+          "ai_usd": 1.98,
+          "with_base_ai_usd": 37.7
+        }
       }
     },
     "high": {
@@ -487,6 +657,7 @@
         "ongoing_inbound": 5,
         "seg_out": 2,
         "seg_in": 1,
+        "kick_seg": 2,
         "sms_out_per_segment": 0.01247,
         "sms_in_per_segment": 0.01047
       },
@@ -525,9 +696,14 @@
         "ai_usd": 45.23,
         "sms_lines": [
           {
-            "item": "Outbound texts (kickoffs + replies)",
-            "usd": 872.0271,
-            "volume": 34965
+            "item": "Kickoff texts (up to 2 segments each)",
+            "usd": 322.973,
+            "volume": 12950
+          },
+          {
+            "item": "Conversation replies",
+            "usd": 549.0541,
+            "volume": 22015
           },
           {
             "item": "Inbound texts",
@@ -598,6 +774,80 @@
         ],
         "sms_usd": 1152.48,
         "total_usd": 1313.47
+      },
+      "graph": {
+        "assumptions": {
+          "history_share": 0.6,
+          "profile_in": 4000,
+          "profile_out": 800,
+          "extract_in": 1200,
+          "extract_out": 400,
+          "context_in": 1000,
+          "call_rate": 0.35,
+          "call_in": 15000,
+          "call_out": 2500,
+          "plan_in": 3500,
+          "plan_out": 1200,
+          "monthly_calls": 200
+        },
+        "calls": 1133,
+        "reactivation": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: build a profile from each record with real history",
+              "usd": 6.2937,
+              "volume": 7770
+            },
+            {
+              "item": "Luna Pro: the partner's profile in every kickoff and reply prompt",
+              "usd": 3.5839,
+              "volume": 34965
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 8.3657,
+              "volume": 25900
+            },
+            {
+              "item": "Luna Pro: read each recorded call (facts, commitments)",
+              "usd": 3.1586,
+              "volume": 1133
+            },
+            {
+              "item": "Luna Pro: draft a revenue plan after each call",
+              "usd": 1.0864,
+              "volume": 1133
+            }
+          ],
+          "ai_usd": 22.49,
+          "with_base_ai_usd": 67.72
+        },
+        "monthly": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: the partner's profile in every touch and reply prompt",
+              "usd": 4.0241,
+              "volume": 39260
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 5.0388,
+              "volume": 15600
+            },
+            {
+              "item": "Luna Pro: read each recorded call",
+              "usd": 0.5575,
+              "volume": 200
+            },
+            {
+              "item": "Luna Pro: revenue plans",
+              "usd": 0.1918,
+              "volume": 200
+            }
+          ],
+          "ai_usd": 9.81,
+          "with_base_ai_usd": 170.81
+        }
       }
     },
     "stress_10x_tokens": {
@@ -622,6 +872,7 @@
         "ongoing_inbound": 3,
         "seg_out": 1,
         "seg_in": 1,
+        "kick_seg": 2,
         "sms_out_per_segment": 0.01197,
         "sms_in_per_segment": 0.01047
       },
@@ -660,9 +911,14 @@
         "ai_usd": 100.48,
         "sms_lines": [
           {
-            "item": "Outbound texts (kickoffs + replies)",
-            "usd": 218.2562,
-            "volume": 18234
+            "item": "Kickoff texts (up to 2 segments each)",
+            "usd": 310.023,
+            "volume": 12950
+          },
+          {
+            "item": "Conversation replies",
+            "usd": 63.2447,
+            "volume": 5284
           },
           {
             "item": "Inbound texts",
@@ -675,8 +931,8 @@
             "volume": 1
           }
         ],
-        "sms_usd": 355.24,
-        "total_usd": 455.73,
+        "sms_usd": 510.26,
+        "total_usd": 610.74,
         "ai_per_1000_kickoffs_usd": 4.627,
         "ai_per_conversation_usd": 0.02294,
         "ai_per_reengaged_partner_usd": 0.0647
@@ -733,6 +989,80 @@
         ],
         "sms_usd": 417.84,
         "total_usd": 775.03
+      },
+      "graph": {
+        "assumptions": {
+          "history_share": 0.35,
+          "profile_in": 15000,
+          "profile_out": 3000,
+          "extract_in": 6000,
+          "extract_out": 1500,
+          "context_in": 4000,
+          "call_rate": 0.2,
+          "call_in": 80000,
+          "call_out": 10000,
+          "plan_in": 20000,
+          "plan_out": 6000,
+          "monthly_calls": 60
+        },
+        "calls": 311,
+        "reactivation": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: build a profile from each record with real history",
+              "usd": 13.7675,
+              "volume": 4532
+            },
+            {
+              "item": "Luna Pro: the partner's profile in every kickoff and reply prompt",
+              "usd": 7.4758,
+              "volume": 18234
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 8.4848,
+              "volume": 6216
+            },
+            {
+              "item": "Luna Pro: read each recorded call (facts, commitments)",
+              "usd": 4.1026,
+              "volume": 311
+            },
+            {
+              "item": "Luna Pro: draft a revenue plan after each call",
+              "usd": 1.5695,
+              "volume": 311
+            }
+          ],
+          "ai_usd": 35.4,
+          "with_base_ai_usd": 135.88
+        },
+        "monthly": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: the partner's profile in every touch and reply prompt",
+              "usd": 12.291,
+              "volume": 29978
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 6.3882,
+              "volume": 4680
+            },
+            {
+              "item": "Luna Pro: read each recorded call",
+              "usd": 0.792,
+              "volume": 60
+            },
+            {
+              "item": "Luna Pro: revenue plans",
+              "usd": 0.303,
+              "volume": 60
+            }
+          ],
+          "ai_usd": 19.77,
+          "with_base_ai_usd": 376.97
+        }
       }
     },
     "all_on_glm_fallback": {
@@ -757,6 +1087,7 @@
         "ongoing_inbound": 3,
         "seg_out": 1,
         "seg_in": 1,
+        "kick_seg": 2,
         "sms_out_per_segment": 0.01197,
         "sms_in_per_segment": 0.01047
       },
@@ -795,9 +1126,14 @@
         "ai_usd": 11.45,
         "sms_lines": [
           {
-            "item": "Outbound texts (kickoffs + replies)",
-            "usd": 218.2562,
-            "volume": 18234
+            "item": "Kickoff texts (up to 2 segments each)",
+            "usd": 310.023,
+            "volume": 12950
+          },
+          {
+            "item": "Conversation replies",
+            "usd": 63.2447,
+            "volume": 5284
           },
           {
             "item": "Inbound texts",
@@ -810,8 +1146,8 @@
             "volume": 1
           }
         ],
-        "sms_usd": 355.24,
-        "total_usd": 366.69,
+        "sms_usd": 510.26,
+        "total_usd": 521.71,
         "ai_per_1000_kickoffs_usd": 0.524,
         "ai_per_conversation_usd": 0.00268,
         "ai_per_reengaged_partner_usd": 0.0074
@@ -868,6 +1204,80 @@
         ],
         "sms_usd": 417.84,
         "total_usd": 464.85
+      },
+      "graph": {
+        "assumptions": {
+          "history_share": 0.35,
+          "profile_in": 1500,
+          "profile_out": 300,
+          "extract_in": 600,
+          "extract_out": 150,
+          "context_in": 400,
+          "call_rate": 0.2,
+          "call_in": 8000,
+          "call_out": 1000,
+          "plan_in": 2000,
+          "plan_out": 600,
+          "monthly_calls": 60
+        },
+        "calls": 311,
+        "reactivation": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: build a profile from each record with real history",
+              "usd": 1.6997,
+              "volume": 4532
+            },
+            {
+              "item": "Luna Pro: the partner's profile in every kickoff and reply prompt",
+              "usd": 1.094,
+              "volume": 18234
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 1.0256,
+              "volume": 6216
+            },
+            {
+              "item": "Luna Pro: read each recorded call (facts, commitments)",
+              "usd": 0.5284,
+              "volume": 311
+            },
+            {
+              "item": "Luna Pro: draft a revenue plan after each call",
+              "usd": 0.1865,
+              "volume": 311
+            }
+          ],
+          "ai_usd": 4.53,
+          "with_base_ai_usd": 15.98
+        },
+        "monthly": {
+          "ai_lines": [
+            {
+              "item": "Luna Pro: the partner's profile in every touch and reply prompt",
+              "usd": 1.7987,
+              "volume": 29978
+            },
+            {
+              "item": "Luna Pro: pull facts from every inbound reply",
+              "usd": 0.7722,
+              "volume": 4680
+            },
+            {
+              "item": "Luna Pro: read each recorded call",
+              "usd": 0.102,
+              "volume": 60
+            },
+            {
+              "item": "Luna Pro: revenue plans",
+              "usd": 0.036,
+              "volume": 60
+            }
+          ],
+          "ai_usd": 2.71,
+          "with_base_ai_usd": 49.72
+        }
       }
     }
   },
@@ -884,20 +1294,32 @@
     ],
     "stress_monthly_ai_usd": 357.19,
     "stress_reactivation_ai_usd": 100.48,
-    "reactivation_sms_usd": 355.24,
+    "reactivation_sms_usd": 510.26,
     "monthly_sms_usd": 417.84,
     "kickoff_batch_saving_usd": 2.81,
+    "graph_reactivation_ai_usd": 3.54,
+    "graph_monthly_ai_usd": 1.98,
+    "with_graph_reactivation_ai_usd": 13.59,
+    "with_graph_monthly_ai_usd": 37.7,
+    "graph_range_reactivation_ai_usd": [
+      0.89,
+      22.49
+    ],
+    "graph_range_monthly_ai_usd": [
+      0.72,
+      9.81
+    ],
     "multiples": {
       "2": {
         "reactivation_ai_usd": 20.1,
         "monthly_ai_usd": 71.44,
-        "reactivation_sms_usd": 710.48,
+        "reactivation_sms_usd": 1020.52,
         "monthly_sms_usd": 835.68
       },
       "5": {
         "reactivation_ai_usd": 50.25,
         "monthly_ai_usd": 178.6,
-        "reactivation_sms_usd": 1776.2,
+        "reactivation_sms_usd": 2551.3,
         "monthly_sms_usd": 2089.2
       }
     },
@@ -914,7 +1336,8 @@
     "5% of drafting falls back to GLM 5.3 Flash; the 'All on GLM' column prices 100%.",
     "The Hermes line ($21.01 of the $35.72 a month) prices the agent's own loop on Luna Pro, uncached.",
     "The starting budget is 2x the base projection for AI: room for longer conversations and more replies than expected. Texting is shown at its projection.",
-    "Texts are kept to one GSM-7 segment (1 segment each in the base case). One em dash or curly quote would switch a text to UCS-2 and bill 3 segments; the agent strips them before sending.",
+    "Kickoff texts run up to 2 GSM-7 segments, leaving room for one line from the partner's own record; every other text is kept to 1. One em dash or curly quote would switch a text to UCS-2 and bill more segments; the agent strips them before sending, and refuses a kickoff over 2 segments.",
+    "The relationship graph adds about $3.54 to the reactivation and $1.98 a month (profiles, reply facts, call reading, revenue plans). With it, AI comes to $13.59 and $37.70 a month, inside the starting budget.",
     "Texting: $0.01197 per outbound segment and $0.01047 per inbound, HighLevel base rate plus carrier fees.",
     "Every partner is assumed textable. Numbers without a working mobile or SMS consent only lower these costs.",
     "The monthly line keeps all partners on the two-week text cadence. Moving partners who never re-engage to email and the newsletter cuts the texting line sharply.",

@@ -159,7 +159,7 @@ def build(sim_dir: Path, out: Path, template: Path, proposal: Path) -> dict[str,
     daily = sorted((sim_dir / "vault" / "Daily").glob("*.md"))
     sample_day = daily[1] if len(daily) > 1 else (daily[0] if daily else None)
     vault_note = sample_day.read_text() if sample_day else ""
-    vault_note = re.sub(r"\[\[Affiliates/[^|\]]+\|([^\]]+)\]\]", r"\1", vault_note)
+    vault_note = re.sub(r"\[\[(?:Affiliates|Partners)/[^|\]]+\|([^\]]+)\]\]", r"\1", vault_note)
     docs = ROOT / "docs"
     cost = json.loads((docs / "cost-projection.json").read_text())
     agreement = docs / "proposal-and-agreement-7ff.md"
@@ -171,6 +171,8 @@ def build(sim_dir: Path, out: Path, template: Path, proposal: Path) -> dict[str,
     page = page.replace("/*__DATA__*/null", json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace("</", "<\\/"))
     page = page.replace("<!--__PROPOSAL__-->", proposal_body(proposal))
     page = page.replace("<!--__AGREEMENT__-->", agreement_html(agreement))
+    from build_relationship_example import part as relationship_part  # the "Relationship graph" tab
+    page = page.replace("<!--__RELATIONSHIP__-->", relationship_part())
     out.write_text(page)
     return {"out": str(out), "bytes": out.stat().st_size, "affiliates": len(rows),
             "events": sum(len(r["ev"]) for r in rows), "featured": data["featured"]}

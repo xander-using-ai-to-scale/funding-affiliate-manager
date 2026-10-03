@@ -19,7 +19,7 @@ import json
 import os
 import secrets
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Protocol
 from urllib import error, parse, request
@@ -205,6 +205,33 @@ class LiveGHL:
         messages = value.get("messages", {})
         return messages.get("messages", []) if isinstance(messages, dict) else messages
 
+    def mark_read(self, contact_id: str) -> None:
+        """Clear the unread count on the partner's conversations once a reply has been triaged."""
+        for conv in self.list_conversations(contact_id=contact_id, limit=5):
+            if conv.get("unreadCount"):
+                self._call("PUT", f"/conversations/{parse.quote(conv['id'])}",
+                           body={"locationId": self.location_id, "unreadCount": 0}, version=CONVERSATIONS_VERSION)
+
+    # calls (recorded and transcribed by GoHighLevel's phone system)
+    def list_call_messages(self, contact_id: str = "", limit: int = 50) -> list[dict[str, Any]]:
+        calls = []
+        for conv in self.list_conversations(contact_id=contact_id, limit=min(limit, 100)):
+            for m in self.list_messages(conv["id"], limit=50):
+                if "CALL" in str(m.get("messageType", "")).upper():
+                    calls.append({**m, "contactId": m.get("contactId") or conv.get("contactId", "")})
+        return calls[:limit]
+
+    def get_transcription(self, message_id: str) -> list[dict[str, Any]]:
+        """Sentences with mediaChannel, startTime, endTime, transcript, confidence. Needs call transcription
+        switched on for the sub-account (a Twilio feature in GoHighLevel)."""
+        value = self._call("GET", f"/conversations/locations/{self.location_id}/messages/"
+                                  f"{parse.quote(message_id)}/transcription", version=CONVERSATIONS_VERSION)
+        return value.get("data") if isinstance(value.get("data"), list) else value.get("transcription", [])
+
+    def recording_ref(self, message_id: str) -> str:
+        """Where the audio lives (fetched on demand, never copied into the vault)."""
+        return f"ghl:/conversations/messages/{message_id}/locations/{self.location_id}/recording"
+
     def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]:
         kind = {"sms": "SMS", "email": "Email"}.get(channel.lower())
         if not kind:
@@ -310,6 +337,7 @@ class MockGHL:
             self.db = {"contacts": {}, "notes": {}, "tasks": {}, "messages": [], "enrollments": [],
                        "opportunities": {}, "custom_fields": [], "tags": [], "outbox": []}
         self.now_override: str = ""
+        self._tick_base, self._tick = "", 0
         self.autosave = True
 
     def _save(self) -> None:
@@ -322,7 +350,13 @@ class MockGHL:
         tmp.replace(self.path)
 
     def _now(self) -> str:
-        return self.now_override or _now_iso()
+        """The simulated clock ticks one second per write, so messages on one simulated day keep their order."""
+        if not self.now_override:
+            return _now_iso()
+        if self.now_override != self._tick_base:
+            self._tick_base, self._tick = self.now_override, 0
+        self._tick += 1
+        return (datetime.fromisoformat(self.now_override) + timedelta(seconds=self._tick)).isoformat()
 
     def _id(self, prefix: str) -> str:
         # Deterministic ids (a counter kept in the file), so the same seed gives the same simulation.
@@ -457,6 +491,27 @@ class MockGHL:
             if m["contactId"] == contact_id:
                 m["unread"] = False
         self._save()
+
+    def record_call(self, contact_id: str, direction: str, duration_s: int,
+                    sentences: list[dict[str, Any]]) -> dict[str, Any]:
+        """Play a recorded, transcribed phone call (the simulation and tests)."""
+        message = {"id": self._id("m"), "contactId": contact_id, "direction": direction, "messageType": "TYPE_CALL",
+                   "body": "", "dateAdded": self._now(), "unread": False, "meta": {"call": {"duration": duration_s}}}
+        self.db["messages"].append(message)
+        self.db.setdefault("transcriptions", {})[message["id"]] = sentences
+        self._save()
+        return message
+
+    def list_call_messages(self, contact_id: str = "", limit: int = 50) -> list[dict[str, Any]]:
+        rows = [m for m in self.db["messages"] if m.get("messageType") == "TYPE_CALL"
+                and (not contact_id or m["contactId"] == contact_id)]
+        return sorted(rows, key=lambda m: m["dateAdded"], reverse=True)[:limit]
+
+    def get_transcription(self, message_id: str) -> list[dict[str, Any]]:
+        return list(self.db.get("transcriptions", {}).get(message_id, []))
+
+    def recording_ref(self, message_id: str) -> str:
+        return f"mock:recording/{message_id}"
 
     def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]:
         message = {"id": self._id("m"), "contactId": contact_id, "direction": "outbound",

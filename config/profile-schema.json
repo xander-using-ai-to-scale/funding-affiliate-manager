@@ -1,0 +1,39 @@
+{
+  "_comment": "The partner profile. Every fact the agent learns lands in one slot. Key slots set profile completeness; when a key slot is empty, its question is what the manager asks next (one per message, lowest ask_rank first). multi: the slot keeps every value; otherwise a newer value replaces the old one. Never store anything in never_store.",
+  "sections": {
+    "goals": "What they want",
+    "work": "How they work",
+    "history": "Background",
+    "loops": "Open loops"
+  },
+  "slots": [
+    {"key": "tier", "label": "Tier", "section": "work", "key_slot": true, "from_record": true},
+    {"key": "niche", "label": "What they do", "section": "work", "key_slot": true, "from_record": true},
+    {"key": "goals", "label": "Goals", "section": "goals", "key_slot": true, "multi": true, "ask_rank": 1,
+     "question": "What are you working toward this year?"},
+    {"key": "client_types", "label": "Clients", "section": "work", "key_slot": true, "multi": true, "ask_rank": 2,
+     "question": "What kind of clients are you working with most these days?"},
+    {"key": "needs", "label": "What would help", "section": "goals", "key_slot": true, "multi": true, "ask_rank": 3,
+     "question": "What would make this partnership worth your time?"},
+    {"key": "deal_types", "label": "What their clients need", "section": "work", "key_slot": true, "multi": true,
+     "ask_rank": 4, "question": "When one of your clients needs capital, what's it usually for?"},
+    {"key": "channel", "label": "Best way to reach them", "section": "work", "key_slot": true, "ask_rank": 5,
+     "question": "Is text the best way to reach you, or do you prefer a call?"},
+    {"key": "deal_size", "label": "Typical deal size", "section": "work", "key_slot": true, "ask_rank": 6,
+     "question": "Roughly what size are the deals your clients usually need?"},
+    {"key": "regions", "label": "Where they work", "section": "work", "key_slot": true, "multi": true, "ask_rank": 7,
+     "question": "Are your clients mostly local, or all over?"},
+    {"key": "best_time", "label": "Best time to reach them", "section": "work", "key_slot": true, "ask_rank": 8,
+     "question": "When's usually the best time to catch you?"},
+    {"key": "blockers", "label": "What's gotten in the way", "section": "goals", "multi": true, "ask_rank": 9,
+     "question": "What's gotten in the way of sending deals lately?"},
+    {"key": "products_used", "label": "Products they've sent deals for", "section": "history", "multi": true},
+    {"key": "past_issues", "label": "Past issues", "section": "history", "multi": true},
+    {"key": "tone", "label": "Tone that works", "section": "work"},
+    {"key": "personal", "label": "Personal (only what they shared)", "section": "work", "multi": true, "sensitive": true},
+    {"key": "open_loop", "label": "Open loop", "section": "loops", "multi": true},
+    {"key": "note", "label": "Note", "section": "history", "multi": true}
+  ],
+  "never_store": ["health or medical details", "religion", "politics", "bank or card account numbers",
+                  "SSN, EIN or other ID numbers", "passwords or login details"]
+}

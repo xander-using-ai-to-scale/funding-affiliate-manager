@@ -8,6 +8,8 @@ Machine, "7FF"). It keeps thousands of affiliates warm and producing on **GoHigh
 - personal check-ins for anyone who has gone quiet
 - "check back with me" follow-ups that land in the right morning's queue
 - the newsletter, reactivation, events, and done-for-you growth services
+- a **relationship graph**: a profile for every partner, built from their record, every reply and every recorded
+  call, that every message is written from
 
 A human Funding Relationship Manager approves everything that goes out.
 
@@ -18,9 +20,9 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
                                         ├─ ghl MCP           full GoHighLevel CLI (demo location only)
                                         ├─ orgo MCP          its own Orgo cloud desktop (GHL UI, LinkedIn, Skool)
                                         ├─ browser-box       read pages in one self-hosted browser
-                                        ├─ data-box          page data, cost-capped per call
+                                        ├─ data-box          page data (scrape); paid rungs need approval
                                         └─ super-browser     bulk lead lists + approval-gated writes (being retired)
-                                      Memory: Obsidian vault (Daily / Affiliates / Campaigns …)
+                                      Memory: Obsidian vault (Partners / Calls / Reviews / Daily / hub notes …)
 ```
 
 ## Demo pack and docs
@@ -32,6 +34,9 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
 | [`docs/proposal-and-agreement-7ff.md`](docs/proposal-and-agreement-7ff.md) | The proposal and agreement in one document to send and sign (`.pdf` and `.docx` alongside, from `scripts/build_documents.py`) |
 | [`docs/call-recap-2026-09-23.md`](docs/call-recap-2026-09-23.md) | Recap of the call with Ty Talbot and Francois Hewing: terms, open questions, next steps |
 | [`docs/simulation-report.md`](docs/simulation-report.md) | The 30-day simulation report (`.json` alongside) |
+| [`docs/relationship-example.html`](docs/relationship-example.html) | The relationship graph, interactive: one fictional partner from record to revenue plan through the real code (drafted and read by GPT-6 Luna Pro), and the 250-partner relationship simulation. Also the demo pack's "Relationship graph" tab. Built by `scripts/build_relationship_example.py` |
+| [`docs/relationship-graph.md`](docs/relationship-graph.md) | The relationship graph spec for 7FF: what the agent knows about each partner, where it lives, how it grows, calls from any recorder, who's texting, what it never stores |
+| [`docs/relationship-simulation.md`](docs/relationship-simulation.md) | The relationship simulation: 250 quiet partners, 30 days of kickoffs, replies, calls and plans (`.json` alongside) |
 | [`docs/workflow-map.html`](docs/workflow-map.html) | The Funding Affiliate OS: lifecycle, cadence, daily loop, GHL build, guardrails |
 | [`docs/proposal-7ff.html`](docs/proposal-7ff.html) | Partnership proposal draft for 7 Figures Funding |
 | [`docs/DEMO-RUNBOOK.md`](docs/DEMO-RUNBOOK.md) | Step-by-step live demo, on the mock CRM today and on GoHighLevel later |
@@ -48,12 +53,13 @@ The 30-day simulation (253 synthetic affiliates, seed-reproducible, reply rates 
 | Quiet or dormant affiliates reactivated | 11 |
 | Producing on day 30, with vs. without the agent | 13 vs 1 |
 
-Cost projection, in the base case: about $10.05 of AI for the whole reactivation of 12,950 partners and $35.72 a month after; the starting budget is twice that ($20.10 and $71.44 a month). Texting through HighLevel ($355.24 and $417.84 a month) is the bigger line.
+Cost projection, in the base case: about $10.05 of AI for the whole reactivation of 12,950 partners and $35.72 a month after; the starting budget is twice that ($20.10 and $71.44 a month). The relationship graph adds about $3.54 and $1.98 a month, inside that budget. Texting through HighLevel ($510.26 with two-segment kickoffs, and $417.84 a month) is the bigger line.
 
 Rebuild after changing a cost assumption, a new simulation run, or an edit to the proposal, agreement or recap (the pack embeds copies of them):
 
 ```bash
 python3 scripts/cost_model.py
+python3 scripts/build_relationship_example.py
 python3 scripts/build_demo_pack.py --sim sim-output
 python3 scripts/build_documents.py docs/proposal-and-agreement-7ff.md
 ```
@@ -67,14 +73,15 @@ The build stops if a cost figure quoted in the proposal or agreement no longer m
 | `files/local-packages/fam/` | The core (Python stdlib + `mcp`): GHL client (live and mock), cadence rules, approvals ledger, Obsidian vault writer, MCP server, CLI, demo simulation |
 | `config/` | The GHL system as data: custom fields, tags, pipelines, workflows, custom values, cadence rules, and `ghl-map.json` (filled by bootstrap) |
 | `skills/` | Hermes skills: `funding-affiliates/*` (cadence, triage, newsletter, offers, reactivation, events, growth services, intake), `computer/orgo-computer`, `memory/obsidian-memory`, `browsers/*`, `sales/*` |
-| `routines/` | Cron prompts: daily tasks + sweep, hourly reply triage, bi-weekly newsletter, monthly offer, weekly scorecard |
-| `knowledge/funding/` | Sourced company, products, economics, segments, conversation playbook, compliance, FAQ (open questions flagged `UNVERIFIED`) |
+| `routines/` | Cron prompts: daily tasks + sweep, hourly reply triage, call ingest, bi-weekly newsletter, monthly offer, weekly scorecard |
+| `knowledge/funding/` | Sourced company, products, economics, segments, conversation playbook, compliance, FAQ, kickoff framework (open questions flagged `UNVERIFIED`) |
+| `examples/partner-journey/` | The frozen worked example the relationship page is built from: each step's inputs and outputs, the partner note after each step, the vault |
 | `knowledge/program/` | Operating cadence, pre-call brief, partner recovery, scorecard templates |
 | `policies/permissions.json` | Tiers: read, CRM hygiene, outbound (approval), commercial (human-only), prohibited |
 | `hermes/config.template.yaml` | Hermes config, including the core/approvals MCP trust split |
 | `deploy/` | Droplet installer, vault sync |
 | `scripts/` | `build_demo_pack.py`: turns a simulation run into `docs/demo-pack.html` |
-| `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split) |
+| `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split; the relationship graph: notes, facts, kickoff limits, identity rule, inbox, review files, calls) |
 
 ## Safety model
 
@@ -93,6 +100,28 @@ PYTHONPATH=files/local-packages/fam/src FAM_GHL_MODE=mock python3 -m fam.cli sim
 ```
 
 This runs 250 synthetic affiliates through 30 days of the real engine: sweep, approvals, sends, reply triage, deals, newsletter, and events. It writes `sim-output/report.md` plus an Obsidian vault of everything the agent did.
+
+## The relationship graph
+
+Each partner gets a profile note in the vault (`Partners/`), linked to hub notes for their tier, line of work,
+manager, source and the products their clients need, with an index in `fam.sqlite3` and the key fields mirrored in
+GoHighLevel. `files/local-packages/fam/src/fam/graph.py` is the one writer (`remember`) and reader (`profile`).
+
+```bash
+fam import zoho                      # or: fam import csv partners.csv / fam import ghl
+fam kickoff draft --size 250         # a wave of personal kickoffs, as a review file + approval card
+fam kickoff nudge                    # one nudge for anyone quiet after 5 days
+fam kickoff status                   # pending / sent / done, reply rate by opener
+fam calls ingest --ghl               # GoHighLevel phone transcripts; without --ghl, the call inbox folder
+fam profile <contact_id>             # what the agent knows about one partner
+fam graph query --slot deal_types --contains equipment --tier Executive
+fam example partner-journey --out examples/partner-journey --model
+fam sim relationships --count 250 --days 30 --start 2026-10-05
+```
+
+Drafting and fact extraction use `FAM_DRAFT_MODEL` through OpenRouter when it's set (falling back to the
+framework templates and keyword rules when a model answer fails a check); without it, templates and rules only.
+The kickoff framework is `knowledge/funding/08-kickoff-framework.md`; the spec is `docs/relationship-graph.md`.
 
 ## Tests
 

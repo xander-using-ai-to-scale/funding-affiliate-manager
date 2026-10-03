@@ -1,0 +1,3060 @@
+{
+  "meta": {
+    "partner": "Dana Reyes (fictional)",
+    "start": "2026-10-05",
+    "drafter": "model",
+    "extractor": "model",
+    "model": "openai/gpt-6-luna-pro",
+    "model_usage": {
+      "drafting": {
+        "calls": 5,
+        "input_tokens": 17694,
+        "output_tokens": 2314
+      },
+      "extraction": {
+        "calls": 5,
+        "input_tokens": 15935,
+        "output_tokens": 4237
+      }
+    },
+    "steps": 7,
+    "fallbacks": {
+      "drafting": [],
+      "extraction": []
+    }
+  },
+  "steps": [
+    {
+      "n": 1,
+      "title": "The record becomes a profile",
+      "day": "2026-10-05",
+      "input": {
+        "record": {
+          "source": "Zoho (synthetic)",
+          "fields": {
+            "tier": "Executive",
+            "plan": "Executive Partner, annual",
+            "join_date": "2023-04-11",
+            "source": "linkedin",
+            "niche": "business consultant",
+            "deals_submitted": 7,
+            "last_deal_date": "2025-06-18",
+            "last_contact_date": "2025-11-02",
+            "assigned_manager": "Justin"
+          },
+          "history": [
+            {
+              "id": "n1",
+              "date": "2023-04-12",
+              "kind": "zoho_note",
+              "text": "Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets."
+            },
+            {
+              "id": "d1",
+              "date": "2024-08-20",
+              "kind": "zoho_deal",
+              "text": "Lone Star Freight, equipment (funded)"
+            },
+            {
+              "id": "d2",
+              "date": "2025-06-18",
+              "kind": "zoho_deal",
+              "text": "Ramirez Hauling, working capital (funded)"
+            },
+            {
+              "id": "n2",
+              "date": "2025-11-02",
+              "kind": "zoho_note",
+              "text": "Dana asked how to find the new partner portal. Said things got slow after summer."
+            }
+          ]
+        }
+      },
+      "output": {
+        "records": 1,
+        "created": 1,
+        "updated": 0,
+        "kickoff_pending": 1,
+        "with_history": 1,
+        "facts": 8
+      },
+      "profile": {
+        "completeness": 40,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ]
+        },
+        "open_loops": [],
+        "next_question": {
+          "slot": "goals",
+          "question": "What are you working toward this year?"
+        },
+        "next_step": "Ask: What are you working toward this year?",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "client_types",
+          "deal_types"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-pending"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: \"\"\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2025-11-02\npreferred_channel: \"\"\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 40\nkickoff: kickoff-pending\nkickoff_variant: \"\"\nnext_step: \"Ask: What are you working toward this year?\"\nupdated: 2026-10-05\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.\n\nProfile 40% complete. Next question to ask: _What are you working toward this year?_\n\n## What they want\n_Nothing yet._\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 40,
+        "next_step": "Ask: What are you working toward this year?",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 2,
+      "title": "The kickoff text",
+      "day": "2026-10-05",
+      "output": {
+        "draft": {
+          "contact_id": "c_7c9d30055291",
+          "name": "Dana Reyes",
+          "variant": "C",
+          "hook": "deals",
+          "drafter": "model",
+          "segments": 2,
+          "body": "Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more about your business and how we can help you close more deals. Would a quick call this week work?"
+        },
+        "approval_card": "*Approval needed* \u2014 1 kickoff wave 1 (1 real, 0 simulated) \u00b7 2 SMS segments\naction `act_82e8012dda68` \u00b7 digest `973f8faee49592c9` \u00b7 demo mode: False\nEvery message in full: `Reviews/2026-10-05 kickoff wave 1 (act_82e8012dda68).md` (all shown below)\n1. Dana Reyes (sms, mock): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more about your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\nReply *approve act_82e8012dda68* to send, *approve act_82e8012dda68 except 4, 17* to hold some back, or tell me what to change.",
+        "review_file": "\n# Review: kickoff wave 1\n\n1 kickoff wave 1 (1 real, 0 simulated) \u00b7 2 SMS segments\n\nApprove all with `approve act_82e8012dda68`, or hold some back with `approve act_82e8012dda68 except 4, 17` (the numbers below).\n\n### 1. [[Partners/Dana Reyes (055291)|Dana Reyes]]\n_sms \u00b7 kickoff \u00b7 mock \u00b7 2 segments \u00b7 variant C_\n\n> Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more about your business and how we can help you close more deals. Would a quick call this week work? Reply STOP to opt out.\n",
+        "sent": {
+          "mock": 1,
+          "live": 0
+        }
+      },
+      "profile": {
+        "completeness": 40,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ]
+        },
+        "open_loops": [],
+        "next_question": {
+          "slot": "goals",
+          "question": "What are you working toward this year?"
+        },
+        "next_step": "Ask: What are you working toward this year?",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "client_types",
+          "deal_types"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-sent"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: \"\"\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2025-11-02\npreferred_channel: \"\"\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 40\nkickoff: kickoff-sent\nkickoff_variant: C\nnext_step: \"Ask: What are you working toward this year?\"\nupdated: 2026-10-05\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.\n\nProfile 40% complete. Next question to ask: _What are you working toward this year?_\n\n## What they want\n_Nothing yet._\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 40,
+        "next_step": "Ask: What are you working toward this year?",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with small trucking and logistics companies and owner-operators growing their fleets; their clients usually need equipment financing and working capital.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 3,
+      "title": "Her first reply",
+      "day": "2026-10-06",
+      "input": {
+        "text": "Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usually around $150k. Texting is best, mornings."
+      },
+      "output": {
+        "triage": {
+          "intent": "general_reply",
+          "actions_taken": [
+            "last_reply_date=today",
+            "lifecycle \u2192 aff:reactivated",
+            "kickoff conversation started",
+            "5 profile fact(s)"
+          ],
+          "facts_added": [
+            {
+              "slot": "client_types",
+              "value": "small trucking companies"
+            },
+            {
+              "slot": "deal_size",
+              "value": "around $150k"
+            },
+            {
+              "slot": "channel",
+              "value": "text"
+            },
+            {
+              "slot": "best_time",
+              "value": "mornings"
+            },
+            {
+              "slot": "note",
+              "value": "It's been a slow year on my end"
+            }
+          ],
+          "completeness": 70,
+          "manager_alert": ""
+        },
+        "reply": {
+          "body": "Sorry it's been a slow year, Dana. What are you working toward this year?",
+          "move": "discover",
+          "drafter": "model"
+        }
+      },
+      "profile": {
+        "completeness": 70,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Best reached by text, mornings.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets",
+            "small trucking companies"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer",
+            "It's been a slow year on my end"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ],
+          "deal_size": [
+            "around $150k"
+          ],
+          "channel": [
+            "text"
+          ],
+          "best_time": [
+            "mornings"
+          ]
+        },
+        "open_loops": [],
+        "next_question": {
+          "slot": "goals",
+          "question": "What are you working toward this year?"
+        },
+        "next_step": "Ask: What are you working toward this year?",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "client_types",
+          "deal_types",
+          "channel",
+          "deal_size",
+          "best_time"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-done"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "deal_size",
+          "value": "around $150k",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "channel",
+          "value": "text",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "best_time",
+          "value": "mornings",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "note",
+          "value": "It's been a slow year on my end",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:9",
+            "label": "small trucking companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "reply"
+          },
+          {
+            "id": "fact:10",
+            "label": "around $150k",
+            "type": "fact",
+            "slot": "Typical deal size",
+            "source": "reply"
+          },
+          {
+            "id": "fact:11",
+            "label": "text",
+            "type": "fact",
+            "slot": "Best way to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:12",
+            "label": "mornings",
+            "type": "fact",
+            "slot": "Best time to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:13",
+            "label": "It's been a slow year on my end",
+            "type": "fact",
+            "slot": "Note",
+            "source": "reply"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          },
+          {
+            "source": "partner",
+            "target": "fact:9"
+          },
+          {
+            "source": "partner",
+            "target": "fact:10"
+          },
+          {
+            "source": "partner",
+            "target": "fact:11"
+          },
+          {
+            "source": "partner",
+            "target": "fact:12"
+          },
+          {
+            "source": "partner",
+            "target": "fact:13"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: reactivated\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2026-10-06\npreferred_channel: text\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 70\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"Ask: What are you working toward this year?\"\nupdated: 2026-10-06\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Best reached by text, mornings.\n\nProfile 70% complete. Next question to ask: _What are you working toward this year?_\n\n## What they want\n_Nothing yet._\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **Clients:** small trucking companies _(text reply, 2026-10-06)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n- **Best way to reach them:** text _(text reply, 2026-10-06)_\n- **Typical deal size:** around $150k _(text reply, 2026-10-06)_\n- **Best time to reach them:** mornings _(text reply, 2026-10-06)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n- **Note:** It's been a slow year on my end _(text reply, 2026-10-06)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n- Clients: small trucking companies _(text reply, 2026-10-06)_ %%client_types reply m_88639893dfd9%%\n- Typical deal size: around $150k _(text reply, 2026-10-06)_ %%deal_size reply m_88639893dfd9%%\n- Best way to reach them: text _(text reply, 2026-10-06)_ %%channel reply m_88639893dfd9%%\n- Best time to reach them: mornings _(text reply, 2026-10-06)_ %%best_time reply m_88639893dfd9%%\n- Note: It's been a slow year on my end _(text reply, 2026-10-06)_ %%note reply m_88639893dfd9%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 replied (general_reply): Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usu\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (reply): Sorry it's been a slow year, Dana. What are you working toward this year?\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 70,
+        "next_step": "Ask: What are you working toward this year?",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Best reached by text, mornings.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 4,
+      "title": "What she wants",
+      "day": "2026-10-07",
+      "input": {
+        "text": "I want to get back to sending a couple deals a month. What would help is a simple page I can send my clients to so they can apply."
+      },
+      "output": {
+        "triage": {
+          "intent": "general_reply",
+          "actions_taken": [
+            "last_reply_date=today",
+            "2 profile fact(s)"
+          ],
+          "facts_added": [
+            {
+              "slot": "goals",
+              "value": "get back to sending a couple deals a month"
+            },
+            {
+              "slot": "needs",
+              "value": "a simple page I can send my clients to so they can apply"
+            }
+          ],
+          "completeness": 90,
+          "manager_alert": ""
+        },
+        "reply": {
+          "body": "That makes sense\u2014one simple link could make it easier for clients to apply. Would a quick 15-minute call this week work to talk through it?",
+          "move": "call_ask",
+          "drafter": "model"
+        }
+      },
+      "profile": {
+        "completeness": 90,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets",
+            "small trucking companies"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer",
+            "It's been a slow year on my end"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ],
+          "deal_size": [
+            "around $150k"
+          ],
+          "channel": [
+            "text"
+          ],
+          "best_time": [
+            "mornings"
+          ],
+          "goals": [
+            "get back to sending a couple deals a month"
+          ],
+          "needs": [
+            "a simple page I can send my clients to so they can apply"
+          ]
+        },
+        "open_loops": [],
+        "next_question": {
+          "slot": "regions",
+          "question": "Are your clients mostly local, or all over?"
+        },
+        "next_step": "Ask: Are your clients mostly local, or all over?",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "goals",
+          "client_types",
+          "needs",
+          "deal_types",
+          "channel",
+          "deal_size",
+          "best_time"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-done"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "deal_size",
+          "value": "around $150k",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "channel",
+          "value": "text",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "best_time",
+          "value": "mornings",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "note",
+          "value": "It's been a slow year on my end",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to sending a couple deals a month",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "needs",
+          "value": "a simple page I can send my clients to so they can apply",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:9",
+            "label": "small trucking companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "reply"
+          },
+          {
+            "id": "fact:10",
+            "label": "around $150k",
+            "type": "fact",
+            "slot": "Typical deal size",
+            "source": "reply"
+          },
+          {
+            "id": "fact:11",
+            "label": "text",
+            "type": "fact",
+            "slot": "Best way to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:12",
+            "label": "mornings",
+            "type": "fact",
+            "slot": "Best time to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:13",
+            "label": "It's been a slow year on my end",
+            "type": "fact",
+            "slot": "Note",
+            "source": "reply"
+          },
+          {
+            "id": "fact:14",
+            "label": "get back to sending a couple deals a month",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "reply"
+          },
+          {
+            "id": "fact:15",
+            "label": "a simple page I can send my clients to so they can apply",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "reply"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          },
+          {
+            "source": "partner",
+            "target": "fact:9"
+          },
+          {
+            "source": "partner",
+            "target": "fact:10"
+          },
+          {
+            "source": "partner",
+            "target": "fact:11"
+          },
+          {
+            "source": "partner",
+            "target": "fact:12"
+          },
+          {
+            "source": "partner",
+            "target": "fact:13"
+          },
+          {
+            "source": "partner",
+            "target": "fact:14"
+          },
+          {
+            "source": "partner",
+            "target": "fact:15"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: reactivated\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2026-10-07\npreferred_channel: text\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 90\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"Ask: Are your clients mostly local, or all over?\"\nupdated: 2026-10-07\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.\n\nProfile 90% complete. Next question to ask: _Are your clients mostly local, or all over?_\n\n## What they want\n- **Goals:** get back to sending a couple deals a month _(text reply, 2026-10-07)_\n- **What would help:** a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **Clients:** small trucking companies _(text reply, 2026-10-06)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n- **Best way to reach them:** text _(text reply, 2026-10-06)_\n- **Typical deal size:** around $150k _(text reply, 2026-10-06)_\n- **Best time to reach them:** mornings _(text reply, 2026-10-06)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n- **Note:** It's been a slow year on my end _(text reply, 2026-10-06)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n- Clients: small trucking companies _(text reply, 2026-10-06)_ %%client_types reply m_88639893dfd9%%\n- Typical deal size: around $150k _(text reply, 2026-10-06)_ %%deal_size reply m_88639893dfd9%%\n- Best way to reach them: text _(text reply, 2026-10-06)_ %%channel reply m_88639893dfd9%%\n- Best time to reach them: mornings _(text reply, 2026-10-06)_ %%best_time reply m_88639893dfd9%%\n- Note: It's been a slow year on my end _(text reply, 2026-10-06)_ %%note reply m_88639893dfd9%%\n- Goals: get back to sending a couple deals a month _(text reply, 2026-10-07)_ %%goals reply m_faf3413d0dbb%%\n- What would help: a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_ %%needs reply m_faf3413d0dbb%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 replied (general_reply): Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usu\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (reply): Sorry it's been a slow year, Dana. What are you working toward this year?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): I want to get back to sending a couple deals a month. What would help is a simple page I can send my clients to so they can apply.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): That makes sense-one simple link could make it easier for clients to apply. Would a quick 15-minute call this week work to talk through it?\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 90,
+        "next_step": "Ask: Are your clients mostly local, or all over?",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 5,
+      "title": "She books a call",
+      "day": "2026-10-07",
+      "input": {
+        "text": "Sure, Thursday morning works."
+      },
+      "output": {
+        "triage": {
+          "intent": "general_reply",
+          "actions_taken": [
+            "last_reply_date=today"
+          ],
+          "facts_added": [],
+          "completeness": 90,
+          "manager_alert": ""
+        },
+        "reply": {
+          "body": "Great, Dana! You can grab a time Thursday morning here: https://example.com/book/justin Looking forward to chatting.",
+          "move": "book",
+          "drafter": "model"
+        },
+        "pre_call_brief": "- **Partner:** Dana Reyes, business consultant. Came from LinkedIn. Joined 2023-04-11. Tier: Executive\n- **Lifecycle:** reactivated. Last reply 2026-10-07, last deal 2025-06-18, deals sent 7\n- **Who they are:** A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.\n- **What they told us last:** Sure, Thursday morning works.\n- **What they want:** get back to sending a couple deals a month; a simple page I can send my clients to so they can apply\n- **Open loops / tasks:** none\n- **Why this call:** first call since the kickoff\n- **Recommended outcome:** a first deal or a date for one, and the next check-in on the calendar\n- **Programs that fit their clients:** Business Line of Credit, Business Term Loan, Short-Term Business Loan\n- **Ask if it doesn't come up:** Are your clients mostly local, or all over?\n- **Do NOT promise:** approvals, rates, timelines, commission changes, or payout dates\n- **Recording:** say at the start that the call is recorded so you remember what you talked about"
+      },
+      "profile": {
+        "completeness": 90,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets",
+            "small trucking companies"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer",
+            "It's been a slow year on my end"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ],
+          "deal_size": [
+            "around $150k"
+          ],
+          "channel": [
+            "text"
+          ],
+          "best_time": [
+            "mornings"
+          ],
+          "goals": [
+            "get back to sending a couple deals a month"
+          ],
+          "needs": [
+            "a simple page I can send my clients to so they can apply"
+          ]
+        },
+        "open_loops": [],
+        "next_question": {
+          "slot": "regions",
+          "question": "Are your clients mostly local, or all over?"
+        },
+        "next_step": "Ask: Are your clients mostly local, or all over?",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "goals",
+          "client_types",
+          "needs",
+          "deal_types",
+          "channel",
+          "deal_size",
+          "best_time"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-done"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "deal_size",
+          "value": "around $150k",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "channel",
+          "value": "text",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "best_time",
+          "value": "mornings",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "note",
+          "value": "It's been a slow year on my end",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to sending a couple deals a month",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "needs",
+          "value": "a simple page I can send my clients to so they can apply",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:9",
+            "label": "small trucking companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "reply"
+          },
+          {
+            "id": "fact:10",
+            "label": "around $150k",
+            "type": "fact",
+            "slot": "Typical deal size",
+            "source": "reply"
+          },
+          {
+            "id": "fact:11",
+            "label": "text",
+            "type": "fact",
+            "slot": "Best way to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:12",
+            "label": "mornings",
+            "type": "fact",
+            "slot": "Best time to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:13",
+            "label": "It's been a slow year on my end",
+            "type": "fact",
+            "slot": "Note",
+            "source": "reply"
+          },
+          {
+            "id": "fact:14",
+            "label": "get back to sending a couple deals a month",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "reply"
+          },
+          {
+            "id": "fact:15",
+            "label": "a simple page I can send my clients to so they can apply",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "reply"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          },
+          {
+            "source": "partner",
+            "target": "fact:9"
+          },
+          {
+            "source": "partner",
+            "target": "fact:10"
+          },
+          {
+            "source": "partner",
+            "target": "fact:11"
+          },
+          {
+            "source": "partner",
+            "target": "fact:12"
+          },
+          {
+            "source": "partner",
+            "target": "fact:13"
+          },
+          {
+            "source": "partner",
+            "target": "fact:14"
+          },
+          {
+            "source": "partner",
+            "target": "fact:15"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: reactivated\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2026-10-07\npreferred_channel: text\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 90\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"Ask: Are your clients mostly local, or all over?\"\nupdated: 2026-10-07\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.\n\nProfile 90% complete. Next question to ask: _Are your clients mostly local, or all over?_\n\n## What they want\n- **Goals:** get back to sending a couple deals a month _(text reply, 2026-10-07)_\n- **What would help:** a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **Clients:** small trucking companies _(text reply, 2026-10-06)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n- **Best way to reach them:** text _(text reply, 2026-10-06)_\n- **Typical deal size:** around $150k _(text reply, 2026-10-06)_\n- **Best time to reach them:** mornings _(text reply, 2026-10-06)_\n\n## Open loops\n_Nothing yet._\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n- **Note:** It's been a slow year on my end _(text reply, 2026-10-06)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n- Clients: small trucking companies _(text reply, 2026-10-06)_ %%client_types reply m_88639893dfd9%%\n- Typical deal size: around $150k _(text reply, 2026-10-06)_ %%deal_size reply m_88639893dfd9%%\n- Best way to reach them: text _(text reply, 2026-10-06)_ %%channel reply m_88639893dfd9%%\n- Best time to reach them: mornings _(text reply, 2026-10-06)_ %%best_time reply m_88639893dfd9%%\n- Note: It's been a slow year on my end _(text reply, 2026-10-06)_ %%note reply m_88639893dfd9%%\n- Goals: get back to sending a couple deals a month _(text reply, 2026-10-07)_ %%goals reply m_faf3413d0dbb%%\n- What would help: a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_ %%needs reply m_faf3413d0dbb%%\n\n## Calls\n_Nothing yet._\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 replied (general_reply): Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usu\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (reply): Sorry it's been a slow year, Dana. What are you working toward this year?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): I want to get back to sending a couple deals a month. What would help is a simple page I can send my clients to so they can apply.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): That makes sense-one simple link could make it easier for clients to apply. Would a quick 15-minute call this week work to talk through it?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): Sure, Thursday morning works.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): Great, Dana! You can grab a time Thursday morning here: https://example.com/book/justin Looking forward to chatting.\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 90,
+        "next_step": "Ask: Are your clients mostly local, or all over?",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to sending a couple deals a month. Best reached by text, mornings.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 6,
+      "title": "The call",
+      "day": "2026-10-08",
+      "input": {
+        "transcript": [
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 0,
+            "words": "Hey Dana, thanks for making time. Quick heads up, I record my calls so I don't lose track of what we talk about. That okay?"
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 9,
+            "words": "Totally fine."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 12,
+            "words": "Great. So tell me where things are at."
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 16,
+            "words": "So most of my clients are small trucking companies and a few logistics outfits, mostly in Texas and Oklahoma. They grow in spurts, so it's usually equipment, a truck or two at a time, or working capital to cover payroll in a slow month."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 41,
+            "words": "What size deals are we usually talking?"
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 45,
+            "words": "Trucks run $100k to $250k, so usually around $150k."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 52,
+            "words": "And what got in the way of sending deals this year?"
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 57,
+            "words": "Honestly I haven't sent any because the portal changed and I didn't know who to call anymore. And it was a slow summer."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 70,
+            "words": "That's on us. I'm your person now, text me anytime."
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 76,
+            "words": "My goal is to get back to two deals a month by the end of the year. I'd love to have a simple page I can put in my email signature so clients can apply without me in the middle."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 95,
+            "words": "We can do that. I'll set up a funnel page draft for you next week, and I'll send you the new submission link and the equipment program summary by Friday."
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 110,
+            "words": "Perfect. Actually I have one now, Martinez Trucking needs two trucks. I'll send you the file tomorrow."
+          },
+          {
+            "speaker": {
+              "name": "Justin"
+            },
+            "start_time": 121,
+            "words": "Love it. I'll watch for it."
+          },
+          {
+            "speaker": {
+              "name": "Dana Reyes"
+            },
+            "start_time": 125,
+            "words": "Mornings are best to reach me, I'm on the road most afternoons."
+          }
+        ],
+        "recorder": "Read.ai-style export (synthetic)"
+      },
+      "output": {
+        "ingest": {
+          "file": "dana-reyes-2026-10-08.json",
+          "ok": true,
+          "contact_id": "c_7c9d30055291",
+          "call_note": "Calls/2026-10-08 Dana Reyes.md",
+          "summary": "Dana works with small trucking companies and logistics outfits, mainly in Texas and Oklahoma, whose needs include trucks and working capital. She wants to return to two deals a month by year-end, would like a simple client application page, and plans to send the Martinez Trucking file tomorrow.",
+          "commitments": [
+            {
+              "owner": "us",
+              "what": "Send Dana the new submission link and equipment program summary.",
+              "due": "2026-10-09"
+            },
+            {
+              "owner": "us",
+              "what": "Set up a funnel page draft for Dana.",
+              "due": "2026-10-16"
+            },
+            {
+              "owner": "partner",
+              "what": "Send Justin the file for Martinez Trucking, which needs two trucks.",
+              "due": "2026-10-09"
+            }
+          ],
+          "manager_tasks": [
+            "Send Dana the new submission link and equipment program summary.",
+            "Set up a funnel page draft for Dana."
+          ],
+          "completeness": 100
+        },
+        "call_note": "\n# Call with Dana Reyes (2026-10-08)\n\n## Summary\nDana works with small trucking companies and logistics outfits, mainly in Texas and Oklahoma, whose needs include trucks and working capital. She wants to return to two deals a month by year-end, would like a simple client application page, and plans to send the Martinez Trucking file tomorrow.\n\n## What we learned\n- **Goals:** get back to two deals a month by the end of the year\n- **Clients:** small trucking companies and a few logistics outfits\n- **What would help:** A simple page clients can use to apply without her in the middle\n- **What their clients need:** equipment financing\n- **What their clients need:** working capital\n- **Typical deal size:** around $150k\n- **Where they work:** Oklahoma\n- **Where they work:** Texas\n- **Best time to reach them:** mornings\n- **What's gotten in the way:** the portal changed, she didn't know who to call anymore, and it was a slow summer\n- **Past issues:** The portal changed and she didn't know who to call anymore\n\n## Commitments\n- [ ] We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)\n- [ ] We: Set up a funnel page draft for Dana. (by 2026-10-16)\n- [ ] Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)\n\n## Transcript\n**Justin:** Hey Dana, thanks for making time. Quick heads up, I record my calls so I don't lose track of what we talk about. That okay?\n**Dana Reyes:** Totally fine.\n**Justin:** Great. So tell me where things are at.\n**Dana Reyes:** So most of my clients are small trucking companies and a few logistics outfits, mostly in Texas and Oklahoma. They grow in spurts, so it's usually equipment, a truck or two at a time, or working capital to cover payroll in a slow month.\n**Justin:** What size deals are we usually talking?\n**Dana Reyes:** Trucks run $100k to $250k, so usually around $150k.\n**Justin:** And what got in the way of sending deals this year?\n**Dana Reyes:** Honestly I haven't sent any because the portal changed and I didn't know who to call anymore. And it was a slow summer.\n**Justin:** That's on us. I'm your person now, text me anytime.\n**Dana Reyes:** My goal is to get back to two deals a month by the end of the year. I'd love to have a simple page I can put in my email signature so clients can apply without me in the middle.\n**Justin:** We can do that. I'll set up a funnel page draft for you next week, and I'll send you the new submission link and the equipment program summary by Friday.\n**Dana Reyes:** Perfect. Actually I have one now, Martinez Trucking needs two trucks. I'll send you the file tomorrow.\n**Justin:** Love it. I'll watch for it.\n**Dana Reyes:** Mornings are best to reach me, I'm on the road most afternoons.\n",
+        "open_tasks": [
+          {
+            "title": "Follow through for Dana: Send Dana the new submission link and equipment program summary.",
+            "due": "2026-10-09"
+          },
+          {
+            "title": "Follow through for Dana: Set up a funnel page draft for Dana.",
+            "due": "2026-10-16"
+          }
+        ]
+      },
+      "profile": {
+        "completeness": 100,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets",
+            "small trucking companies",
+            "small trucking companies and a few logistics outfits"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer",
+            "It's been a slow year on my end"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ],
+          "deal_size": [
+            "around $150k"
+          ],
+          "channel": [
+            "text"
+          ],
+          "best_time": [
+            "mornings"
+          ],
+          "goals": [
+            "get back to sending a couple deals a month",
+            "get back to two deals a month by the end of the year"
+          ],
+          "needs": [
+            "a simple page I can send my clients to so they can apply",
+            "A simple page clients can use to apply without her in the middle"
+          ],
+          "regions": [
+            "Oklahoma",
+            "Texas"
+          ],
+          "blockers": [
+            "the portal changed, she didn't know who to call anymore, and it was a slow summer"
+          ],
+          "past_issues": [
+            "The portal changed and she didn't know who to call anymore"
+          ],
+          "open_loop": [
+            "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)"
+          ]
+        },
+        "open_loops": [
+          {
+            "id": 23,
+            "text": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "since": "2026-10-08"
+          },
+          {
+            "id": 24,
+            "text": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "since": "2026-10-08"
+          },
+          {
+            "id": 25,
+            "text": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+            "since": "2026-10-08"
+          }
+        ],
+        "next_question": null,
+        "next_step": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+        "revenue_plan": "",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "goals",
+          "client_types",
+          "needs",
+          "deal_types",
+          "channel",
+          "deal_size",
+          "regions",
+          "best_time"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-done"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "deal_size",
+          "value": "around $150k",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "channel",
+          "value": "text",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "best_time",
+          "value": "mornings",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "note",
+          "value": "It's been a slow year on my end",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to sending a couple deals a month",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "needs",
+          "value": "a simple page I can send my clients to so they can apply",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to two deals a month by the end of the year",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies and a few logistics outfits",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "needs",
+          "value": "A simple page clients can use to apply without her in the middle",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "regions",
+          "value": "Oklahoma",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "regions",
+          "value": "Texas",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "blockers",
+          "value": "the portal changed, she didn't know who to call anymore, and it was a slow summer",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "past_issues",
+          "value": "The portal changed and she didn't know who to call anymore",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:9",
+            "label": "small trucking companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "reply"
+          },
+          {
+            "id": "fact:10",
+            "label": "around $150k",
+            "type": "fact",
+            "slot": "Typical deal size",
+            "source": "reply"
+          },
+          {
+            "id": "fact:11",
+            "label": "text",
+            "type": "fact",
+            "slot": "Best way to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:12",
+            "label": "mornings",
+            "type": "fact",
+            "slot": "Best time to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:13",
+            "label": "It's been a slow year on my end",
+            "type": "fact",
+            "slot": "Note",
+            "source": "reply"
+          },
+          {
+            "id": "fact:14",
+            "label": "get back to sending a couple deals a month",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "reply"
+          },
+          {
+            "id": "fact:15",
+            "label": "a simple page I can send my clients to so they can apply",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "reply"
+          },
+          {
+            "id": "fact:16",
+            "label": "get back to two deals a month by the end of the year",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "call"
+          },
+          {
+            "id": "fact:17",
+            "label": "small trucking companies and a few logistics outfits",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "call"
+          },
+          {
+            "id": "fact:18",
+            "label": "A simple page clients can use to apply without her in the middle",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "call"
+          },
+          {
+            "id": "fact:19",
+            "label": "Oklahoma",
+            "type": "fact",
+            "slot": "Where they work",
+            "source": "call"
+          },
+          {
+            "id": "fact:20",
+            "label": "Texas",
+            "type": "fact",
+            "slot": "Where they work",
+            "source": "call"
+          },
+          {
+            "id": "fact:21",
+            "label": "the portal changed, she didn't know who to call anymore, and it was a slow summer",
+            "type": "fact",
+            "slot": "What's gotten in the way",
+            "source": "call"
+          },
+          {
+            "id": "fact:22",
+            "label": "The portal changed and she didn't know who to call anymore",
+            "type": "fact",
+            "slot": "Past issues",
+            "source": "call"
+          },
+          {
+            "id": "loop:23",
+            "label": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "type": "loop"
+          },
+          {
+            "id": "loop:24",
+            "label": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "type": "loop"
+          },
+          {
+            "id": "loop:25",
+            "label": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+            "type": "loop"
+          },
+          {
+            "id": "call:0",
+            "label": "Call 2026-10-08",
+            "type": "call"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          },
+          {
+            "source": "partner",
+            "target": "fact:9"
+          },
+          {
+            "source": "partner",
+            "target": "fact:10"
+          },
+          {
+            "source": "partner",
+            "target": "fact:11"
+          },
+          {
+            "source": "partner",
+            "target": "fact:12"
+          },
+          {
+            "source": "partner",
+            "target": "fact:13"
+          },
+          {
+            "source": "partner",
+            "target": "fact:14"
+          },
+          {
+            "source": "partner",
+            "target": "fact:15"
+          },
+          {
+            "source": "partner",
+            "target": "fact:16"
+          },
+          {
+            "source": "partner",
+            "target": "fact:17"
+          },
+          {
+            "source": "partner",
+            "target": "fact:18"
+          },
+          {
+            "source": "partner",
+            "target": "fact:19"
+          },
+          {
+            "source": "partner",
+            "target": "fact:20"
+          },
+          {
+            "source": "partner",
+            "target": "fact:21"
+          },
+          {
+            "source": "partner",
+            "target": "fact:22"
+          },
+          {
+            "source": "partner",
+            "target": "loop:23"
+          },
+          {
+            "source": "partner",
+            "target": "loop:24"
+          },
+          {
+            "source": "partner",
+            "target": "loop:25"
+          },
+          {
+            "source": "partner",
+            "target": "call:0"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: reactivated\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2026-10-08\npreferred_channel: text\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 100\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)\"\nupdated: 2026-10-08\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.\n\nProfile 100% complete.\n\n## What they want\n- **Goals:** get back to sending a couple deals a month _(text reply, 2026-10-07)_\n- **Goals:** get back to two deals a month by the end of the year _(call, 2026-10-08)_\n- **What would help:** a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_\n- **What would help:** A simple page clients can use to apply without her in the middle _(call, 2026-10-08)_\n- **What's gotten in the way:** the portal changed, she didn't know who to call anymore, and it was a slow summer _(call, 2026-10-08)_\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **Clients:** small trucking companies _(text reply, 2026-10-06)_\n- **Clients:** small trucking companies and a few logistics outfits _(call, 2026-10-08)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n- **Best way to reach them:** text _(text reply, 2026-10-06)_\n- **Typical deal size:** around $150k _(text reply, 2026-10-06)_\n- **Where they work:** Oklahoma _(call, 2026-10-08)_\n- **Where they work:** Texas _(call, 2026-10-08)_\n- **Best time to reach them:** mornings _(text reply, 2026-10-06)_\n\n## Open loops\n- [ ] We: Send Dana the new submission link and equipment program summary. (by 2026-10-09) _(since 2026-10-08)_\n- [ ] We: Set up a funnel page draft for Dana. (by 2026-10-16) _(since 2026-10-08)_\n- [ ] Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09) _(since 2026-10-08)_\n\n## Revenue plan\n_Drafted once they've engaged and the profile is at least 60% complete._\n\n## Background\n- **Past issues:** The portal changed and she didn't know who to call anymore _(call, 2026-10-08)_\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n- **Note:** It's been a slow year on my end _(text reply, 2026-10-06)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n- Clients: small trucking companies _(text reply, 2026-10-06)_ %%client_types reply m_88639893dfd9%%\n- Typical deal size: around $150k _(text reply, 2026-10-06)_ %%deal_size reply m_88639893dfd9%%\n- Best way to reach them: text _(text reply, 2026-10-06)_ %%channel reply m_88639893dfd9%%\n- Best time to reach them: mornings _(text reply, 2026-10-06)_ %%best_time reply m_88639893dfd9%%\n- Note: It's been a slow year on my end _(text reply, 2026-10-06)_ %%note reply m_88639893dfd9%%\n- Goals: get back to sending a couple deals a month _(text reply, 2026-10-07)_ %%goals reply m_faf3413d0dbb%%\n- What would help: a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_ %%needs reply m_faf3413d0dbb%%\n- Goals: get back to two deals a month by the end of the year _(call, 2026-10-08)_ %%goals call readai:rai-7f3c2%%\n- Clients: small trucking companies and a few logistics outfits _(call, 2026-10-08)_ %%client_types call readai:rai-7f3c2%%\n- What would help: A simple page clients can use to apply without her in the middle _(call, 2026-10-08)_ %%needs call readai:rai-7f3c2%%\n- Where they work: Oklahoma _(call, 2026-10-08)_ %%regions call readai:rai-7f3c2%%\n- Where they work: Texas _(call, 2026-10-08)_ %%regions call readai:rai-7f3c2%%\n- What's gotten in the way: the portal changed, she didn't know who to call anymore, and it was a slow summer _(call, 2026-10-08)_ %%blockers call readai:rai-7f3c2%%\n- Past issues: The portal changed and she didn't know who to call anymore _(call, 2026-10-08)_ %%past_issues call readai:rai-7f3c2%%\n- Open loop: We: Send Dana the new submission link and equipment program summary. (by 2026-10-09) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n- Open loop: We: Set up a funnel page draft for Dana. (by 2026-10-16) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n- Open loop: Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n\n## Calls\n- 2026-10-08 [[Calls/2026-10-08 Dana Reyes|Dana Reyes x Justin, partner call]] \u2014 Dana works with small trucking companies and logistics outfits, mainly in Texas and Oklahoma, whose needs include trucks and working capital. She wants to return to two deals a month by year-end, would like a simple client application page, and plans to send the Martinez Trucking file tomorrow.\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 replied (general_reply): Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usu\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (reply): Sorry it's been a slow year, Dana. What are you working toward this year?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): I want to get back to sending a couple deals a month. What would help is a simple page I can send my clients to so they can apply.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): That makes sense-one simple link could make it easier for clients to apply. Would a quick 15-minute call this week work to talk through it?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): Sure, Thursday morning works.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): Great, Dana! You can grab a time Thursday morning here: https://example.com/book/justin Looking forward to chatting.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 follow-up set for [[Daily/2026-10-09]] \u2014 From the call on 2026-10-08: Send Dana the new submission link and equipment program summary.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 follow-up set for [[Daily/2026-10-16]] \u2014 From the call on 2026-10-08: Set up a funnel page draft for Dana.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 call: [[Calls/2026-10-08 Dana Reyes|Dana Reyes x Justin, partner call]]\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 100,
+        "next_step": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    },
+    {
+      "n": 7,
+      "title": "Her revenue plan",
+      "day": "2026-10-08",
+      "output": {
+        "plan": "**Who they serve:** Small trucking companies and a few logistics outfits in Oklahoma and Texas  \n**What their clients need:** Equipment financing and working capital, around $150k  \n**7FF programs to lead with:** Business Term Loan, Short-Term Business Loan, Business Line of Credit  \n**Their goal:** Get back to sending two deals a month by the end of the year  \n**Next 30 days:**\n1. We: Send Dana the new submission link and equipment program summary (by 2026-10-09).\n2. We: Set up a funnel page draft for Dana (by 2026-10-16).\n**How we'll know it's working:** Track the number of deals Dana submits each month."
+      },
+      "profile": {
+        "completeness": 100,
+        "summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.",
+        "values": {
+          "client_types": [
+            "small trucking and logistics companies",
+            "owner-operators growing their fleets",
+            "small trucking companies",
+            "small trucking companies and a few logistics outfits"
+          ],
+          "deal_types": [
+            "equipment financing",
+            "working capital"
+          ],
+          "note": [
+            "Asked how to find the new partner portal",
+            "said things got slow after summer",
+            "It's been a slow year on my end"
+          ],
+          "tier": [
+            "Executive"
+          ],
+          "niche": [
+            "business consultant"
+          ],
+          "deal_size": [
+            "around $150k"
+          ],
+          "channel": [
+            "text"
+          ],
+          "best_time": [
+            "mornings"
+          ],
+          "goals": [
+            "get back to sending a couple deals a month",
+            "get back to two deals a month by the end of the year"
+          ],
+          "needs": [
+            "a simple page I can send my clients to so they can apply",
+            "A simple page clients can use to apply without her in the middle"
+          ],
+          "regions": [
+            "Oklahoma",
+            "Texas"
+          ],
+          "blockers": [
+            "the portal changed, she didn't know who to call anymore, and it was a slow summer"
+          ],
+          "past_issues": [
+            "The portal changed and she didn't know who to call anymore"
+          ],
+          "open_loop": [
+            "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)"
+          ]
+        },
+        "open_loops": [
+          {
+            "id": 23,
+            "text": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "since": "2026-10-08"
+          },
+          {
+            "id": 24,
+            "text": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "since": "2026-10-08"
+          },
+          {
+            "id": 25,
+            "text": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+            "since": "2026-10-08"
+          }
+        ],
+        "next_question": null,
+        "next_step": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+        "revenue_plan": "**Who they serve:** Small trucking companies and a few logistics outfits in Oklahoma and Texas  \n**What their clients need:** Equipment financing and working capital, around $150k  \n**7FF programs to lead with:** Business Term Loan, Short-Term Business Loan, Business Line of Credit  \n**Their goal:** Get back to sending two deals a month by the end of the year  \n**Next 30 days:**\n1. We: Send Dana the new submission link and equipment program summary (by 2026-10-09).\n2. We: Set up a funnel page draft for Dana (by 2026-10-16).\n**How we'll know it's working:** Track the number of deals Dana submits each month.",
+        "filled_slots": [
+          "tier",
+          "niche",
+          "goals",
+          "client_types",
+          "needs",
+          "deal_types",
+          "channel",
+          "deal_size",
+          "regions",
+          "best_time"
+        ],
+        "tier": "Executive",
+        "joined": "2023-04-11",
+        "deals": 7,
+        "manager": "Justin",
+        "kickoff": "kickoff-done"
+      },
+      "facts": [
+        {
+          "slot": "client_types",
+          "value": "small trucking and logistics companies",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "client_types",
+          "value": "owner-operators growing their fleets",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "equipment financing",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "deal_types",
+          "value": "working capital",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "Asked how to find the new partner portal",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "note",
+          "value": "said things got slow after summer",
+          "source_type": "zoho_history",
+          "observed_on": "2025-11-02"
+        },
+        {
+          "slot": "tier",
+          "value": "Executive",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "niche",
+          "value": "business consultant",
+          "source_type": "zoho",
+          "observed_on": "2026-10-05"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "deal_size",
+          "value": "around $150k",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "channel",
+          "value": "text",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "best_time",
+          "value": "mornings",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "note",
+          "value": "It's been a slow year on my end",
+          "source_type": "reply",
+          "observed_on": "2026-10-06"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to sending a couple deals a month",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "needs",
+          "value": "a simple page I can send my clients to so they can apply",
+          "source_type": "reply",
+          "observed_on": "2026-10-07"
+        },
+        {
+          "slot": "goals",
+          "value": "get back to two deals a month by the end of the year",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "client_types",
+          "value": "small trucking companies and a few logistics outfits",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "needs",
+          "value": "A simple page clients can use to apply without her in the middle",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "regions",
+          "value": "Oklahoma",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "regions",
+          "value": "Texas",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "blockers",
+          "value": "the portal changed, she didn't know who to call anymore, and it was a slow summer",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "past_issues",
+          "value": "The portal changed and she didn't know who to call anymore",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        },
+        {
+          "slot": "open_loop",
+          "value": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+          "source_type": "call",
+          "observed_on": "2026-10-08"
+        }
+      ],
+      "graph": {
+        "nodes": [
+          {
+            "id": "partner",
+            "label": "Dana Reyes",
+            "type": "partner"
+          },
+          {
+            "id": "hub:manager:Justin",
+            "label": "Justin",
+            "type": "hub-manager"
+          },
+          {
+            "id": "hub:niche:Business consultant",
+            "label": "Business consultant",
+            "type": "hub-niche"
+          },
+          {
+            "id": "hub:product:Equipment financing",
+            "label": "Equipment financing",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:product:Working capital",
+            "label": "Working capital",
+            "type": "hub-product"
+          },
+          {
+            "id": "hub:source:LinkedIn",
+            "label": "LinkedIn",
+            "type": "hub-source"
+          },
+          {
+            "id": "hub:tier:Executive",
+            "label": "Executive",
+            "type": "hub-tier"
+          },
+          {
+            "id": "fact:3",
+            "label": "small trucking and logistics companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:4",
+            "label": "owner-operators growing their fleets",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:5",
+            "label": "equipment financing",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:6",
+            "label": "working capital",
+            "type": "fact",
+            "slot": "What their clients need",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:7",
+            "label": "Asked how to find the new partner portal",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:8",
+            "label": "said things got slow after summer",
+            "type": "fact",
+            "slot": "Note",
+            "source": "zoho_history"
+          },
+          {
+            "id": "fact:9",
+            "label": "small trucking companies",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "reply"
+          },
+          {
+            "id": "fact:10",
+            "label": "around $150k",
+            "type": "fact",
+            "slot": "Typical deal size",
+            "source": "reply"
+          },
+          {
+            "id": "fact:11",
+            "label": "text",
+            "type": "fact",
+            "slot": "Best way to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:12",
+            "label": "mornings",
+            "type": "fact",
+            "slot": "Best time to reach them",
+            "source": "reply"
+          },
+          {
+            "id": "fact:13",
+            "label": "It's been a slow year on my end",
+            "type": "fact",
+            "slot": "Note",
+            "source": "reply"
+          },
+          {
+            "id": "fact:14",
+            "label": "get back to sending a couple deals a month",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "reply"
+          },
+          {
+            "id": "fact:15",
+            "label": "a simple page I can send my clients to so they can apply",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "reply"
+          },
+          {
+            "id": "fact:16",
+            "label": "get back to two deals a month by the end of the year",
+            "type": "fact",
+            "slot": "Goals",
+            "source": "call"
+          },
+          {
+            "id": "fact:17",
+            "label": "small trucking companies and a few logistics outfits",
+            "type": "fact",
+            "slot": "Clients",
+            "source": "call"
+          },
+          {
+            "id": "fact:18",
+            "label": "A simple page clients can use to apply without her in the middle",
+            "type": "fact",
+            "slot": "What would help",
+            "source": "call"
+          },
+          {
+            "id": "fact:19",
+            "label": "Oklahoma",
+            "type": "fact",
+            "slot": "Where they work",
+            "source": "call"
+          },
+          {
+            "id": "fact:20",
+            "label": "Texas",
+            "type": "fact",
+            "slot": "Where they work",
+            "source": "call"
+          },
+          {
+            "id": "fact:21",
+            "label": "the portal changed, she didn't know who to call anymore, and it was a slow summer",
+            "type": "fact",
+            "slot": "What's gotten in the way",
+            "source": "call"
+          },
+          {
+            "id": "fact:22",
+            "label": "The portal changed and she didn't know who to call anymore",
+            "type": "fact",
+            "slot": "Past issues",
+            "source": "call"
+          },
+          {
+            "id": "loop:23",
+            "label": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+            "type": "loop"
+          },
+          {
+            "id": "loop:24",
+            "label": "We: Set up a funnel page draft for Dana. (by 2026-10-16)",
+            "type": "loop"
+          },
+          {
+            "id": "loop:25",
+            "label": "Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09)",
+            "type": "loop"
+          },
+          {
+            "id": "call:0",
+            "label": "Call 2026-10-08",
+            "type": "call"
+          }
+        ],
+        "links": [
+          {
+            "source": "partner",
+            "target": "hub:manager:Justin"
+          },
+          {
+            "source": "partner",
+            "target": "hub:niche:Business consultant"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Equipment financing"
+          },
+          {
+            "source": "partner",
+            "target": "hub:product:Working capital"
+          },
+          {
+            "source": "partner",
+            "target": "hub:source:LinkedIn"
+          },
+          {
+            "source": "partner",
+            "target": "hub:tier:Executive"
+          },
+          {
+            "source": "partner",
+            "target": "fact:3"
+          },
+          {
+            "source": "partner",
+            "target": "fact:4"
+          },
+          {
+            "source": "partner",
+            "target": "fact:5"
+          },
+          {
+            "source": "partner",
+            "target": "fact:6"
+          },
+          {
+            "source": "partner",
+            "target": "fact:7"
+          },
+          {
+            "source": "partner",
+            "target": "fact:8"
+          },
+          {
+            "source": "partner",
+            "target": "fact:9"
+          },
+          {
+            "source": "partner",
+            "target": "fact:10"
+          },
+          {
+            "source": "partner",
+            "target": "fact:11"
+          },
+          {
+            "source": "partner",
+            "target": "fact:12"
+          },
+          {
+            "source": "partner",
+            "target": "fact:13"
+          },
+          {
+            "source": "partner",
+            "target": "fact:14"
+          },
+          {
+            "source": "partner",
+            "target": "fact:15"
+          },
+          {
+            "source": "partner",
+            "target": "fact:16"
+          },
+          {
+            "source": "partner",
+            "target": "fact:17"
+          },
+          {
+            "source": "partner",
+            "target": "fact:18"
+          },
+          {
+            "source": "partner",
+            "target": "fact:19"
+          },
+          {
+            "source": "partner",
+            "target": "fact:20"
+          },
+          {
+            "source": "partner",
+            "target": "fact:21"
+          },
+          {
+            "source": "partner",
+            "target": "fact:22"
+          },
+          {
+            "source": "partner",
+            "target": "loop:23"
+          },
+          {
+            "source": "partner",
+            "target": "loop:24"
+          },
+          {
+            "source": "partner",
+            "target": "loop:25"
+          },
+          {
+            "source": "partner",
+            "target": "call:0"
+          }
+        ]
+      },
+      "note": "---\ntype: partner\nghl_contact_id: c_7c9d30055291\ntier: Executive\nplan: \"Executive Partner, annual\"\nniche: business consultant\njoined: 2023-04-11\ntenure_months: 42\nlifecycle: reactivated\nsource: linkedin\ndeals: 7\nlast_deal: 2025-06-18\nlast_reply: 2026-10-08\npreferred_channel: text\nmanager: \"[[Managers/Justin]]\"\nprofile_completeness: 100\nkickoff: kickoff-done\nkickoff_variant: C\nnext_step: \"We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)\"\nupdated: 2026-10-08\n---\n\n# Dana Reyes\n\n**Tier** [[Tiers/Executive|Executive]] \u00b7 **Does** [[Niches/Business consultant|Business consultant]] \u00b7 **Manager** [[Managers/Justin|Justin]] \u00b7 **Came from** [[Sources/LinkedIn|LinkedIn]] \u00b7 **Clients need** [[Products/Equipment financing|Equipment financing]], [[Products/Working capital|Working capital]]\n\n## Profile\nA business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.\n\nProfile 100% complete.\n\n## What they want\n- **Goals:** get back to sending a couple deals a month _(text reply, 2026-10-07)_\n- **Goals:** get back to two deals a month by the end of the year _(call, 2026-10-08)_\n- **What would help:** a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_\n- **What would help:** A simple page clients can use to apply without her in the middle _(call, 2026-10-08)_\n- **What's gotten in the way:** the portal changed, she didn't know who to call anymore, and it was a slow summer _(call, 2026-10-08)_\n\n## How they work\n- **Tier:** Executive _(Zoho, 2026-10-05)_\n- **What they do:** business consultant _(Zoho, 2026-10-05)_\n- **Clients:** small trucking and logistics companies _(Zoho notes, 2025-11-02)_\n- **Clients:** owner-operators growing their fleets _(Zoho notes, 2025-11-02)_\n- **Clients:** small trucking companies _(text reply, 2026-10-06)_\n- **Clients:** small trucking companies and a few logistics outfits _(call, 2026-10-08)_\n- **What their clients need:** equipment financing _(Zoho notes, 2025-11-02)_\n- **What their clients need:** working capital _(Zoho notes, 2025-11-02)_\n- **Best way to reach them:** text _(text reply, 2026-10-06)_\n- **Typical deal size:** around $150k _(text reply, 2026-10-06)_\n- **Where they work:** Oklahoma _(call, 2026-10-08)_\n- **Where they work:** Texas _(call, 2026-10-08)_\n- **Best time to reach them:** mornings _(text reply, 2026-10-06)_\n\n## Open loops\n- [ ] We: Send Dana the new submission link and equipment program summary. (by 2026-10-09) _(since 2026-10-08)_\n- [ ] We: Set up a funnel page draft for Dana. (by 2026-10-16) _(since 2026-10-08)_\n- [ ] Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09) _(since 2026-10-08)_\n\n## Revenue plan\n**Who they serve:** Small trucking companies and a few logistics outfits in Oklahoma and Texas  \n**What their clients need:** Equipment financing and working capital, around $150k  \n**7FF programs to lead with:** Business Term Loan, Short-Term Business Loan, Business Line of Credit  \n**Their goal:** Get back to sending two deals a month by the end of the year  \n**Next 30 days:**\n1. We: Send Dana the new submission link and equipment program summary (by 2026-10-09).\n2. We: Set up a funnel page draft for Dana (by 2026-10-16).\n**How we'll know it's working:** Track the number of deals Dana submits each month.\n\n## Background\n- **Past issues:** The portal changed and she didn't know who to call anymore _(call, 2026-10-08)_\n- **Note:** Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_\n- **Note:** said things got slow after summer _(Zoho notes, 2025-11-02)_\n- **Note:** It's been a slow year on my end _(text reply, 2026-10-06)_\n**From their record:**\n- 2025-11-02 Zoho note: Dana asked how to find the new partner portal. Said things got slow after summer.\n- 2025-06-18 Zoho deal: Ramirez Hauling, working capital (funded)\n- 2024-08-20 Zoho deal: Lone Star Freight, equipment (funded)\n- 2023-04-12 Zoho note: Onboarding call. Dana consults for small trucking and logistics companies. Mostly work with owner-operators who are growing their fleets.\n\n## Facts\n- Clients: small trucking and logistics companies _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- Clients: owner-operators growing their fleets _(Zoho notes, 2025-11-02)_ %%client_types zoho_history ZX-10482%%\n- What their clients need: equipment financing _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- What their clients need: working capital _(Zoho notes, 2025-11-02)_ %%deal_types zoho_history ZX-10482%%\n- Note: Asked how to find the new partner portal _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Note: said things got slow after summer _(Zoho notes, 2025-11-02)_ %%note zoho_history ZX-10482%%\n- Tier: Executive _(Zoho, 2026-10-05)_ %%tier zoho ZX-10482%%\n- What they do: business consultant _(Zoho, 2026-10-05)_ %%niche zoho ZX-10482%%\n- Clients: small trucking companies _(text reply, 2026-10-06)_ %%client_types reply m_88639893dfd9%%\n- Typical deal size: around $150k _(text reply, 2026-10-06)_ %%deal_size reply m_88639893dfd9%%\n- Best way to reach them: text _(text reply, 2026-10-06)_ %%channel reply m_88639893dfd9%%\n- Best time to reach them: mornings _(text reply, 2026-10-06)_ %%best_time reply m_88639893dfd9%%\n- Note: It's been a slow year on my end _(text reply, 2026-10-06)_ %%note reply m_88639893dfd9%%\n- Goals: get back to sending a couple deals a month _(text reply, 2026-10-07)_ %%goals reply m_faf3413d0dbb%%\n- What would help: a simple page I can send my clients to so they can apply _(text reply, 2026-10-07)_ %%needs reply m_faf3413d0dbb%%\n- Goals: get back to two deals a month by the end of the year _(call, 2026-10-08)_ %%goals call readai:rai-7f3c2%%\n- Clients: small trucking companies and a few logistics outfits _(call, 2026-10-08)_ %%client_types call readai:rai-7f3c2%%\n- What would help: A simple page clients can use to apply without her in the middle _(call, 2026-10-08)_ %%needs call readai:rai-7f3c2%%\n- Where they work: Oklahoma _(call, 2026-10-08)_ %%regions call readai:rai-7f3c2%%\n- Where they work: Texas _(call, 2026-10-08)_ %%regions call readai:rai-7f3c2%%\n- What's gotten in the way: the portal changed, she didn't know who to call anymore, and it was a slow summer _(call, 2026-10-08)_ %%blockers call readai:rai-7f3c2%%\n- Past issues: The portal changed and she didn't know who to call anymore _(call, 2026-10-08)_ %%past_issues call readai:rai-7f3c2%%\n- Open loop: We: Send Dana the new submission link and equipment program summary. (by 2026-10-09) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n- Open loop: We: Set up a funnel page draft for Dana. (by 2026-10-16) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n- Open loop: Dana: Send Justin the file for Martinez Trucking, which needs two trucks. (by 2026-10-09) _(call, 2026-10-08)_ %%open_loop call readai:rai-7f3c2%%\n\n## Calls\n- 2026-10-08 [[Calls/2026-10-08 Dana Reyes|Dana Reyes x Justin, partner call]] \u2014 Dana works with small trucking companies and logistics outfits, mainly in Texas and Oklahoma, whose needs include trucks and working capital. She wants to return to two deals a month by year-end, would like a simple client application page, and plans to send the Martinez Trucking file tomorrow.\n\n## Manager notes\n_Yours. The agent reads this section and never edits it._\n\n## Timeline\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 profile built from zoho: 4 history items, 8 facts, 40% complete\n- 2026-10-05 [[Daily/2026-10-05]] \u2014 mock sms (kickoff): Hey Dana! It's Justin at 7 Figures Funding. You've sent us 7 deals since 2023, and I'm your new partner manager. I'd love to learn more abou\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 lifecycle \u2014 \u2192 aff:reactivated (replied: general_reply)\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 replied (general_reply): Hey Justin! Good to hear from you. Honestly it's been a slow year on my end. Most of my clients are small trucking companies and they always need equipment, usu\n- 2026-10-06 [[Daily/2026-10-06]] \u2014 mock sms (reply): Sorry it's been a slow year, Dana. What are you working toward this year?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): I want to get back to sending a couple deals a month. What would help is a simple page I can send my clients to so they can apply.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): That makes sense-one simple link could make it easier for clients to apply. Would a quick 15-minute call this week work to talk through it?\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 replied (general_reply): Sure, Thursday morning works.\n- 2026-10-07 [[Daily/2026-10-07]] \u2014 mock sms (reply): Great, Dana! You can grab a time Thursday morning here: https://example.com/book/justin Looking forward to chatting.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 follow-up set for [[Daily/2026-10-09]] \u2014 From the call on 2026-10-08: Send Dana the new submission link and equipment program summary.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 follow-up set for [[Daily/2026-10-16]] \u2014 From the call on 2026-10-08: Set up a funnel page draft for Dana.\n- 2026-10-08 [[Daily/2026-10-08]] \u2014 call: [[Calls/2026-10-08 Dana Reyes|Dana Reyes x Justin, partner call]]\n",
+      "ghl_fields": {
+        "tier": "Executive",
+        "profile_completeness": 100,
+        "next_step": "We: Send Dana the new submission link and equipment program summary. (by 2026-10-09)",
+        "profile_summary": "A business consultant on the Executive tier, partner since April 2023. Has sent 7 deals, the last in June 2025. Works mostly with owner-operators growing their fleets and small trucking companies and a few logistics outfits; their clients usually need equipment financing and working capital (around $150k). Working toward: get back to two deals a month by the end of the year. Best reached by text, mornings. 3 open loops.",
+        "obsidian_note": "Partners/Dana Reyes (055291).md"
+      }
+    }
+  ]
+}

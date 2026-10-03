@@ -1,0 +1,119 @@
+{
+  "source": "readai",
+  "id": "rai-7f3c2",
+  "title": "Dana Reyes x Justin, partner call",
+  "start_time": "2026-10-08T10:00:00",
+  "duration_minutes": 24,
+  "participants": [
+    {
+      "name": "Justin",
+      "email": "justin@example.com"
+    },
+    {
+      "name": "Dana Reyes",
+      "email": "dana.reyes@example.com"
+    }
+  ],
+  "transcript": {
+    "speaker_blocks": [
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 0,
+        "words": "Hey Dana, thanks for making time. Quick heads up, I record my calls so I don't lose track of what we talk about. That okay?"
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 9,
+        "words": "Totally fine."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 12,
+        "words": "Great. So tell me where things are at."
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 16,
+        "words": "So most of my clients are small trucking companies and a few logistics outfits, mostly in Texas and Oklahoma. They grow in spurts, so it's usually equipment, a truck or two at a time, or working capital to cover payroll in a slow month."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 41,
+        "words": "What size deals are we usually talking?"
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 45,
+        "words": "Trucks run $100k to $250k, so usually around $150k."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 52,
+        "words": "And what got in the way of sending deals this year?"
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 57,
+        "words": "Honestly I haven't sent any because the portal changed and I didn't know who to call anymore. And it was a slow summer."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 70,
+        "words": "That's on us. I'm your person now, text me anytime."
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 76,
+        "words": "My goal is to get back to two deals a month by the end of the year. I'd love to have a simple page I can put in my email signature so clients can apply without me in the middle."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 95,
+        "words": "We can do that. I'll set up a funnel page draft for you next week, and I'll send you the new submission link and the equipment program summary by Friday."
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 110,
+        "words": "Perfect. Actually I have one now, Martinez Trucking needs two trucks. I'll send you the file tomorrow."
+      },
+      {
+        "speaker": {
+          "name": "Justin"
+        },
+        "start_time": 121,
+        "words": "Love it. I'll watch for it."
+      },
+      {
+        "speaker": {
+          "name": "Dana Reyes"
+        },
+        "start_time": 125,
+        "words": "Mornings are best to reach me, I'm on the road most afternoons."
+      }
+    ]
+  }
+}

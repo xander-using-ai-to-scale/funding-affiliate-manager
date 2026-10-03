@@ -160,6 +160,10 @@ mcp_servers:
       FAM_DEMO_MODE: "__FAM_DEMO_MODE__"
       GHL_API_KEY: "__GHL_API_KEY__"
       GHL_LOCATION_ID: "__GHL_LOCATION_ID__"
+      OPENROUTER_API_KEY: "__OPENROUTER_API_KEY__"  # drafting and fact extraction (fam.llm); blank model = templates
+      FAM_DRAFT_MODEL: "__FAM_DRAFT_MODEL__"
+      FAM_FALLBACK_MODEL: "__FAM_FALLBACK_MODEL__"
+      FAM_CALL_INBOX: "__FAM_CALL_INBOX__"
     trust: full
     timeout: 900
     tools:
@@ -223,17 +227,23 @@ mcp_servers:
     timeout: 300
 
   browser-box:
-    # One self-hosted browser (fetch/read/session/status). Serialized: one call at a time.
+    # One self-hosted browser, read tools only. Serialized: one call at a time. Writes
+    # (act, task, computer) stay off; posting goes through Super Browser's approvals.
     url: __BROWSER_BOX_URL__
     headers:
       Authorization: "Bearer __BROWSER_BOX_TOKEN__"
     trust: full
     timeout: 180
+    tools:
+      include: [fetch, read, session, status]
 
   data-box:
-    # Page data: URL -> markdown/text/links, a per-call cost cap (max_cost_usd), async jobs.
+    # Page data: URL -> markdown/text/links, async jobs. A paid rung never runs without
+    # approval. plan/execute/sources (priced pulls via paid enrichment) stay off: SOUL rule.
     url: __DATABOX_URL__
     headers:
       Authorization: "Bearer __DATABOX_TOKEN__"
     trust: full
     timeout: 180
+    tools:
+      include: [status, scrape, job]

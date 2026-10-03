@@ -1,7 +1,7 @@
 """`fam` — command line for the operator, cron, and the demo.
 
     fam status | sweep [--apply] | queue | brief ID | inbox | scorecard | actions [--state S]
-    fam approve ACTION DIGEST --approver NAME     (a human at the terminal)
+    fam approve ACTION DIGEST --approver NAME [--except 4,17]   (a human at the terminal)
     fam execute ACTION
     fam cadence run-standing                      (cron: bulk cadence under standing approvals)
     fam stop "reason" | fam resume --actor NAME
@@ -9,6 +9,17 @@
     fam sim seed [--count 250] [--live --test-email E --test-phone P --test-name N]
     fam sim run [--days 30] [--out sim-output]
     fam sim inbound --text "..." [--contact ID] [--channel sms]   (mock CRM: play an affiliate replying)
+    fam sim relationships [--days 30] [--out sim-output/relationships]   (kickoff → replies → calls → profiles)
+
+  Relationship graph
+    fam profile ID                                 the partner's profile
+    fam graph query [--tier T] [--slot S --contains X] [--hub H] [--min N]
+    fam graph stats | fam graph reindex            (rebuild the facts index from the vault)
+    fam import csv PARTNERS.csv [--history H.csv] | fam import zoho [--limit N] | fam import ghl [--no-kickoff]
+    fam kickoff enroll | draft [--size N] [--model|--template] | nudge | status
+    fam calls ingest [--ghl] [--file F --contact ID]   (default: the call inbox folder)
+    fam plan ID                                    draft and save the partner's revenue plan
+    fam example partner-journey [--out examples/partner-journey] [--model]
 """
 
 from __future__ import annotations
@@ -46,6 +57,41 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("action_id")
     sp.add_argument("digest")
     sp.add_argument("--approver", required=True)
+    sp.add_argument("--except", dest="exclude", default="", help="message numbers to hold back, e.g. 4,17")
+    sp = sub.add_parser("profile")
+    sp.add_argument("contact_id")
+    sp = sub.add_parser("graph")
+    sp.add_argument("what", choices=["query", "stats", "reindex"])
+    sp.add_argument("--tier", default="")
+    sp.add_argument("--niche", default="")
+    sp.add_argument("--slot", default="")
+    sp.add_argument("--contains", default="")
+    sp.add_argument("--hub", default="")
+    sp.add_argument("--min", type=int, default=0)
+    sp.add_argument("--limit", type=int, default=50)
+    sp = sub.add_parser("import")
+    sp.add_argument("source", choices=["csv", "zoho", "ghl"])
+    sp.add_argument("path", nargs="?", default="")
+    sp.add_argument("--history", default="")
+    sp.add_argument("--limit", type=int, default=0)
+    sp.add_argument("--no-kickoff", action="store_true", help="don't tag quiet partners for the kickoff")
+    sp = sub.add_parser("kickoff")
+    sp.add_argument("what", choices=["enroll", "draft", "nudge", "status"])
+    sp.add_argument("--size", type=int, default=0)
+    group = sp.add_mutually_exclusive_group()
+    group.add_argument("--model", action="store_true", help="draft with FAM_DRAFT_MODEL (default when it is set)")
+    group.add_argument("--template", action="store_true", help="draft from the framework templates only")
+    sp = sub.add_parser("calls")
+    sp.add_argument("what", choices=["ingest"])
+    sp.add_argument("--ghl", action="store_true", help="GoHighLevel phone calls instead of the call inbox")
+    sp.add_argument("--file", default="")
+    sp.add_argument("--contact", default="")
+    sp = sub.add_parser("plan")
+    sp.add_argument("contact_id")
+    sp = sub.add_parser("example")
+    sp.add_argument("what", choices=["partner-journey"])
+    sp.add_argument("--out", default="examples/partner-journey")
+    sp.add_argument("--model", action="store_true", help="real model drafts and extraction (needs FAM_DRAFT_MODEL)")
     sp = sub.add_parser("execute")
     sp.add_argument("action_id")
     sp = sub.add_parser("cadence")
@@ -58,7 +104,7 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("what", choices=["bootstrap"])
     sp.add_argument("--apply", action="store_true")
     sp = sub.add_parser("sim")
-    sp.add_argument("what", choices=["seed", "run", "inbound"])
+    sp.add_argument("what", choices=["seed", "run", "inbound", "relationships"])
     sp.add_argument("--count", type=int, default=250)
     sp.add_argument("--days", type=int, default=30)
     sp.add_argument("--out", default="sim-output")
@@ -76,6 +122,18 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         settings = Settings.load()
+        if args.cmd == "example":
+            from . import example
+            _print(example.partner_journey(settings, Path(args.out).resolve(), use_model=args.model))
+            return 0
+        if args.cmd == "sim" and args.what == "relationships":
+            from . import relsim
+            start = date.fromisoformat(args.start) if args.start else date.today()
+            out = Path(args.out if args.out != "sim-output" else "sim-output/relationships").resolve()
+            relsim.run(settings, out, start=start, days=args.days, count=args.count)
+            print((out / "report.md").read_text())
+            print(f"\nreport: {out / 'report.md'}\nvault:  {out / 'vault'}")
+            return 0
         if args.cmd == "sim":
             from . import sim
             start = date.fromisoformat(args.start) if args.start else date.today()
@@ -143,7 +201,55 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "actions":
             _print([engine._action_view(r) for r in engine.store.list_actions(args.state)])
         elif args.cmd == "approve":
-            _print(engine.approve(args.action_id, args.digest, args.approver))
+            held = [int(x) for x in args.exclude.replace(" ", "").split(",") if x]
+            _print(engine.approve(args.action_id, args.digest, args.approver, held))
+        elif args.cmd == "profile":
+            _print(engine.profile_get(args.contact_id))
+        elif args.cmd == "graph":
+            if args.what == "stats":
+                _print(engine.graph.stats())
+            elif args.what == "reindex":
+                _print(engine.graph.reindex())
+            else:
+                _print(engine.graph.query(tier=args.tier, niche=args.niche, slot=args.slot, contains=args.contains,
+                                          hub=args.hub, min_completeness=args.min, limit=args.limit))
+        elif args.cmd == "import":
+            from . import sources
+            if args.source == "csv":
+                if not args.path:
+                    raise FamError("fam import csv PARTNERS.csv [--history HISTORY.csv]")
+                src = sources.CsvSource(Path(args.path), Path(args.history) if args.history else None).records()
+            elif args.source == "zoho":
+                src = sources.ZohoSource(sources.zoho_mapping(settings)).records(limit=args.limit)
+            else:
+                src = sources.GhlHistorySource(engine).records()
+            _print(sources.import_records(engine, src, mark_kickoff=not args.no_kickoff, limit=args.limit))
+        elif args.cmd == "kickoff":
+            from . import drafting, kickoff
+            use = True if args.model else False if args.template else None
+            drafter = drafting.open_drafter(settings.kickoff, use_model=use)
+            if args.what == "enroll":
+                _print(kickoff.enroll(engine))
+            elif args.what == "draft":
+                result = kickoff.draft_wave(engine, args.size, drafter=drafter)
+                if result.get("ok"):
+                    print(result["action"]["approval_card"] + "\n")
+                _print({k: v for k, v in result.items() if k not in {"action", "drafts"}})
+            elif args.what == "nudge":
+                result = kickoff.draft_nudges(engine, drafter=drafter)
+                print(result["action"]["approval_card"] if result.get("ok") else json.dumps(result))
+            else:
+                _print(kickoff.status(engine))
+        elif args.cmd == "calls":
+            from . import calls
+            if args.file:
+                _print(calls.ingest(engine, calls.parse_file(Path(args.file).expanduser()), contact_id=args.contact))
+            elif args.ghl:
+                _print(calls.poll_ghl(engine, contact_id=args.contact))
+            else:
+                _print(calls.poll_drop(engine))
+        elif args.cmd == "plan":
+            _print(engine.write_revenue_plan(args.contact_id))
         elif args.cmd == "execute":
             _print(engine.execute(args.action_id))
         elif args.cmd == "cadence":

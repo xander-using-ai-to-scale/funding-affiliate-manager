@@ -18,18 +18,22 @@ contact as a GHL note so the demo shows exactly what would have gone out.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import secrets
+import time
+from dataclasses import replace
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from . import cadence
-from .cadence import Affiliate, affiliate_from_contact
+from . import cadence, drafting, extract
+from .cadence import KICKOFF_DONE, KICKOFF_PENDING, KICKOFF_SENT, Affiliate, affiliate_from_contact
 from .config import Settings
 from .errors import ApprovalRequired, FamError
 from .ghl import GHLBackend, open_backend
+from .graph import SOURCE_NAMES, Graph
 from .store import Store, digest, now_iso, stable_json
 from .vault import Vault
 
@@ -44,8 +48,15 @@ BANNED_PHRASES = (
     "can't lose",
     "cannot lose",
 )
+# Partner messages go out in the named manager's voice: never about AI, and never a claim about who is typing.
+VOICE_LINT = (re.compile(r"\bAI\b"),
+              re.compile(r"artificial intelligence|chat ?bot|\bbots?\b|language model|automated (?:message|text|"
+                         r"reply|system)|virtual assistant|ai assistant|drafted (?:by|with)|not a (?:bot|robot)|"
+                         r"(?:i'?m|i am) (?:a )?(?:real )?(?:person|human)\b", re.I))
+REPLY_PERSONALLY_TAG = "fam:reply-personally"
+KICKOFF_KINDS = {"kickoff", "kickoff_nudge"}
 SERVICES = {"funnel", "reactivation", "email_campaigns", "social", "crm_help"}
-MANAGER_TASK_PREFIXES = ("CALL ", "Answer ", "Scope ")  # human work; a sent touch never closes these
+MANAGER_TASK_PREFIXES = ("CALL ", "Answer ", "Scope ", "Reply personally")  # human work; a sent touch never closes these
 MANAGER_TASK_MARK = "[For the manager]"
 SERVICE_LABELS = {"funnel": "a funnel page", "reactivation": "lead reactivation", "email_campaigns": "email campaigns",
                   "social": "social content", "crm_help": "CRM help"}
@@ -77,8 +88,24 @@ class FamEngine:
         self.store = Store(self.settings.state_dir / "fam.sqlite3")
         self.tz = ZoneInfo(self.settings.cadence["timezone"])
         self.vault = Vault(self.settings.vault_dir, self.settings.cadence["timezone"])
+        kick = self.settings.kickoff
+        self.graph = Graph(self.store, self.vault, self.settings.profile_schema,
+                           default_manager=str(kick.get("default_sender", "")),
+                           generic_managers=kick.get("generic_manager_names", []))
         self._today = today
         self.actor = os.getenv("FAM_ACTOR", "funding-affiliate-manager")
+        self._extractor: Any = None
+
+    @property
+    def extractor(self) -> Any:
+        """Facts from replies and calls: the model when FAM_DRAFT_MODEL is set, keyword rules otherwise."""
+        if self._extractor is None:
+            self._extractor = extract.open_extractor(list(self.graph.slots))
+        return self._extractor
+
+    @extractor.setter
+    def extractor(self, value: Any) -> None:
+        self._extractor = value
 
     # ── clock ────────────────────────────────────────────────────────────────
     def today(self) -> date:
@@ -183,8 +210,11 @@ class FamEngine:
             "open_tasks": tasks,
             "recent_notes": notes,
             "recent_messages": messages[:10],
-            "drafting_rules": "Use knowledge/funding/05-conversation-playbook.md. Short, warm, peer-to-peer. "
-                              "No guaranteed approvals, rates, or income claims.",
+            "profile": self.profile_get(contact_id, aff=aff),
+            "drafting_rules": "Use knowledge/funding/05-conversation-playbook.md and 07-kickoff-framework.md. Write as "
+                              "the partner's manager (profile.manager), short, warm, peer-to-peer, one question. "
+                              "Build on profile.summary and their own words. Never mention AI or drafting. No "
+                              "guaranteed approvals, rates, or income claims.",
         }
 
     def daily_queue(self) -> dict[str, Any]:
@@ -198,20 +228,114 @@ class FamEngine:
                 "bulk_counts": plan["bulk_counts"]}
 
     def reply_inbox(self, limit: int = 25) -> list[dict[str, Any]]:
+        """Every unread inbound text since our last message, per partner, skipping messages already triaged
+        (GoHighLevel can keep showing a conversation as unread after we've handled it)."""
         rows = []
         for conv in self.ghl.list_conversations(unread_only=True, limit=limit):
             if conv.get("lastMessageDirection") not in (None, "", "inbound"):
                 continue
             contact_id = conv.get("contactId", "")
-            text = conv.get("lastMessageBody") or ""
+            pending: list[dict[str, Any]] = []
+            for m in sorted(self.ghl.list_messages(conv.get("id", ""), limit=20),
+                            key=lambda m: m.get("dateAdded") or "", reverse=True):
+                if m.get("direction") != "inbound":
+                    break
+                if "CALL" not in str(m.get("messageType", "")).upper():  # calls go through call ingest
+                    pending.append(m)
+            pending.reverse()
+            seen = self.graph.seen([str(m.get("id", "")) for m in pending])
+            fresh = [m for m in pending if str(m.get("id", "")) not in seen]
+            if not fresh and pending:
+                continue
+            if not pending:  # a backend without message ids: fall back to the conversation's last message
+                fresh = [{"id": "", "body": conv.get("lastMessageBody") or "", "dateAdded": conv.get("lastMessageDate")}]
+            text = "\n".join((m.get("body") or "").strip() for m in fresh if (m.get("body") or "").strip())
             try:
-                aff = self.affiliate(contact_id)
-                who = aff.summary()
+                who = self.affiliate(contact_id).summary()
             except FamError:
                 who = {"id": contact_id}
-            rows.append({"contact": who, "conversation_id": conv.get("id"), "last_message": text[:600],
-                         "received": conv.get("lastMessageDate"), "baseline": cadence.classify_reply(text)})
+            rows.append({"contact": who, "conversation_id": conv.get("id"), "last_message": text[:1200],
+                         "message_ids": [str(m.get("id")) for m in fresh if m.get("id")],
+                         "messages": [{"id": m.get("id"), "date": m.get("dateAdded"),
+                                       "body": (m.get("body") or "")[:600]} for m in fresh],
+                         "received": fresh[-1].get("dateAdded") if fresh else conv.get("lastMessageDate"),
+                         "baseline": cadence.classify_reply(text)})
         return rows
+
+    # ── the relationship graph ───────────────────────────────────────────────
+    def remember(self, aff: Affiliate, **kwargs: Any) -> dict[str, Any]:
+        """Write to the graph (vault note + index), then mirror the profile into the partner's GHL fields."""
+        out = self.graph.remember(aff, day=self.today().isoformat(), **kwargs)
+        self._sync_profile(aff, out["profile"])
+        return out
+
+    def _sync_profile(self, aff: Affiliate, p: dict[str, Any]) -> None:
+        values = {"profile_summary": p["summary"][:2000], "profile_completeness": p["completeness"],
+                  "next_step": p.get("next_step", "")[:250], "obsidian_note": p.get("note_path", "")}
+        mapped = self.settings.field_ids()
+        values = {k: v for k, v in values.items() if k in mapped and str(aff.fields.get(k) or "") != str(v)}
+        if values:
+            self._set_fields(aff.id, values)
+
+    def profile_get(self, contact_id: str, aff: Affiliate | None = None) -> dict[str, Any]:
+        aff = aff or self.affiliate(contact_id)
+        p = self.graph.profile(aff, self.today())
+        p["next_step"] = self.graph.next_step(p)
+        return p
+
+    def facts_record(self, contact_id: str, facts: list[Any], source_type: str = "manual", source_ref: str = "",
+                     close_loops: list[int] | None = None) -> dict[str, Any]:
+        """Add what the manager or the agent learned outside a reply or call (a conversation, research)."""
+        aff = self.affiliate(contact_id)
+        out = self.remember(aff, facts=facts, source_type=source_type or "manual", source_ref=source_ref,
+                            close_loops=close_loops or [])
+        self.store.audit(actor=self.actor, action="facts.record", resource=contact_id, decision="autonomous",
+                         result="ok", details={"added": len(out["facts_added"]), "source": source_type})
+        return {"ok": True, "facts_added": out["facts_added"], "completeness": out["profile"]["completeness"],
+                "note": out["note"]}
+
+    def pre_call_brief(self, contact_id: str, why: str = "") -> dict[str, Any]:
+        """knowledge/program/pre-call-brief.md, filled from the profile, for the manager before a call."""
+        aff = self.affiliate(contact_id)
+        p = self.profile_get(contact_id, aff=aff)
+        v = p["values"]
+        said = next((i["summary"] for i in p["history"] if i["kind"] == "reply"), "")
+        tasks = [t.get("title", "") for t in self.ghl.list_tasks(contact_id) if not t.get("completed")]
+        fits = sorted({x for n in v.get("deal_types", []) for x in drafting.PRODUCTS.get(n, [])})
+        lines = [
+            f"**Partner:** {p['name']}, {p['niche'] or 'partner'}. Came from {SOURCE_NAMES.get(p['source'], p['source'])}. "
+            f"Joined {p['joined'] or 'unknown'}"
+            + (f". Tier: {p['tier']}" if p["tier"] else ""),
+            f"**Lifecycle:** {p['lifecycle'].removeprefix('aff:') or 'unknown'}. Last reply {p['last_reply'] or 'none'}, last deal "
+            f"{p['last_deal'] or 'none'}, deals sent {p['deals']}",
+            f"**Who they are:** {p['summary']}",
+            f"**What they told us last:** {said.split(') ', 1)[-1] if said else 'nothing yet'}",
+            f"**What they want:** {'; '.join(v.get('goals', []) + v.get('needs', [])) or 'ask'}",
+            f"**Open loops / tasks:** {'; '.join([l['text'] for l in p['open_loops']] + tasks) or 'none'}",
+            f"**Why this call:** {why or 'get to know them and agree a plan'}",
+            f"**Recommended outcome:** a first deal or a date for one, and the next check-in on the calendar",
+            f"**Programs that fit their clients:** {', '.join(fits[:3]) or 'ask what their clients need'}",
+            f"**Ask if it doesn't come up:** {p['next_question']['question'] if p['next_question'] else 'nothing open'}",
+            "**Do NOT promise:** approvals, rates, timelines, commission changes, or payout dates",
+            "**Recording:** say at the start that the call is recorded so you remember what you talked about",
+        ]
+        brief = "\n".join(f"- {line}" for line in lines)
+        self.vault.log("Pre-call brief", f"- {self.vault.partner_link(aff.name, aff.id)}\n{brief}",
+                       day=self.today().isoformat())
+        return {"ok": True, "contact_id": contact_id, "brief": brief}
+
+    def write_revenue_plan(self, contact_id: str, plan: str = "", drafter: Any = None) -> dict[str, Any]:
+        """Save the partner's revenue plan. Without text, draft it from the profile."""
+        aff = self.affiliate(contact_id)
+        if not plan.strip():
+            p = self.profile_get(contact_id, aff=aff)
+            plan = (drafter or drafting.open_drafter(self.settings.kickoff)).revenue_plan(p)
+        self._lint(plan)
+        out = self.remember(aff, revenue_plan=plan, interaction={"kind": "revenue_plan",
+                                                                 "ref": f"{aff.id}:plan:{self.today().isoformat()}",
+                                                                 "summary": "revenue plan written"})
+        self.vault.log("Revenue plan", f"- {self.vault.partner_link(aff.name, aff.id)}", day=self.today().isoformat())
+        return {"ok": True, "plan": plan, "note": out["note"]}
 
     # ── CRM hygiene (autonomous, audited) ─────────────────────────────────────
     def _set_fields(self, contact_id: str, values: dict[str, Any]) -> None:
@@ -228,6 +352,8 @@ class FamEngine:
         self._sync_lifecycle_stage(aff, lifecycle)
         self.vault.affiliate(aff.name, aff.id, f"lifecycle {aff.lifecycle or '—'} → {lifecycle} ({reason})",
                              source=aff.source, lifecycle=lifecycle, day=self.today().isoformat())
+        self.graph.render(replace(aff, tags=[t for t in aff.tags if t not in stale] + [lifecycle]),
+                          self.today().isoformat())
         self.store.audit(actor=self.actor, action="lifecycle.set", resource=aff.id, decision="autonomous",
                          result="ok", details={"from": aff.lifecycle, "to": lifecycle, "reason": reason})
 
@@ -310,16 +436,23 @@ class FamEngine:
         return {"ok": True, "service": service, "opportunity_id": opp.get("id", "")}
 
     def record_reply(self, contact_id: str, text: str, intent: str = "", follow_up_date: str = "",
-                     summary: str = "") -> dict[str, Any]:
-        """Apply the outcome of one inbound reply to the CRM. The model passes its own intent;
-        the keyword baseline fills in when it doesn't, and STOP is always honored."""
+                     summary: str = "", facts: list[Any] | None = None, service: str = "",
+                     message_ids: list[str] | None = None) -> dict[str, Any]:
+        """Apply the outcome of one inbound reply to the CRM and the partner's profile. The model passes its
+        own intent and facts; the keyword baselines fill in when it doesn't. STOP is always honored, and an
+        "is this a bot?" question always goes to the manager instead of getting a drafted answer."""
+        ids = [str(i) for i in (message_ids or []) if i]
+        if ids and len(self.graph.seen(ids)) == len(ids):
+            return {"ok": True, "duplicate": True, "intent": "", "actions_taken": [], "manager_alert": "",
+                    "draft_reply": False}
         aff = self.affiliate(contact_id)
         baseline = cadence.classify_reply(text)
-        if baseline["intent"] == "unsubscribe":
-            intent = "unsubscribe"
+        if baseline["intent"] in {"unsubscribe", "identity_question"}:
+            intent = baseline["intent"]
         intent = intent or baseline["intent"]
         today = self.today()
         taken: list[str] = []
+        loops: list[dict[str, str]] = []
         self._set_fields(contact_id, {"last_reply_date": today.isoformat()})
         taken.append("last_reply_date=today")
         alert = ""
@@ -334,37 +467,77 @@ class FamEngine:
             if aff.lifecycle in {"aff:quiet", "aff:dormant", "aff:dead"} or was in {"aff:quiet", "aff:dormant",
                                                                                     "aff:dead"}:
                 self._apply_lifecycle(aff, "aff:reactivated", f"replied: {intent}")
+                aff = self.affiliate(contact_id)
                 taken.append("lifecycle → aff:reactivated")
+            kickoff = [t for t in aff.tags if t in (KICKOFF_PENDING, KICKOFF_SENT)]
+            if kickoff:  # the conversation has started: the kickoff track is done with them
+                self.ghl.remove_tags(contact_id, kickoff)
+                self.ghl.add_tags(contact_id, [KICKOFF_DONE])
+                aff = replace(aff, tags=[t for t in aff.tags if t not in kickoff] + [KICKOFF_DONE])
+                taken.append("kickoff conversation started")
             self.ghl.add_note(contact_id, f"Reply ({intent}): {summary or text[:400]}")
-            if intent == "has_deal":
+            if intent == "identity_question":
+                self.ghl.add_tags(contact_id, [REPLY_PERSONALLY_TAG])
+                self.schedule_followup(contact_id, today.isoformat(),
+                                       f"{aff.first_name} asked who they're texting with: \"{text[:160]}\". Reply to "
+                                       "them yourself. The agent won't draft anything to them until this task is done.",
+                                       title=f"Reply personally to {aff.first_name}", customer_touch=False)
+                taken.append("personal reply task for the manager")
+                alert = (f"{aff.name} asked if they're texting with a real person. Please reply to them yourself; "
+                         "I won't draft anything to them until your task is done.")
+            elif intent == "has_deal":
                 self.ghl.add_tags(contact_id, ["deal:incoming"])
                 self.schedule_followup(contact_id, today.isoformat(),
                                        f"Has a deal to send — call today. They said: {text[:160]}",
                                        title=f"CALL {aff.first_name} — has a deal", customer_touch=False)
+                loops.append({"slot": "open_loop", "value": f"Call about the deal they have ({today.isoformat()})"})
                 taken.append("deal:incoming + same-day call task")
                 alert = f"🔥 {aff.name} has a deal. Same-day call task created."
             elif intent == "check_back_later":
                 due = cadence.parse_day(follow_up_date) or today + timedelta(days=14)
                 self.schedule_followup(contact_id, due.isoformat(), summary or f"They asked: {text[:160]}")
+                loops.append({"slot": "open_loop", "value": f"Check back on {due.isoformat()}: "
+                                                            f"{(summary or text)[:100]}"})
                 taken.append(f"follow-up task {due.isoformat()}")
             elif intent == "wants_service":
-                self.queue_growth_service(contact_id, baseline.get("service", "crm_help"), text[:160])
-                taken.append(f"growth service queued: {baseline.get('service', 'crm_help')}")
-                alert = f"{aff.name} wants help with {SERVICE_LABELS.get(baseline.get('service', 'crm_help'), 'CRM help')}."
+                chosen = service if service in SERVICES else baseline.get("service", "crm_help")
+                self.queue_growth_service(contact_id, chosen, text[:160])
+                loops.append({"slot": "open_loop", "value": f"Scope {SERVICE_LABELS.get(chosen, chosen)} for them"})
+                taken.append(f"growth service queued: {chosen}")
+                alert = f"{aff.name} wants help with {SERVICE_LABELS.get(chosen, 'CRM help')}."
             elif intent in {"commission_question", "question"}:
                 self.schedule_followup(contact_id, today.isoformat(), f"Answer: {text[:180]}",
                                        title=f"Answer {aff.first_name}'s question", customer_touch=False)
+                loops.append({"slot": "open_loop", "value": f"Answer their question: {text[:90]}"})
                 taken.append("answer task today")
                 alert = f"{aff.name} asked: {text[:140]}"
             elif intent == "event_interest":
                 self.ghl.add_tags(contact_id, ["want:event"])
                 taken.append("want:event")
+        learned: list[Any] = []
+        if intent not in {"unsubscribe", "identity_question"}:
+            learned = list(facts) if facts is not None else self.extractor.extract_text(text)["facts"]
+        ref = ids[-1] if ids else digest({"c": contact_id, "t": text, "d": today.isoformat()})
+        out = self.remember(aff, facts=learned + loops, source_type="reply", source_ref=ref,
+                            interaction={"kind": "reply", "ref": ref, "summary": f"({intent}) {text[:260]}"})
+        if out["facts_added"]:
+            taken.append(f"{len(out['facts_added'])} profile fact(s)")
+        self.graph.mark_seen(ids, contact_id)
+        mark_read = getattr(self.ghl, "mark_read", None)
+        if mark_read:
+            try:
+                mark_read(contact_id)
+            except FamError:
+                pass  # dedupe above already keeps a re-listed reply from being triaged twice
         self.vault.affiliate(aff.name, aff.id, f"replied ({intent}): {text[:160]}", day=today.isoformat())
         self.vault.log("Reply triaged", f"- {self.vault.affiliate_link(aff.name, aff.id)} — **{intent}** — "
                        f"{'; '.join(taken)}", day=today.isoformat())
         self.store.audit(actor=self.actor, action="reply.record", resource=contact_id, decision="autonomous",
                          result="ok", details={"intent": intent, "taken": taken})
-        return {"ok": True, "intent": intent, "baseline": baseline, "actions_taken": taken, "manager_alert": alert}
+        return {"ok": True, "intent": intent, "baseline": baseline, "actions_taken": taken, "manager_alert": alert,
+                "facts_added": out["facts_added"], "completeness": out["profile"]["completeness"],
+                "next_question": out["profile"]["next_question"],
+                "draft_reply": intent not in {"unsubscribe", "identity_question"}}
 
     def record_deal(self, contact_id: str, note: str = "") -> dict[str, Any]:
         aff = self.affiliate(contact_id)
@@ -376,6 +549,10 @@ class FamEngine:
                 self.ghl.complete_task(contact_id, task["id"])
         self._apply_lifecycle(aff, "aff:producing", "deal submitted")
         self.ghl.add_note(contact_id, f"Deal submitted {today}. {note}")
+        self.graph.close_loops(contact_id, "Call about the deal")
+        self.graph.close_loops(contact_id, f"{aff.first_name}: send us")  # the file they promised is the deal
+        self.remember(self.affiliate(contact_id), interaction={"kind": "deal", "ref": f"{contact_id}:deal:{today}",
+                                                              "summary": f"deal submitted. {note}"[:200]})
         self.vault.log("Deal recorded", f"- {self.vault.affiliate_link(aff.name, aff.id)} submitted a deal. {note}",
                        day=today)
         return {"ok": True, "deals_submitted": aff.deals_submitted + 1}
@@ -389,6 +566,25 @@ class FamEngine:
                            "06-compliance-guardrails.md")
         if re.search(r"\b\d{1,2}(\.\d+)?\s?%\s*(apr|interest|rate)", lowered):
             raise FamError("message states a specific rate; rates only from a sourced 7FF program card")
+
+    def _lint_voice(self, text: str) -> None:
+        """Partner messages never mention AI or drafting and never claim who is typing (identity questions go
+        to the manager, who answers personally)."""
+        for pattern in VOICE_LINT:
+            hit = pattern.search(text)
+            if hit:
+                raise FamError(f"partner messages never talk about AI or who is typing (found {hit.group(0)!r}); "
+                               "see files/SOUL.md")
+
+    def _personal_reply_pending(self, aff: Affiliate) -> bool:
+        """True while the manager still owes this partner a personal answer to "is this a bot?"."""
+        if REPLY_PERSONALLY_TAG not in aff.tags:
+            return False
+        open_task = any(not t.get("completed") and str(t.get("title", "")).startswith("Reply personally")
+                        for t in self.ghl.list_tasks(aff.id))
+        if not open_task:
+            self.ghl.remove_tags(aff.id, [REPLY_PERSONALLY_TAG])
+        return open_task
 
     def _freeze(self, kind: str, payload: dict[str, Any], recipients: int, summary: str) -> dict[str, Any]:
         payload = {**payload, "location_id": self.ghl.location_id, "prepared_for": self.today().isoformat()}
@@ -413,8 +609,8 @@ class FamEngine:
         view["demo_mode"] = self.settings.demo_mode
         if row["kind"] == "send_messages":
             view["preview"] = [{"contact_id": m["contact_id"], "name": m.get("name", ""), "channel": m["channel"],
-                                "subject": m.get("subject", ""), "body": " ".join(m["body"].split())[:280],
-                                "delivery": m.get("delivery", "")}
+                                "subject": m.get("subject", ""), "body": " ".join(m["body"].split())[:480],
+                                "delivery": m.get("delivery", ""), "segments": m.get("segments", 0)}
                                for m in payload["messages"][:8]]
         else:
             view["workflow_key"] = payload.get("workflow_key", "")
@@ -434,7 +630,8 @@ class FamEngine:
         """Freeze a batch of individually drafted messages for one manager approval."""
         if not messages:
             raise FamError("no messages to prepare")
-        cap = int(self.settings.cadence["batch_approval_max"])
+        kickoff_batch = all(str(m.get("kind", "")) in KICKOFF_KINDS for m in messages)
+        cap = int(self.settings.kickoff["batch_max"] if kickoff_batch else self.settings.cadence["batch_approval_max"])
         if len(messages) > cap:
             raise FamError(f"batch has {len(messages)} messages; max per approval is {cap}")
         frozen = []
@@ -452,9 +649,12 @@ class FamEngine:
             if not body:
                 raise FamError(f"{contact_id}: empty body")
             self._lint(body + " " + str(m.get("subject", "")))
+            self._lint_voice(body + " " + str(m.get("subject", "")))
             aff = self.affiliate(contact_id)
             if aff.is_dnc:
                 raise FamError(f"{aff.name} is do-not-contact")
+            if self._personal_reply_pending(aff):
+                raise FamError(f"{aff.name} asked who they're texting with; the manager replies personally first")
             segments = 0
             if channel == "sms":
                 if not aff.phone:
@@ -465,11 +665,15 @@ class FamEngine:
                 if len(body) > 480:
                     raise FamError(f"{aff.name}: SMS longer than 480 characters")
                 segments = cadence.sms_segments(body)["segments"]
+                limit = int(self.settings.kickoff["max_segments"])
+                if kind in KICKOFF_KINDS and segments > limit:
+                    raise FamError(f"{aff.name}: kickoff texts stay within {limit} SMS segments (this is {segments})")
             if channel == "email" and not aff.email:
                 raise FamError(f"{aff.name} has no email")
             frozen.append({"contact_id": contact_id, "name": aff.name, "channel": channel, "kind": kind,
                            "subject": str(m.get("subject", ""))[:150], "body": body,
-                           "delivery": self._delivery_mode(aff), "segments": segments})
+                           "delivery": self._delivery_mode(aff), "segments": segments,
+                           **({"variant": str(m["variant"])} if m.get("variant") else {})})
         real = sum(1 for m in frozen if m["delivery"] in {"live", "mock"})
         summary = f"{len(frozen)} {purpose} ({real} real, {len(frozen) - real} simulated)"
         billed = sum(m["segments"] for m in frozen)
@@ -525,20 +729,32 @@ class FamEngine:
         view = self._action_view({**row, "state": "approval_requested"})
         lines = [f"*Approval needed* — {row['summary']}",
                  f"action `{action_id}` · digest `{row['payload_hash']}` · demo mode: {self.settings.demo_mode}"]
+        if row["kind"] == "send_messages":
+            payload = json.loads(row["payload_json"])
+            review = self.vault.review(action_id, payload.get("purpose", "messages"), row["summary"],
+                                       payload["messages"], day=self.today().isoformat())
+            view["review_file"] = str(review)
+            full = len(payload["messages"]) <= 8
+            lines.append(f"Every message in full: `{review.relative_to(self.vault.root)}`"
+                         + (" (all shown below)" if full else f" ({len(payload['messages'])} messages; read them there)"))
         for i, p in enumerate(view.get("preview", []), 1):
             subj = f" — _{p['subject']}_" if p.get("subject") else ""
-            lines.append(f"{i}. {p['name']} ({p['channel']}, {p['delivery']}){subj}: {p['body'][:180]}")
+            body = p["body"] if len(view.get("preview", [])) == row["recipients"] else p["body"][:180]
+            lines.append(f"{i}. {p['name']} ({p['channel']}, {p['delivery']}){subj}: {body}")
         if view.get("sample_contacts"):
             lines.append("Contacts: " + ", ".join(view["sample_contacts"]) +
                          (" …" if row["recipients"] > len(view["sample_contacts"]) else ""))
         for key, value in (view.get("custom_values") or {}).items():
             lines.append(f"{key}: {value}")
-        lines.append(f"Reply *approve {action_id}* to send, or tell me what to change.")
+        lines.append(f"Reply *approve {action_id}* to send, *approve {action_id} except 4, 17* to hold some back, "
+                     "or tell me what to change.")
         view["approval_card"] = "\n".join(lines)
         return view
 
-    def approve(self, action_id: str, action_digest: str, approver: str) -> dict[str, Any]:
-        """Record a human approval. Exposed ONLY on the untrusted approvals MCP."""
+    def approve(self, action_id: str, action_digest: str, approver: str,
+                exclude: list[int] | None = None) -> dict[str, Any]:
+        """Record a human approval. Exposed ONLY on the untrusted approvals MCP. `exclude` holds back messages
+        by their number in the review file; everything else in the batch is approved as frozen."""
         row = self.store.get_action(action_id)
         if not row:
             raise FamError(f"unknown action {action_id}")
@@ -548,16 +764,21 @@ class FamEngine:
             raise FamError("digest does not match the frozen action — re-read the approval card")
         if not approver.strip():
             raise FamError("approver name is required")
+        excluded = sorted({int(x) for x in (exclude or [])})
+        if excluded and row["kind"] != "send_messages":
+            raise FamError("exceptions apply to message batches only")
+        if any(not 1 <= x <= int(row["recipients"]) for x in excluded):
+            raise FamError(f"exceptions must be message numbers between 1 and {row['recipients']}")
         ttl = int(self.settings.cadence["approval_ttl_hours"])
         approval = {"approval_id": _new_id("apr"), "action_id": action_id, "digest": action_digest,
-                    "approver": approver.strip(), "created_at": now_iso(),
+                    "approver": approver.strip(), "created_at": now_iso(), "excluded_json": json.dumps(excluded),
                     "expires_at": (datetime.now(UTC) + timedelta(hours=ttl)).replace(microsecond=0).isoformat()}
         self.store.insert_approval(approval)
         self.store.update_action(action_id, state="approved", approval_id=approval["approval_id"])
         self.store.audit(actor=approver, action=f"{row['kind']}.approve", resource=action_id, decision="human",
-                         result="approved", details={"expires_at": approval["expires_at"]})
+                         result="approved", details={"expires_at": approval["expires_at"], "held_back": excluded})
         return {"ok": True, "action_id": action_id, "approval_id": approval["approval_id"],
-                "expires_at": approval["expires_at"]}
+                "expires_at": approval["expires_at"], "held_back": excluded}
 
     def _require_writes_enabled(self) -> None:
         if self.store.get_flag("external_writes_enabled", "true") != "true":
@@ -589,7 +810,8 @@ class FamEngine:
             raise FamError("approval was already used")
         self.store.update_action(action_id, state="executing")
         if row["kind"] == "send_messages":
-            result = self._execute_messages(payload)
+            held = set(json.loads(approval.get("excluded_json") or "[]"))
+            result = self._execute_messages(payload, action_id=action_id, held_back=held)
         elif row["kind"] == "enroll_workflow":
             result = self._execute_enrollment(payload)
         else:
@@ -615,10 +837,16 @@ class FamEngine:
                     self.ghl.complete_task(aff.id, task["id"])
         self._set_fields(aff.id, values)
 
-    def _execute_messages(self, payload: dict[str, Any]) -> dict[str, Any]:
-        counts = {"live": 0, "mock": 0, "simulated": 0, "failed": 0}
+    def _execute_messages(self, payload: dict[str, Any], action_id: str = "",
+                          held_back: set[int] | None = None) -> dict[str, Any]:
+        counts = {"live": 0, "mock": 0, "simulated": 0, "failed": 0, "held_back": 0}
         per_contact = []
-        for m in payload["messages"]:
+        pause = float(self.settings.kickoff.get("send_pause_seconds", 0) or 0)
+        for n, m in enumerate(payload["messages"], 1):
+            if n in (held_back or set()):
+                counts["held_back"] += 1
+                per_contact.append({"contact_id": m["contact_id"], "ok": True, "held_back": True})
+                continue
             try:
                 aff = self.affiliate(m["contact_id"])
                 if aff.is_dnc:
@@ -628,7 +856,10 @@ class FamEngine:
                                               f"{m.get('subject', '')}\n{m['body']}".strip())
                 else:
                     self.ghl.send_message(aff.id, m["channel"], m["body"], m.get("subject", ""))
+                    if m["delivery"] == "live" and m["channel"] == "sms" and pause:
+                        time.sleep(pause)  # pace live texts under the A2P throughput limit
                 self._touch_bookkeeping(aff, m["channel"], m.get("kind", ""))
+                self._after_send(aff, m, f"{action_id}:{n}")
                 self.vault.affiliate(aff.name, aff.id, f"{m['delivery']} {m['channel']} ({m.get('kind', '')}): "
                                      f"{m['body'][:140]}", day=self.today().isoformat())
                 counts[m["delivery"]] += 1
@@ -639,8 +870,27 @@ class FamEngine:
         self.store.bump(self.today().isoformat(), "personal_messages",
                         counts["live"] + counts["mock"] + counts["simulated"])
         self.vault.log("Messages sent", f"- {payload['purpose']}: live {counts['live']}, mock {counts['mock']}, "
-                       f"simulated {counts['simulated']}, failed {counts['failed']}", day=self.today().isoformat())
+                       f"simulated {counts['simulated']}, failed {counts['failed']}"
+                       + (f", held back {counts['held_back']}" if counts["held_back"] else ""),
+                       day=self.today().isoformat())
         return {**counts, "per_contact": per_contact}
+
+    def _after_send(self, aff: Affiliate, m: dict[str, Any], ref: str) -> None:
+        """Kickoff tags move along, and every personal message becomes part of the partner's history."""
+        kind = m.get("kind", "")
+        tags = list(aff.tags)
+        if kind == "kickoff":
+            self.ghl.remove_tags(aff.id, [KICKOFF_PENDING])
+            self.ghl.add_tags(aff.id, [KICKOFF_SENT])
+            tags = [t for t in tags if t != KICKOFF_PENDING] + [KICKOFF_SENT]
+            self.graph.set_variant(aff.id, m.get("variant", ""))
+        elif kind == "kickoff_nudge":
+            self.ghl.remove_tags(aff.id, [KICKOFF_SENT])
+            self.ghl.add_tags(aff.id, [KICKOFF_DONE])
+            tags = [t for t in tags if t != KICKOFF_SENT] + [KICKOFF_DONE]
+        interaction = {"kickoff": "kickoff_sent", "kickoff_nudge": "nudge_sent"}.get(kind, "message_sent")
+        self.remember(replace(aff, tags=tags), interaction={"kind": interaction, "ref": ref or digest(m),
+                                                            "summary": m["body"][:400], "variant": m.get("variant", "")})
 
     def _execute_enrollment(self, payload: dict[str, Any]) -> dict[str, Any]:
         counts = {"live": 0, "mock": 0, "simulated": 0, "failed": 0}
