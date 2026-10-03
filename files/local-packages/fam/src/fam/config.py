@@ -53,12 +53,15 @@ DEFAULT_CADENCE: dict[str, Any] = {
     "dormant_after_days": 90,
     "dead_after_days": 180,
     "dead_reactivation_every_days": 90,
-    "sms_window_start_hour": 11,
+    "sms_window_start_hour": 9,  # the recipient's local time
     "sms_window_end_hour": 20,
     "daily_personal_touch_cap": 40,
     "daily_bulk_enroll_cap": 2000,
     "batch_approval_max": 100,
     "approval_ttl_hours": 12,
+    "resume_ttl_hours": 36,
+    "action_ttl_hours": 48,
+    "inbox_lookback_days": 14,
     "timezone": "America/New_York",
 }
 
@@ -72,6 +75,7 @@ DEFAULT_KICKOFF: dict[str, Any] = {
     "nudge_after_days": 5,
     "variants": ["A", "B", "C"],
     "calendar_link": "",
+    "mailing_address": "",
     "send_pause_seconds": 1.0,
 }
 

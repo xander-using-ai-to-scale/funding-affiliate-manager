@@ -51,8 +51,6 @@ PRODUCTS = {
 GROWTH_SERVICES = {"a funnel page": "a funnel page for their funding referrals", "lead reactivation":
                    "reactivating their own old leads", "social content": "social content", "email campaigns":
                    "an email campaign to their list", "CRM help": "CRM help", "more leads": "a lead-gen plan"}
-YES = re.compile(r"\b(?:yes|yeah|yep|sure|sounds good|let'?s do it|works for me|that works|i'?m in|ok(?:ay)?|"
-                 r"definitely|absolutely|happy to)\b", re.I)
 # A question asking for a call: the kickoff's last line, our call ask, or a model's rewording of either.
 CALL_ASK = re.compile(r"\b(?:quick|short|15-minute|hop on a|jump on a|set up a|grab a)\b[^?]*\bcall\b[^?]*\?|"
                       r"\bcall\b[^?]*\b(?:this|next) week\b[^?]*\?", re.I)
@@ -133,36 +131,66 @@ class TemplateDrafter:
         return NUDGE.format(first=p.get("first_name") or "there", sender=sender, company=self.company)
 
     def next_move(self, p: dict[str, Any], intent: str, inbound: str) -> dict[str, str]:
-        """What our reply should do: book the call, ask the next discovery question, or just acknowledge."""
+        """What our reply should do: confirm a time they offered, book the call, ask the next discovery question,
+        or just acknowledge. The model drafter rewords these moves; it never picks a different one."""
         history = p.get("history", [])  # newest first
         ours = [i for i in history if i["kind"] in OUR_MESSAGES]
         asked_call = bool(ours) and bool(CALL_ASK.search(ours[0].get("summary") or ""))
         asks = sum(1 for i in ours if CALL_ASK.search(i.get("summary") or ""))
         talked = any(i["kind"] == "call" for i in history)
-        if intent in {"has_deal", "question", "commission_question", "check_back_later", "event_interest",
-                      "unsubscribe", "identity_question"}:
+        signals = cadence.reply_signals(inbound)
+        texter = signals["prefers_text"] or "text" in [v.lower() for v in p.get("values", {}).get("channel", [])]
+        if intent in cadence.NO_DRAFT_INTENTS:
             return {"move": intent}
-        if asked_call and YES.search(inbound or ""):
+        if intent == "has_deal":  # a deal outranks everything, even a "perfect timing" that sounds like a yes
+            return {"move": "has_deal"}
+        if intent == "will_send_deals":
+            return {"move": "ask_for_deal"}
+        if intent == "book_call" or (asked_call and signals["affirmative"] and intent in {"general_reply", "question"}):
+            if signals["proposed_time"]:
+                return {"move": "confirm_time", "time": signals["proposed_time"]}
             return {"move": "book"}
-        if intent == "wants_service" and not talked and not asked_call:
+        if intent == "not_interested":
+            return {"move": "close_out"}
+        if intent in {"question", "commission_question", "check_back_later", "event_interest"}:
+            return {"move": intent}
+        can_ask_call = not talked and not texter and not asked_call and asks < 2
+        if intent == "wants_service" and can_ask_call:
             return {"move": "call_ask", "why": "scope the help they asked for"}
         replies = sum(1 for i in history if i["kind"] == "reply")
-        # the kickoff already asked once; ask again after two replies, and never twice in a row
-        if not talked and replies >= 2 and not asked_call and asks < 2:
+        # the kickoff already asked once; ask again after two replies, never twice in a row, never to a texter
+        if replies >= 2 and can_ask_call:
             return {"move": "call_ask"}
-        if p.get("next_question"):
-            return {"move": "discover", "slot": p["next_question"]["slot"], "question": p["next_question"]["question"]}
-        return {"move": "call_ask" if not talked else "acknowledge"}
+        recent = " ".join((i.get("summary") or "") for i in ours[:2]).lower()
+        for q in p.get("open_questions") or ([p["next_question"]] if p.get("next_question") else []):
+            if q["question"].lower() not in recent:  # don't ask again what we asked in our last two texts
+                return {"move": "discover", "slot": q["slot"], "question": q["question"]}
+        return {"move": "call_ask" if can_ask_call else "acknowledge"}
+
+    def _opener(self, p: dict[str, Any], first: str, options: tuple[str, ...]) -> str:
+        """A different opening line from our last message, so a thread never reads like a form letter."""
+        ours = [i for i in p.get("history", []) if i["kind"] in OUR_MESSAGES]
+        last = (ours[0].get("summary") or "").lower() if ours else ""
+        n = len(ours)
+        for k in range(len(options)):
+            line = options[(n + k) % len(options)].format(first=first)
+            if line.split(",")[0].lower() not in last:
+                return line
+        return options[n % len(options)].format(first=first)
 
     def reply(self, p: dict[str, Any], sender: str, intent: str, inbound: str,
               follow_up_date: str = "") -> dict[str, Any]:
         first = p.get("first_name") or "there"
         move = self.next_move(p, intent, inbound)
         m = move["move"]
-        if m == "identity_question" or m == "unsubscribe":
+        if m in cadence.NO_DRAFT_INTENTS:
             return {"body": "", "move": m, "drafter": self.name}
-        if m == "has_deal":
-            body = f"That's great, {first}. I'll give you a call today to get the details, or send the file here whenever you're ready."
+        if m == "has_deal":  # never ask for a client's file by text: the call collects it
+            body = f"That's great, {first}. I'll give you a call today to get the details."
+        elif m == "ask_for_deal":
+            body = f"Love that, {first}. Do you have one in the pipeline right now that I can help you with?"
+        elif m == "close_out":
+            body = f"Understood, {first}. Thanks for letting me know. If anything changes, I'm here."
         elif m == "check_back_later":
             when = f" around {follow_up_date}" if follow_up_date else " then"
             body = f"Totally understand, {first}. I'll reach back out{when}. Good luck in the meantime!"
@@ -170,16 +198,24 @@ class TemplateDrafter:
             body = f"Good question, {first}. Let me get you the exact answer today."
         elif m == "event_interest":
             body = f"Will do, {first}! I'll send the link over so you can grab a spot."
+        elif m == "confirm_time":
+            when = move["time"][:1].upper() + move["time"][1:]
+            body = f"{when} works, {first}. I'll give you a call then. Talk soon!"
         elif m == "book":
             body = (f"Perfect. Grab any time that works for you here: {self.calendar_link}" if self.calendar_link
                     else f"Perfect, {first}. What day and time work best for you?")
         elif m == "call_ask":
-            lead = "Happy to help with that" if move.get("why") else "Really appreciate you sharing that"
-            body = f"{lead}, {first}. Would a quick 15-minute call this week be easier to talk it through?"
+            lead = (f"Happy to help with that, {first}." if move.get("why")
+                    else self._opener(p, first, ("Really appreciate you sharing that, {first}.", "Thanks, {first}.",
+                                                 "Good to know, {first}.")))
+            body = f"{lead} Would a quick 15-minute call this week be easier to talk it through?"
         elif m == "discover":
-            body = f"Great to hear from you, {first}! {move['question']}"
+            lead = self._opener(p, first, ("Great to hear from you, {first}!", "Thanks for sharing that, {first}.",
+                                           "Got it, {first}.", "Appreciate that, {first}."))
+            body = f"{lead} {move['question']}"
         else:
-            body = f"Thanks, {first}. Really glad we connected."
+            body = self._opener(p, first, ("Thanks, {first}. Really glad we connected.",
+                                           "Appreciate it, {first}. Talk soon.", "Sounds good, {first}. Thank you!"))
         return {"body": body, "move": m, "drafter": self.name}
 
     def revenue_plan(self, p: dict[str, Any]) -> str:
@@ -272,6 +308,8 @@ class ModelDrafter(TemplateDrafter):
         warm = ("react to one thing they said in a few natural words, the way a friend would (don't list back what "
                 "they told you or call it context)")
         goal = {"discover": f"{warm}, then ask: {move.get('question', '')}",
+                "confirm_time": f"confirm you'll call them {move.get('time', '')}; no question needed",
+                "ask_for_deal": f"{warm}, then ask if they have a deal in the pipeline now you can help with",
                 "call_ask": f"{warm}, then ask if a quick 15-minute call this week works",
                 "book": (f"say great and share the booking link {self.calendar_link}; no question needed" if self.calendar_link
                          else "say great and ask what day and time work best")}.get(move["move"], f"reply like this: {base['body']}")

@@ -42,7 +42,7 @@
     "permission.self_expand": {"tier": 4, "decision": "deny"},
     "audit.alter_or_delete": {"tier": 4, "decision": "deny"}
   },
-  "caps": {"daily_personal_touch_cap": 40, "daily_bulk_enroll_cap": 2000, "batch_approval_max": 100, "sms_window_et": "11:00-20:00"},
+  "caps": {"daily_personal_touch_cap": 40, "daily_bulk_enroll_cap": 2000, "batch_approval_max": 100, "sms_window_recipient_local": "09:00-20:00"},
   "standing_external_write_autonomy_enabled": true,
   "standing_external_write_scope": "cadence workflow enrollments only (onboarding, biweekly_touch, monthly_offer, dormant_reactivation, dead_reactivation)"
 }

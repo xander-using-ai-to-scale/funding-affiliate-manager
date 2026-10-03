@@ -24,15 +24,15 @@ import re
 import secrets
 import time
 from dataclasses import replace
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time as dtime, timedelta
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from . import cadence, drafting, extract
+from . import cadence, drafting, extract, timezones
 from .cadence import KICKOFF_DONE, KICKOFF_PENDING, KICKOFF_SENT, Affiliate, affiliate_from_contact
 from .config import Settings
-from .errors import ApprovalRequired, FamError
-from .ghl import GHLBackend, open_backend
+from .errors import ApprovalRequired, FamError, GHLError
+from .ghl import GHLBackend, iso_time, open_backend
 from .graph import SOURCE_NAMES, Graph
 from .store import Store, digest, now_iso, stable_json
 from .vault import Vault
@@ -55,6 +55,11 @@ VOICE_LINT = (re.compile(r"\bAI\b"),
                          r"(?:i'?m|i am) (?:a )?(?:real )?(?:person|human)\b", re.I))
 REPLY_PERSONALLY_TAG = "fam:reply-personally"
 KICKOFF_KINDS = {"kickoff", "kickoff_nudge"}
+EMAIL_OPT_OUT_LINE = "Reply UNSUBSCRIBE and we'll stop emailing you."
+REVIEW_THREAD_MAX = 12_000  # characters of review posted into Slack; bigger batches are read in the vault
+# Where a batch can be sent from: approved once, then resumable (paused by quiet hours or the stop switch, or a
+# run that died mid-way) until its approval expires. Only messages still "pending" in the outbox ever go out.
+SENDABLE_STATES = ("approved", "paused", "executing", "needs_reconcile")
 SERVICES = {"funnel", "reactivation", "email_campaigns", "social", "crm_help"}
 MANAGER_TASK_PREFIXES = ("CALL ", "Answer ", "Scope ", "Reply personally")  # human work; a sent touch never closes these
 MANAGER_TASK_MARK = "[For the manager]"
@@ -80,6 +85,31 @@ def _new_id(prefix: str) -> str:
     return f"{prefix}_{secrets.token_hex(6)}"
 
 
+def _no_mentions(text: str) -> str:
+    """Partner text posted to Slack can't ping anyone: no <!channel>, @here, <@U…>."""
+    text = re.sub(r"<[!@#][^>]*>", "[mention]", str(text or ""))
+    return re.sub(r"@(?=(?:here|channel|everyone)\b)", "@\u200b", text, flags=re.I)
+
+
+def _slack_safe(text: str) -> str:
+    """...and inside the card it can't restyle it either: no markup characters."""
+    return re.sub(r"[*_~`>]", "", _no_mentions(text)).replace("<", "‹").replace(">", "›")
+
+
+def _chunks(text: str, size: int) -> list[str]:
+    """Split on blank lines into pieces under `size` characters (one Slack message each)."""
+    out, cur = [], ""
+    for block in text.split("\n\n"):
+        if cur and len(cur) + len(block) + 2 > size:
+            out.append(cur)
+            cur = ""
+        cur = (cur + "\n\n" + block) if cur else block
+        while len(cur) > size:
+            out.append(cur[:size])
+            cur = cur[size:]
+    return out + ([cur] if cur else [])
+
+
 class FamEngine:
     def __init__(self, settings: Settings | None = None, backend: GHLBackend | None = None,
                  today: date | None = None):
@@ -93,6 +123,7 @@ class FamEngine:
                            default_manager=str(kick.get("default_sender", "")),
                            generic_managers=kick.get("generic_manager_names", []))
         self._today = today
+        self.clock: Any = None  # tests set a callable returning an aware datetime
         self.actor = os.getenv("FAM_ACTOR", "funding-affiliate-manager")
         self._extractor: Any = None
 
@@ -111,8 +142,13 @@ class FamEngine:
     def today(self) -> date:
         return self._today or datetime.now(self.tz).date()
 
-    def _local_hour(self) -> int:
-        return datetime.now(self.tz).hour
+    def now(self) -> datetime:
+        """The send clock. With a pinned day (tests, simulations) sends happen at 14:00 Eastern that day."""
+        if self.clock:
+            return self.clock()
+        if self._today:
+            return datetime.combine(self._today, dtime(18, 0), tzinfo=UTC)
+        return datetime.now(UTC)
 
     # ── status ───────────────────────────────────────────────────────────────
     def status(self) -> dict[str, Any]:
@@ -132,6 +168,8 @@ class FamEngine:
                 "enrollments": self.store.count(self.today().isoformat(), "enrollments"),
             },
             "pending_approvals": len(self.store.list_actions("approval_requested")),
+            "paused_batches": len(self.store.list_actions("paused")),
+            "sends_to_settle": len(self.store.outbox(states=("unknown",))),
             "standing_approvals": [r for r in self.store.list_standing() if not r["revoked_at"]],
             "vault": str(s.vault_dir),
         }
@@ -228,39 +266,54 @@ class FamEngine:
                 "bulk_counts": plan["bulk_counts"]}
 
     def reply_inbox(self, limit: int = 25) -> list[dict[str, Any]]:
-        """Every unread inbound text since our last message, per partner, skipping messages already triaged
-        (GoHighLevel can keep showing a conversation as unread after we've handled it)."""
+        return self.reply_inbox_page(limit)["rows"]
+
+    def reply_inbox_page(self, limit: int = 25) -> dict[str, Any]:
+        """Every inbound text not yet triaged, oldest first, read or unread. A thread somebody already opened in
+        the GoHighLevel app, or one where our next message landed on top of their reply, still gets triaged:
+        what counts is whether each inbound message id has been recorded, not GoHighLevel's unread flag."""
+        lookback = int(self.settings.cadence.get("inbox_lookback_days", 14))
+        since = (self.now() - timedelta(days=lookback)).replace(microsecond=0).isoformat()
+        found = []
+        for conv in self.ghl.list_recent_conversations(since):
+            conv_id = str(conv.get("id", ""))
+            last = iso_time(conv.get("lastMessageDate"))
+            if conv_id and last and last <= self.store.watermark(conv_id):
+                continue  # nothing new in this conversation since every inbound in it was triaged
+            inbound = [m for m in self.ghl.list_messages(conv_id, limit=50)
+                       if m.get("direction") == "inbound" and "CALL" not in str(m.get("messageType", "")).upper()
+                       and iso_time(m.get("dateAdded")) >= since]
+            seen = self.graph.seen([str(m.get("id", "")) for m in inbound])
+            fresh = sorted((m for m in inbound if str(m.get("id", "")) not in seen),
+                           key=lambda m: iso_time(m.get("dateAdded")))
+            if not fresh:
+                if conv_id and last:
+                    self.store.set_watermark(conv_id, str(conv.get("contactId", "")), last)
+                continue
+            found.append((conv, fresh))
+        found.sort(key=lambda cf: iso_time(cf[1][0].get("dateAdded")))  # the longest-waiting partner first
         rows = []
-        for conv in self.ghl.list_conversations(unread_only=True, limit=limit):
-            if conv.get("lastMessageDirection") not in (None, "", "inbound"):
-                continue
+        for conv, fresh in found[:limit]:
             contact_id = conv.get("contactId", "")
-            pending: list[dict[str, Any]] = []
-            for m in sorted(self.ghl.list_messages(conv.get("id", ""), limit=20),
-                            key=lambda m: m.get("dateAdded") or "", reverse=True):
-                if m.get("direction") != "inbound":
-                    break
-                if "CALL" not in str(m.get("messageType", "")).upper():  # calls go through call ingest
-                    pending.append(m)
-            pending.reverse()
-            seen = self.graph.seen([str(m.get("id", "")) for m in pending])
-            fresh = [m for m in pending if str(m.get("id", "")) not in seen]
-            if not fresh and pending:
-                continue
-            if not pending:  # a backend without message ids: fall back to the conversation's last message
-                fresh = [{"id": "", "body": conv.get("lastMessageBody") or "", "dateAdded": conv.get("lastMessageDate")}]
-            text = "\n".join((m.get("body") or "").strip() for m in fresh if (m.get("body") or "").strip())
+            parts = []
+            for m in fresh:
+                body = (m.get("body") or "").strip()
+                media = [str(a) for a in (m.get("attachments") or []) if a]
+                parts.append(body + "".join(f"\n[attachment] {a}" for a in media) if media else body)
+            text = "\n".join(p for p in parts if p)
             try:
                 who = self.affiliate(contact_id).summary()
             except FamError:
                 who = {"id": contact_id}
             rows.append({"contact": who, "conversation_id": conv.get("id"), "last_message": text[:1200],
                          "message_ids": [str(m.get("id")) for m in fresh if m.get("id")],
-                         "messages": [{"id": m.get("id"), "date": m.get("dateAdded"),
-                                       "body": (m.get("body") or "")[:600]} for m in fresh],
-                         "received": fresh[-1].get("dateAdded") if fresh else conv.get("lastMessageDate"),
+                         "messages": [{"id": m.get("id"), "date": iso_time(m.get("dateAdded")),
+                                       "body": (m.get("body") or "")[:600],
+                                       "attachments": [str(a) for a in (m.get("attachments") or []) if a]}
+                                      for m in fresh],
+                         "received": iso_time(fresh[-1].get("dateAdded")),
                          "baseline": cadence.classify_reply(text)})
-        return rows
+        return {"rows": rows, "remaining": max(0, len(found) - limit)}
 
     # ── the relationship graph ───────────────────────────────────────────────
     def remember(self, aff: Affiliate, **kwargs: Any) -> dict[str, Any]:
@@ -439,42 +492,68 @@ class FamEngine:
                      summary: str = "", facts: list[Any] | None = None, service: str = "",
                      message_ids: list[str] | None = None) -> dict[str, Any]:
         """Apply the outcome of one inbound reply to the CRM and the partner's profile. The model passes its
-        own intent and facts; the keyword baselines fill in when it doesn't. STOP is always honored, and an
-        "is this a bot?" question always goes to the manager instead of getting a drafted answer."""
+        own intent and facts; the keyword baselines fill in when it doesn't. STOP, HELP and wrong numbers are
+        always honored and never count as a reply; "is this a bot?" always goes to the manager."""
         ids = [str(i) for i in (message_ids or []) if i]
         if ids and len(self.graph.seen(ids)) == len(ids):
             return {"ok": True, "duplicate": True, "intent": "", "actions_taken": [], "manager_alert": "",
                     "draft_reply": False}
         aff = self.affiliate(contact_id)
         baseline = cadence.classify_reply(text)
-        if baseline["intent"] in {"unsubscribe", "identity_question"}:
+        if baseline["intent"] in cadence.NO_DRAFT_INTENTS:
             intent = baseline["intent"]
         intent = intent or baseline["intent"]
         today = self.today()
         taken: list[str] = []
         loops: list[dict[str, str]] = []
-        self._set_fields(contact_id, {"last_reply_date": today.isoformat()})
-        taken.append("last_reply_date=today")
+        extra_facts: list[dict[str, str]] = []
+        counts_as_reply = intent not in cadence.NON_REPLY_INTENTS
+        engaged = counts_as_reply and intent != "not_interested"
+        if counts_as_reply:
+            self._set_fields(contact_id, {"last_reply_date": today.isoformat()})
+            taken.append("last_reply_date=today")
         alert = ""
+
+        def end_kickoff() -> None:
+            nonlocal aff
+            kickoff = [t for t in aff.tags if t in (KICKOFF_PENDING, KICKOFF_SENT)]
+            if kickoff:  # the conversation has started (or ended): the kickoff track is done with them
+                self.ghl.remove_tags(contact_id, kickoff)
+                self.ghl.add_tags(contact_id, [KICKOFF_DONE])
+                aff = replace(aff, tags=[t for t in aff.tags if t not in kickoff] + [KICKOFF_DONE])
+                taken.append("kickoff track closed")
+
         if intent == "unsubscribe":
             self.ghl.add_tags(contact_id, [cadence.DNC_TAG])
             self.ghl.update_contact(contact_id, {"dnd": True})
             self.ghl.add_note(contact_id, f"Opted out: {text[:200]}")
             taken.append("DNC + dnd set")
             alert = f"{aff.name} opted out. No further outreach."
+        elif intent == "help":
+            end_kickoff()  # no automated nudge to someone who asked for help; the manager follows up
+            self.ghl.add_note(contact_id, f"Texted HELP: {text[:200]}")
+            self.schedule_followup(contact_id, today.isoformat(), f"{aff.first_name} texted HELP. The carrier HELP "
+                                   "auto-reply covers the required details; check in personally if they need more.",
+                                   title=f"Answer {aff.first_name}'s HELP text", customer_touch=False)
+            taken.append("HELP: task for the manager, no drafted reply")
+            alert = f"{aff.name} texted HELP. Nothing was drafted; a task is on your list."
+        elif intent == "wrong_number":
+            self.ghl.add_tags(contact_id, [cadence.WRONG_NUMBER_TAG])
+            end_kickoff()
+            self.ghl.add_note(contact_id, f"Wrong number reported: {text[:200]}")
+            self.schedule_followup(contact_id, today.isoformat(), f"Whoever has {aff.first_name}'s number says it's "
+                                   "the wrong person. Find the right number; no texts go to this one until then.",
+                                   title=f"Fix {aff.first_name}'s phone number", customer_touch=False)
+            taken.append("wrong number: texts blocked, task to fix it")
+            alert = f"{aff.name}'s number reached the wrong person. Texts to it are blocked until it's fixed."
         else:
             was, _ = cadence.target_lifecycle(aff, today, self.settings.cadence)
-            if aff.lifecycle in {"aff:quiet", "aff:dormant", "aff:dead"} or was in {"aff:quiet", "aff:dormant",
-                                                                                    "aff:dead"}:
+            if engaged and (aff.lifecycle in {"aff:quiet", "aff:dormant", "aff:dead"}
+                            or was in {"aff:quiet", "aff:dormant", "aff:dead"}):
                 self._apply_lifecycle(aff, "aff:reactivated", f"replied: {intent}")
                 aff = self.affiliate(contact_id)
                 taken.append("lifecycle → aff:reactivated")
-            kickoff = [t for t in aff.tags if t in (KICKOFF_PENDING, KICKOFF_SENT)]
-            if kickoff:  # the conversation has started: the kickoff track is done with them
-                self.ghl.remove_tags(contact_id, kickoff)
-                self.ghl.add_tags(contact_id, [KICKOFF_DONE])
-                aff = replace(aff, tags=[t for t in aff.tags if t not in kickoff] + [KICKOFF_DONE])
-                taken.append("kickoff conversation started")
+            end_kickoff()
             self.ghl.add_note(contact_id, f"Reply ({intent}): {summary or text[:400]}")
             if intent == "identity_question":
                 self.ghl.add_tags(contact_id, [REPLY_PERSONALLY_TAG])
@@ -485,6 +564,10 @@ class FamEngine:
                 taken.append("personal reply task for the manager")
                 alert = (f"{aff.name} asked if they're texting with a real person. Please reply to them yourself; "
                          "I won't draft anything to them until your task is done.")
+            elif intent == "not_interested":
+                self.ghl.add_tags(contact_id, [cadence.NOT_INTERESTED_TAG])
+                taken.append("not interested: no more kickoff or reactivation texts")
+                alert = f"{aff.name} isn't interested right now: {text[:120]}"
             elif intent == "has_deal":
                 self.ghl.add_tags(contact_id, ["deal:incoming"])
                 self.schedule_followup(contact_id, today.isoformat(),
@@ -493,6 +576,20 @@ class FamEngine:
                 loops.append({"slot": "open_loop", "value": f"Call about the deal they have ({today.isoformat()})"})
                 taken.append("deal:incoming + same-day call task")
                 alert = f"🔥 {aff.name} has a deal. Same-day call task created."
+            elif intent == "book_call":
+                when = baseline.get("proposed_time", "")
+                self.schedule_followup(contact_id, today.isoformat(),
+                                       f"{aff.first_name} wants a call" + (f": {when}" if when else "") +
+                                       f". They said: {text[:160]}",
+                                       title=f"CALL {aff.first_name}" + (f" — {when}" if when else " — book a time"),
+                                       customer_touch=False)
+                loops.append({"slot": "open_loop", "value": f"Call {when or 'to be booked'} ({today.isoformat()})"})
+                taken.append("call task" + (f" for {when}" if when else ""))
+                alert = f"📞 {aff.name} wants to talk" + (f" {when}" if when else "") + "."
+            elif intent == "will_send_deals":
+                loops.append({"slot": "open_loop", "value": f"{aff.first_name}: plans to send deals; ask for the first one"})
+                taken.append("open loop: ask for their first deal")
+                alert = f"{aff.name} says they plan to send deals."
             elif intent == "check_back_later":
                 due = cadence.parse_day(follow_up_date) or today + timedelta(days=14)
                 self.schedule_followup(contact_id, due.isoformat(), summary or f"They asked: {text[:160]}")
@@ -514,12 +611,17 @@ class FamEngine:
             elif intent == "event_interest":
                 self.ghl.add_tags(contact_id, ["want:event"])
                 taken.append("want:event")
+            if baseline.get("prefers_text"):
+                extra_facts.append({"slot": "channel", "value": "text"})
+            if baseline.get("empty"):
+                alert = alert or f"{aff.name} sent a message with no text (a picture or file?). Open it in GoHighLevel."
         learned: list[Any] = []
-        if intent not in {"unsubscribe", "identity_question"}:
+        if intent not in cadence.NO_DRAFT_INTENTS:
             learned = list(facts) if facts is not None else self.extractor.extract_text(text)["facts"]
         ref = ids[-1] if ids else digest({"c": contact_id, "t": text, "d": today.isoformat()})
-        out = self.remember(aff, facts=learned + loops, source_type="reply", source_ref=ref,
-                            interaction={"kind": "reply", "ref": ref, "summary": f"({intent}) {text[:260]}"})
+        kind = "reply" if counts_as_reply else "inbound_other"  # STOP/HELP/wrong number never count as a reply
+        out = self.remember(aff, facts=learned + extra_facts + loops, source_type="reply", source_ref=ref,
+                            interaction={"kind": kind, "ref": ref, "summary": f"({intent}) {text[:260]}"})
         if out["facts_added"]:
             taken.append(f"{len(out['facts_added'])} profile fact(s)")
         self.graph.mark_seen(ids, contact_id)
@@ -536,8 +638,8 @@ class FamEngine:
                          result="ok", details={"intent": intent, "taken": taken})
         return {"ok": True, "intent": intent, "baseline": baseline, "actions_taken": taken, "manager_alert": alert,
                 "facts_added": out["facts_added"], "completeness": out["profile"]["completeness"],
-                "next_question": out["profile"]["next_question"],
-                "draft_reply": intent not in {"unsubscribe", "identity_question"}}
+                "next_question": out["profile"]["next_question"], "counts_as_reply": counts_as_reply,
+                "draft_reply": intent not in cadence.NO_DRAFT_INTENTS}
 
     def record_deal(self, contact_id: str, note: str = "") -> dict[str, Any]:
         aff = self.affiliate(contact_id)
@@ -586,16 +688,43 @@ class FamEngine:
             self.ghl.remove_tags(aff.id, [REPLY_PERSONALLY_TAG])
         return open_task
 
+    @staticmethod
+    def _family(kind: str) -> str:
+        """Batches conflict within a family: two kickoff batches, or two replies, for the same partner. A routine
+        check-in batch never blocks answering someone who just wrote (it is skipped at send time instead)."""
+        return "kickoff" if kind in KICKOFF_KINDS else "reply" if kind == "reply" else ""
+
+    def _reserve(self, action_id: str, messages: list[dict[str, Any]]) -> None:
+        by_family: dict[str, list[str]] = {}
+        for m in messages:
+            if family := self._family(m.get("kind", "")):
+                by_family.setdefault(family, []).append(m["contact_id"])
+        for family, ids in by_family.items():
+            self.store.reserve(action_id, family, ids)
+
     def _freeze(self, kind: str, payload: dict[str, Any], recipients: int, summary: str) -> dict[str, Any]:
         payload = {**payload, "location_id": self.ghl.location_id, "prepared_for": self.today().isoformat()}
         payload_hash = digest({"kind": kind, "payload": payload})
         existing = self.store.find_action(kind, payload_hash)
-        if existing:
+        messages = payload.get("messages", []) if kind == "send_messages" else []
+        if existing and existing["state"] not in {"expired", "cancelled"}:
             return self._action_view(existing)
+        for family in {self._family(m.get("kind", "")) for m in messages} - {""}:
+            ids = [m["contact_id"] for m in messages if self._family(m.get("kind", "")) == family]
+            held = self.store.reserved(ids, kinds=(family,), exclude_action=existing["action_id"] if existing else "")
+            if held:
+                names = {m["contact_id"]: m.get("name", m["contact_id"]) for m in messages}
+                raise FamError("already in another open batch (cancel it or let it expire first): " +
+                               ", ".join(f"{names[c]} → {a}" for c, a in sorted(held.items())))
+        if existing:  # the same batch again after it expired or was cancelled: reopen it with a fresh clock
+            self.store.update_action(existing["action_id"], state="prepared", approval_id="", created_at=now_iso())
+            self._reserve(existing["action_id"], messages)
+            return self._action_view(self.store.get_action(existing["action_id"]))
         row = {"action_id": _new_id("act"), "kind": kind, "payload_json": stable_json(payload),
                "payload_hash": payload_hash, "recipients": recipients, "state": "prepared",
                "summary": summary, "created_at": now_iso(), "updated_at": now_iso()}
         self.store.insert_action(row)
+        self._reserve(row["action_id"], messages)
         self.store.audit(actor=self.actor, action=f"{kind}.prepare", resource=row["action_id"],
                          decision="approval-required", result="prepared",
                          details={"recipients": recipients, "summary": summary})
@@ -610,7 +739,9 @@ class FamEngine:
         if row["kind"] == "send_messages":
             view["preview"] = [{"contact_id": m["contact_id"], "name": m.get("name", ""), "channel": m["channel"],
                                 "subject": m.get("subject", ""), "body": " ".join(m["body"].split())[:480],
-                                "delivery": m.get("delivery", ""), "segments": m.get("segments", 0)}
+                                "delivery": m.get("delivery", ""), "segments": m.get("segments", 0),
+                                "they_wrote": (m.get("context") or {}).get("their_last", {}).get("text", "")[:300],
+                                "flags": (m.get("context") or {}).get("flags", [])}
                                for m in payload["messages"][:8]]
         else:
             view["workflow_key"] = payload.get("workflow_key", "")
@@ -626,10 +757,93 @@ class FamEngine:
             return "mock" if (not self.settings.demo_mode or aff.is_test_contact) else "simulated"
         return "live" if (not self.settings.demo_mode or aff.is_test_contact) else "simulated"
 
+    def kicked_off_ids(self) -> set[str]:
+        """Everyone whose kickoff went out (or may have), whatever their tags say: a CRM write that failed after
+        the send can leave the tags behind, but the outbox and the history don't forget."""
+        return self.store.kickoff_claimed() | self.graph.contacts_with("kickoff_sent")
+
+    def kicked_off(self, aff: Affiliate) -> bool:
+        """A partner who has had their kickoff (or may have: an unsettled send) never gets another one."""
+        return (bool({KICKOFF_SENT, KICKOFF_DONE} & set(aff.tags)) or bool(self.store.kickoff_claimed([aff.id]))
+                or bool(self.graph.interactions(aff.id, ["kickoff_sent"], limit=1)))
+
+    def _email_footer(self, delivery: str) -> str:
+        """Commercial email carries the sender's postal address and a working opt-out (CAN-SPAM)."""
+        k = self.settings.kickoff
+        address = str(k.get("mailing_address") or "").strip()
+        if not address and delivery == "live":
+            raise FamError("set mailing_address in config/kickoff.json (the company's postal address) before any "
+                           "email goes out: commercial email has to carry it")
+        return "\n\n--\n" + str(k["company"]) + (f", {address}" if address else "") + "\n" + EMAIL_OPT_OUT_LINE
+
+    def _latest_inbound(self, contact_id: str) -> tuple[str, str] | None:
+        """The partner's newest text straight from GoHighLevel (it may not have been triaged yet)."""
+        try:
+            found = [m for conv in self.ghl.list_conversations(contact_id=contact_id, limit=3)
+                     for m in self.ghl.list_messages(conv.get("id", ""), limit=20)
+                     if m.get("direction") == "inbound" and "CALL" not in str(m.get("messageType", "")).upper()]
+        except FamError:
+            return None
+        if not found:
+            return None
+        newest = max(found, key=lambda m: iso_time(m.get("dateAdded")))
+        return (newest.get("body") or "").strip(), iso_time(newest.get("dateAdded"))
+
+    def _reply_context(self, aff: Affiliate, kind: str, body: str, move: str = "") -> dict[str, Any]:
+        """What the approver needs next to a reply: what the partner said, what we said last, how it was read,
+        and anything about the draft that doesn't fit. Built here, from the record, never from the model."""
+        if kind in KICKOFF_KINDS:
+            return {}
+        history = self.graph.interactions(aff.id, ["reply", "inbound_other", "kickoff_sent", "nudge_sent",
+                                                   "message_sent"], limit=12)
+        theirs = next((i for i in history if i["kind"] in {"reply", "inbound_other"}), None)
+        ours = next((i for i in history if i["kind"] in drafting.OUR_MESSAGES), None)
+        their_text, their_at = "", ""
+        latest = self._latest_inbound(aff.id) if kind == "reply" else None
+        if latest:
+            their_text, their_at = latest
+        elif theirs:
+            their_text, their_at = re.sub(r"^\([a-z_]+\)\s*", "", theirs["summary"]), theirs["at"]
+        if not their_text and not ours and not latest:
+            return {}
+        base = cadence.classify_reply(their_text) if their_text else {"intent": ""}
+        return {"their_last": {"at": their_at, "text": their_text[:600]},
+                "our_last": {"at": ours["at"], "text": ours["summary"][:400]} if ours else {},
+                "intent": base["intent"], "move": move[:40],
+                "flags": self._context_flags(their_text, base, ours["summary"] if ours else "", body, latest)}
+
+    def _context_flags(self, their: str, base: dict[str, Any], ours: str, draft: str,
+                       latest: tuple[str, str] | None) -> list[str]:
+        flags: list[str] = []
+        d = draft.lower()
+        if latest is not None and not latest[0]:
+            flags.append("Their last message has no text (a picture or file?). Open it in GoHighLevel first.")
+        if not their:
+            return flags
+        signals = cadence.reply_signals(their)
+        offered = signals["proposed_time"]
+        if offered:
+            keys = [w for w in re.findall(r"[a-z0-9:]+", offered.lower())
+                    if w not in {"at", "this", "next", "after", "before", "around"}]
+            link = str(self.settings.kickoff.get("calendar_link") or "")
+            if not any(k in d for k in keys) or (link and link.lower() in d):
+                flags.append(f"They offered a time (\"{offered}\"); the draft doesn't confirm it.")
+        if signals["prefers_text"] and re.search(r"\bcall\b[^?]*\?", d):
+            flags.append("They said texting is easier; the draft asks for a call.")
+        if base["intent"] in {"book_call", "has_deal", "will_send_deals"} and d.startswith("good question"):
+            flags.append(f"Read as {base['intent']}, but the draft answers it like a question.")
+        asked_before = [q.strip().lower() for q in re.findall(r"[^.!?]*\?", ours)]
+        if any(q and q in d for q in asked_before):
+            flags.append("The draft asks the same question as our last message.")
+        if ours and draft and " ".join(draft.lower().split()[:3]) == " ".join(ours.lower().split()[:3]):
+            flags.append("The draft opens the same way as our last message.")
+        return flags
+
     def prepare_messages(self, messages: list[dict[str, Any]], purpose: str = "personal touches") -> dict[str, Any]:
         """Freeze a batch of individually drafted messages for one manager approval."""
         if not messages:
             raise FamError("no messages to prepare")
+        self.expire_stale()
         kickoff_batch = all(str(m.get("kind", "")) in KICKOFF_KINDS for m in messages)
         cap = int(self.settings.kickoff["batch_max"] if kickoff_batch else self.settings.cadence["batch_approval_max"])
         if len(messages) > cap:
@@ -655,36 +869,52 @@ class FamEngine:
                 raise FamError(f"{aff.name} is do-not-contact")
             if self._personal_reply_pending(aff):
                 raise FamError(f"{aff.name} asked who they're texting with; the manager replies personally first")
+            if kind == "kickoff" and self.kicked_off(aff):
+                raise FamError(f"{aff.name} already had their kickoff")
+            delivery = self._delivery_mode(aff)
             segments = 0
             if channel == "sms":
                 if not aff.phone:
                     raise FamError(f"{aff.name} has no phone for SMS")
+                if aff.sms_blocked:
+                    raise FamError(f"{aff.name}'s number was reported wrong; fix it before texting")
                 body = cadence.sms_normalize(body)
-                if kind != "reply" and "stop" not in body.lower():
-                    body = body.rstrip() + " Reply STOP to opt out."
+                if kind != "reply" and drafting.STOP_SUFFIX.strip().lower() not in body.lower():
+                    body = body.rstrip() + drafting.STOP_SUFFIX
                 if len(body) > 480:
                     raise FamError(f"{aff.name}: SMS longer than 480 characters")
                 segments = cadence.sms_segments(body)["segments"]
                 limit = int(self.settings.kickoff["max_segments"])
                 if kind in KICKOFF_KINDS and segments > limit:
                     raise FamError(f"{aff.name}: kickoff texts stay within {limit} SMS segments (this is {segments})")
-            if channel == "email" and not aff.email:
-                raise FamError(f"{aff.name} has no email")
+            if channel == "email":
+                if not aff.email:
+                    raise FamError(f"{aff.name} has no email")
+                if aff.no_email:
+                    raise FamError(f"{aff.name} opted out of email")
+                if EMAIL_OPT_OUT_LINE not in body:
+                    body = body.rstrip() + self._email_footer(delivery)
+            context = self._reply_context(aff, kind, body, str(m.get("move", "")))
             frozen.append({"contact_id": contact_id, "name": aff.name, "channel": channel, "kind": kind,
                            "subject": str(m.get("subject", ""))[:150], "body": body,
-                           "delivery": self._delivery_mode(aff), "segments": segments,
-                           **({"variant": str(m["variant"])} if m.get("variant") else {})})
+                           "delivery": delivery, "segments": segments,
+                           **({"variant": str(m["variant"])} if m.get("variant") else {}),
+                           **({"context": context} if context else {})})
         real = sum(1 for m in frozen if m["delivery"] in {"live", "mock"})
         summary = f"{len(frozen)} {purpose} ({real} real, {len(frozen) - real} simulated)"
         billed = sum(m["segments"] for m in frozen)
         if billed:
             summary += f" · {billed} SMS segment{'s' if billed != 1 else ''}"
+        flagged = sum(1 for m in frozen if m.get("context", {}).get("flags"))
+        if flagged:
+            summary += f" · {flagged} flagged for a closer look"
         return self._freeze("send_messages", {"messages": frozen, "purpose": purpose}, len(frozen), summary)
 
     def prepare_enrollment(self, workflow_key: str, contact_ids: list[str] | None = None,
                            from_sweep_kind: str = "", purpose: str = "",
                            custom_values: dict[str, str] | None = None) -> dict[str, Any]:
         """Freeze a bulk workflow enrollment (cadence, newsletter, event, new offer)."""
+        self.expire_stale()
         if workflow_key not in BULK_WORKFLOW_KEYS:
             raise FamError(f"workflow_key must be one of {sorted(BULK_WORKFLOW_KEYS)}")
         workflow_id = self.settings.workflow_id(workflow_key)
@@ -718,8 +948,35 @@ class FamEngine:
                    "custom_values": custom_values or {}}
         return self._freeze("enroll_workflow", payload, len(ids), summary)
 
+    # ── outbound: expiry and cancel ──────────────────────────────────────────
+    def expire_stale(self) -> list[str]:
+        """Batches nobody approved within action_ttl_hours expire, which frees their partners for the next batch.
+        A wave drafted Monday and approved Thursday would otherwise text the same people as Tuesday's wave."""
+        ttl = int(self.settings.cadence.get("action_ttl_hours", 48))
+        cutoff = (datetime.now(UTC) - timedelta(hours=ttl)).replace(microsecond=0).isoformat()
+        expired = []
+        for state in ("prepared", "approval_requested"):
+            for row in self.store.list_actions(state, limit=5000):
+                if row["created_at"] < cutoff and self.store.transition(row["action_id"], (state,), "expired"):
+                    expired.append(row["action_id"])
+                    self.store.audit(actor=self.actor, action=f"{row['kind']}.expire", resource=row["action_id"],
+                                     decision="autonomous", result="expired", details={"ttl_hours": ttl})
+        return expired
+
+    def cancel_action(self, action_id: str, reason: str) -> dict[str, Any]:
+        """Withdraw a batch that hasn't started sending. Cancelling only ever sends less, so it needs no approval."""
+        row = self.store.get_action(action_id)
+        if not row:
+            raise FamError(f"unknown action {action_id}")
+        if not self.store.transition(action_id, ("prepared", "approval_requested", "approved"), "cancelled"):
+            raise FamError(f"action is {row['state']}; only a batch that hasn't started sending can be cancelled")
+        self.store.audit(actor=self.actor, action=f"{row['kind']}.cancel", resource=action_id, decision="autonomous",
+                         result="cancelled", details={"reason": reason})
+        return {"ok": True, "action_id": action_id, "state": "cancelled"}
+
     # ── outbound: approve / execute ──────────────────────────────────────────
     def request_approval(self, action_id: str) -> dict[str, Any]:
+        self.expire_stale()
         row = self.store.get_action(action_id)
         if not row:
             raise FamError(f"unknown action {action_id}")
@@ -734,13 +991,26 @@ class FamEngine:
             review = self.vault.review(action_id, payload.get("purpose", "messages"), row["summary"],
                                        payload["messages"], day=self.today().isoformat())
             view["review_file"] = str(review)
+            view["review_thread"] = self._review_thread(review.read_text(), payload["messages"])
             full = len(payload["messages"]) <= 8
             lines.append(f"Every message in full: `{review.relative_to(self.vault.root)}`"
-                         + (" (all shown below)" if full else f" ({len(payload['messages'])} messages; read them there)"))
-        for i, p in enumerate(view.get("preview", []), 1):
-            subj = f" — _{p['subject']}_" if p.get("subject") else ""
-            body = p["body"] if len(view.get("preview", [])) == row["recipients"] else p["body"][:180]
-            lines.append(f"{i}. {p['name']} ({p['channel']}, {p['delivery']}){subj}: {body}")
+                         + (" (all shown below)" if full else f" ({len(payload['messages'])} messages; open the "
+                            "file in Obsidian to read them all)"))
+            flagged = [i for i, m in enumerate(payload["messages"], 1) if m.get("context", {}).get("flags")]
+            if flagged:
+                lines.append(f"⚠️ Look closely at {', '.join(map(str, flagged))}: the draft may not fit what they said.")
+            for i, m in enumerate(payload["messages"][:8], 1):
+                subj = f" — _{_slack_safe(m['subject'])}_" if m.get("subject") else ""
+                body = m["body"] if full else m["body"][:180]
+                ctx = m.get("context") or {}
+                said = ""
+                if ctx.get("their_last", {}).get("text") or ctx.get("intent"):
+                    said = (f" They wrote: “{_slack_safe(ctx.get('their_last', {}).get('text', ''))[:220]}”"
+                            f" (read as {ctx.get('intent') or '?'}"
+                            + (f", move: {ctx['move']}" if ctx.get("move") else "") + ").")
+                warn = "".join(f" ⚠️ {f}" for f in ctx.get("flags", []))
+                lines.append(f"{i}. {_slack_safe(m['name'])} ({m['channel']}, {m['delivery']}){subj}:{said}{warn}"
+                             f" Draft: {_slack_safe(body)}")
         if view.get("sample_contacts"):
             lines.append("Contacts: " + ", ".join(view["sample_contacts"]) +
                          (" …" if row["recipients"] > len(view["sample_contacts"]) else ""))
@@ -751,13 +1021,28 @@ class FamEngine:
         view["approval_card"] = "\n".join(lines)
         return view
 
+    @staticmethod
+    def _review_thread(review: str, messages: list[dict[str, Any]]) -> list[str]:
+        """What the agent posts under the card. A small batch goes in full. A big one (a 250-text kickoff wave is
+        ~90k characters, and re-typing that into Slack every wave would cost more than the whole reactivation's
+        drafting) stays in the vault, and only the messages flagged for a closer look are posted."""
+        if len(review) <= REVIEW_THREAD_MAX:
+            return [_no_mentions(c) for c in _chunks(review, 3500)]
+        sections = review.split("\n### ")
+        flagged = [f"### {sections[i]}" for i, m in enumerate(messages, 1)
+                   if i < len(sections) and (m.get("context") or {}).get("flags")][:10]
+        return [_no_mentions(c) for c in _chunks("\n\n".join(flagged), 3500)] if flagged else []
+
     def approve(self, action_id: str, action_digest: str, approver: str,
                 exclude: list[int] | None = None) -> dict[str, Any]:
         """Record a human approval. Exposed ONLY on the untrusted approvals MCP. `exclude` holds back messages
         by their number in the review file; everything else in the batch is approved as frozen."""
+        self.expire_stale()
         row = self.store.get_action(action_id)
         if not row:
             raise FamError(f"unknown action {action_id}")
+        if row["state"] == "expired":
+            raise FamError("this batch expired before it was approved; prepare it again so it is checked fresh")
         if row["state"] != "approval_requested":
             raise FamError(f"action is {row['state']}; request approval first")
         if action_digest != row["payload_hash"]:
@@ -785,39 +1070,51 @@ class FamEngine:
             raise FamError(f"external writes are stopped: {self.store.get_flag('stop_reason', '')}")
 
     def execute(self, action_id: str) -> dict[str, Any]:
+        """Send an approved batch. Safe to call again: a batch paused by quiet hours or the stop switch, or a run
+        that died mid-way, picks up where it stopped while its approval lasts, and only messages that never
+        started are sent. A message whose outcome is unknown is left for a person to settle."""
         import json as _json
         self._require_writes_enabled()
         row = self.store.get_action(action_id)
         if not row:
             raise FamError(f"unknown action {action_id}")
-        if row["state"] != "approved":
+        if row["state"] not in SENDABLE_STATES:
             raise ApprovalRequired(f"action is {row['state']}; it needs a human approval first")
         approval = self.store.get_approval(row["approval_id"])
         if not approval or approval["digest"] != row["payload_hash"]:
             raise FamError("approval does not match this action")
-        if approval["expires_at"] < now_iso():
+        if self._approval_lapsed(approval, started=row["state"] != "approved"):
             self.store.update_action(action_id, state="approval_requested")
-            raise FamError("approval expired — request a fresh one")
+            raise FamError("approval expired — request a fresh one" +
+                           (" to send the rest of this batch" if row["state"] != "approved" else ""))
         payload = _json.loads(row["payload_json"])
         if payload.get("location_id") != self.ghl.location_id:
             raise FamError("action was prepared for a different GHL location")
-        if row["kind"] == "send_messages":
-            has_real_sms = any(m["channel"] == "sms" and m["delivery"] == "live" for m in payload["messages"])
-            start, end = self.settings.cadence["sms_window_start_hour"], self.settings.cadence["sms_window_end_hour"]
-            if has_real_sms and not (start <= self._local_hour() < end) and not os.getenv("FAM_IGNORE_SMS_WINDOW"):
-                raise FamError(f"outside the SMS send window ({start}:00–{end}:00 {self.settings.cadence['timezone']})")
-        if not self.store.use_approval(approval["approval_id"]):
-            raise FamError("approval was already used")
-        self.store.update_action(action_id, state="executing")
-        if row["kind"] == "send_messages":
-            held = set(json.loads(approval.get("excluded_json") or "[]"))
-            result = self._execute_messages(payload, action_id=action_id, held_back=held)
-        elif row["kind"] == "enroll_workflow":
-            result = self._execute_enrollment(payload)
+        if row["state"] == "approved":
+            if not self.store.use_approval(approval["approval_id"]):
+                raise FamError("approval was already used")
+            if not self.store.transition(action_id, ("approved",), "executing"):
+                raise FamError("another run is already sending this batch")
         else:
-            raise FamError(f"unknown action kind {row['kind']}")
-        state = "executed" if not result["failed"] else "executed_with_errors"
-        self.store.update_action(action_id, state=state, result_json=stable_json(result))
+            self.store.transition(action_id, (row["state"],), "executing")
+        result: dict[str, Any] = {}
+        # A crashed message batch can resume from its outbox; a crashed enrollment has no outbox, so it stops
+        # in a state nothing sends from (re-running it could enroll everyone twice).
+        state = "paused" if row["kind"] == "send_messages" else "interrupted"
+        try:
+            if row["kind"] == "send_messages":
+                held = set(json.loads(approval.get("excluded_json") or "[]"))
+                result = self._execute_messages(payload, action_id=action_id, held_back=held,
+                                                prepared_at=row["created_at"])
+                state = result.pop("state")
+            elif row["kind"] == "enroll_workflow":
+                result = self._execute_enrollment(payload)
+                state = "stopped" if result.get("stopped") else (
+                    "executed" if not result["failed"] else "executed_with_errors")
+            else:
+                raise FamError(f"unknown action kind {row['kind']}")
+        finally:  # never leave a batch stuck in "executing": a crash leaves it paused, resumable from the outbox
+            self.store.update_action(action_id, state=state, result_json=stable_json(result))
         self.store.audit(actor=self.actor, action=f"{row['kind']}.execute", resource=action_id,
                          decision=f"approved:{approval['approver']}", result=state,
                          details={k: v for k, v in result.items() if k != "per_contact"})
@@ -837,43 +1134,225 @@ class FamEngine:
                     self.ghl.complete_task(aff.id, task["id"])
         self._set_fields(aff.id, values)
 
+    def _approval_lapsed(self, approval: dict[str, Any], started: bool) -> bool:
+        """An approval must be used within approval_ttl_hours. Once a batch has started, the texts it held back
+        for the recipients' quiet hours may finish for resume_ttl_hours after the approval (an evening approval
+        whose West Coast texts wait for the morning)."""
+        if not started:
+            return approval["expires_at"] < now_iso()
+        hours = int(self.settings.cadence.get("resume_ttl_hours", 36))
+        limit = (datetime.fromisoformat(approval["created_at"]) + timedelta(hours=hours)).isoformat()
+        return limit < now_iso()
+
+    def resume_paused(self) -> dict[str, Any]:
+        """Send what paused batches held back, as each recipient's window opens. Runs on a schedule without the
+        model: it only finishes batches a person already approved, and never re-sends anything."""
+        if self.store.get_flag("external_writes_enabled", "true") != "true":
+            return {"ok": True, "stopped": True, "resumed": []}
+        resumed = []
+        stuck = (datetime.now(UTC) - timedelta(minutes=10)).replace(microsecond=0).isoformat()
+        rows = self.store.list_actions("paused", limit=200) + [
+            r for r in self.store.list_actions("executing", limit=200) if r["updated_at"] < stuck]  # a run killed hard
+        for row in rows:
+            try:
+                result = self.execute(row["action_id"])
+            except FamError as exc:
+                resumed.append({"action_id": row["action_id"], "error": str(exc)})
+                continue
+            sent = result.get("live", 0) + result.get("mock", 0) + result.get("simulated", 0)
+            if sent or result["state"] != "paused":
+                resumed.append({"action_id": row["action_id"], "state": result["state"], "sent": sent,
+                                "still_waiting": result.get("pending", 0)})
+        return {"ok": True, "resumed": resumed}
+
+    def _stale(self, aff: Affiliate, m: dict[str, Any], prepared_at: str = "") -> str:
+        """Why a message approved earlier shouldn't go out now ("" if it still should)."""
+        kind = m.get("kind", "")
+        if aff.is_dnc:
+            return "opted out after approval"
+        if m["channel"] == "sms" and aff.sms_blocked:
+            return "number reported wrong after approval"
+        if m["channel"] == "email" and aff.no_email:
+            return "opted out of email after approval"
+        if kind == "kickoff" and (KICKOFF_PENDING not in aff.tags or self.kicked_off(aff)):
+            return "no longer waiting on a kickoff"
+        if kind == "kickoff_nudge" and KICKOFF_SENT not in aff.tags:
+            return "no longer waiting on a nudge (they replied, or the kickoff track ended)"
+        if cadence.NOT_INTERESTED_TAG in aff.tags and kind in KICKOFF_KINDS:
+            return "said they're not interested"
+        if kind not in KICKOFF_KINDS and kind != "reply" and prepared_at:
+            heard = self.graph.last_processed_at(aff.id)
+            if heard and heard >= prepared_at:  # both stamped by this server's clock; a tie counts as after
+                return "they wrote after this was drafted; answer what they said instead"
+        if kind == "reply":  # compared with the newest text frozen into the batch, in GoHighLevel's own clock
+            answered = str(((m.get("context") or {}).get("their_last") or {}).get("at") or "")
+            newer = self._latest_inbound(aff.id)
+            if newer and newer[1] and newer[1][: len(answered) or None] > answered:
+                return "they wrote again after this reply was drafted; draft it fresh"
+        return ""
+
+    def _send_window_open(self, aff: Affiliate, m: dict[str, Any]) -> bool:
+        """Quiet hours are the recipient's: checked per text, in their time zone, at the moment of sending.
+        FAM_IGNORE_SMS_WINDOW only works against the mock CRM (demos at odd hours), never for a real text."""
+        if m["channel"] != "sms" or m["delivery"] == "simulated":
+            return True
+        if m["delivery"] == "mock" and os.getenv("FAM_IGNORE_SMS_WINDOW"):
+            return True
+        c = self.settings.cadence
+        return timezones.in_window(aff.phone, self.now(), int(c["sms_window_start_hour"]), int(c["sms_window_end_hour"]))
+
     def _execute_messages(self, payload: dict[str, Any], action_id: str = "",
-                          held_back: set[int] | None = None) -> dict[str, Any]:
-        counts = {"live": 0, "mock": 0, "simulated": 0, "failed": 0, "held_back": 0}
+                          held_back: set[int] | None = None, prepared_at: str = "") -> dict[str, Any]:
+        messages = payload["messages"]
+        self.store.outbox_init(action_id, messages)
+        orphaned = (datetime.now(UTC) - timedelta(minutes=10)).replace(microsecond=0).isoformat()
+        for r in self.store.outbox(action_id, states=("sending",)):
+            if r["updated_at"] < orphaned:  # a run was killed mid-send: GoHighLevel may or may not have it
+                self.store.outbox_set(action_id, r["n"], state="unknown",
+                                      detail="a run stopped while sending this; check the GoHighLevel conversation")
+        rows = {r["n"]: r for r in self.store.outbox(action_id)}
+        counts = {"live": 0, "mock": 0, "simulated": 0, "failed": 0, "held_back": 0, "skipped": 0, "unknown": 0,
+                  "deferred": 0}
         per_contact = []
         pause = float(self.settings.kickoff.get("send_pause_seconds", 0) or 0)
-        for n, m in enumerate(payload["messages"], 1):
+        stopped = ""
+        for n, m in enumerate(messages, 1):
+            if n % 10 == 0:
+                self.store.update_action(action_id)  # heartbeat: a live run is never mistaken for a dead one
+            if rows[n]["state"] != "pending":
+                continue  # already settled by an earlier run
             if n in (held_back or set()):
+                self.store.outbox_set(action_id, n, state="held_back")
                 counts["held_back"] += 1
                 per_contact.append({"contact_id": m["contact_id"], "ok": True, "held_back": True})
                 continue
+            if self.store.get_flag("external_writes_enabled", "true") != "true":  # read fresh for every message
+                stopped = self.store.get_flag("stop_reason", "stopped")
+                break
             try:
                 aff = self.affiliate(m["contact_id"])
-                if aff.is_dnc:
-                    raise FamError("contact opted out after approval")
-                if m["delivery"] == "simulated":
-                    self.ghl.add_note(aff.id, f"[SIMULATED {m['channel'].upper()} — demo mode, not delivered]\n"
-                                              f"{m.get('subject', '')}\n{m['body']}".strip())
-                else:
-                    self.ghl.send_message(aff.id, m["channel"], m["body"], m.get("subject", ""))
-                    if m["delivery"] == "live" and m["channel"] == "sms" and pause:
-                        time.sleep(pause)  # pace live texts under the A2P throughput limit
-                self._touch_bookkeeping(aff, m["channel"], m.get("kind", ""))
-                self._after_send(aff, m, f"{action_id}:{n}")
-                self.vault.affiliate(aff.name, aff.id, f"{m['delivery']} {m['channel']} ({m.get('kind', '')}): "
-                                     f"{m['body'][:140]}", day=self.today().isoformat())
-                counts[m["delivery"]] += 1
-                per_contact.append({"contact_id": aff.id, "delivery": m["delivery"], "ok": True})
-            except FamError as exc:
+                why = self._stale(aff, m, prepared_at)
+            except Exception as exc:  # noqa: BLE001 - nothing was sent; record it and keep going
+                self.store.outbox_set(action_id, n, state="failed", detail=f"before sending: {exc}"[:300])
                 counts["failed"] += 1
                 per_contact.append({"contact_id": m["contact_id"], "ok": False, "error": str(exc)})
-        self.store.bump(self.today().isoformat(), "personal_messages",
-                        counts["live"] + counts["mock"] + counts["simulated"])
+                continue
+            if why:
+                self.store.outbox_set(action_id, n, state="skipped", detail=why)
+                counts["skipped"] += 1
+                per_contact.append({"contact_id": aff.id, "ok": True, "skipped": why})
+                continue
+            if not self._send_window_open(aff, m):
+                counts["deferred"] += 1  # stays pending; the next run inside their window sends it
+                per_contact.append({"contact_id": aff.id, "ok": True, "deferred": "outside their quiet-hours window"})
+                continue
+            if not self.store.outbox_claim(action_id, n):
+                counts["skipped"] += 1
+                per_contact.append({"contact_id": aff.id, "ok": True, "skipped": "already handled"})
+                continue
+            try:
+                if m["delivery"] == "simulated":
+                    note = self.ghl.add_note(aff.id, f"[SIMULATED {m['channel'].upper()} — demo mode, not delivered]\n"
+                                                     f"{m.get('subject', '')}\n{m['body']}".strip())
+                    message_id = str((note or {}).get("id", "simulated"))
+                else:
+                    sent = self.ghl.send_message(aff.id, m["channel"], m["body"], m.get("subject", ""))
+                    message_id = str((sent or {}).get("messageId") or (sent or {}).get("id") or "")
+            except Exception as exc:  # noqa: BLE001 - every outcome is recorded; nothing is retried blindly
+                definite = m["delivery"] == "simulated" or (isinstance(exc, GHLError) and exc.rejected) or (
+                    isinstance(exc, FamError) and not isinstance(exc, GHLError))
+                state = "failed" if definite else "unknown"
+                self.store.outbox_set(action_id, n, state=state, detail=str(exc)[:300])
+                counts[state] += 1
+                per_contact.append({"contact_id": aff.id, "ok": False, "error": str(exc), "outcome": state})
+                continue
+            self.store.outbox_set(action_id, n, state="sent", message_id=message_id)
+            counts[m["delivery"]] += 1
+            per_contact.append({"contact_id": aff.id, "delivery": m["delivery"], "ok": True})
+            self._bookkeep(action_id, n, aff, m)
+            if m["delivery"] == "live" and m["channel"] == "sms" and pause:
+                time.sleep(pause)  # pace live texts under the A2P throughput limit
+        sent = counts["live"] + counts["mock"] + counts["simulated"]
+        self.store.bump(self.today().isoformat(), "personal_messages", sent)
+        pending = sum(1 for r in self.store.outbox(action_id, states=("pending",)))
+        unknown = len(self.store.outbox(action_id, states=("unknown",)))
+        failed = len(self.store.outbox(action_id, states=("failed",)))
+        state = ("paused" if stopped or pending else "needs_reconcile" if unknown
+                 else "executed_with_errors" if failed else "executed")
         self.vault.log("Messages sent", f"- {payload['purpose']}: live {counts['live']}, mock {counts['mock']}, "
-                       f"simulated {counts['simulated']}, failed {counts['failed']}"
-                       + (f", held back {counts['held_back']}" if counts["held_back"] else ""),
-                       day=self.today().isoformat())
-        return {**counts, "per_contact": per_contact}
+                       f"simulated {counts['simulated']}, failed {counts['failed']}, skipped {counts['skipped']}"
+                       + (f", held back {counts['held_back']}" if counts["held_back"] else "")
+                       + (f", **{counts['unknown']} unknown — settle them**" if counts["unknown"] else "")
+                       + (f", {pending} waiting ({'stopped: ' + stopped if stopped else 'quiet hours'})"
+                          if pending else ""), day=self.today().isoformat())
+        return {**counts, "pending": pending, "stopped": stopped, "state": state, "per_contact": per_contact}
+
+    def _bookkeep(self, action_id: str, n: int, aff: Affiliate, m: dict[str, Any]) -> bool:
+        """After a send: touch dates, kickoff tags, the partner's history and note. Its own step, so a slow CRM
+        write can't make a delivered text look failed (and get sent again); it is retried until it lands."""
+        try:
+            self._touch_bookkeeping(aff, m["channel"], m.get("kind", ""))
+            self._after_send(aff, m, f"{action_id}:{n}")
+            self.vault.affiliate(aff.name, aff.id, f"{m['delivery']} {m['channel']} ({m.get('kind', '')}): "
+                                 f"{m['body'][:140]}", day=self.today().isoformat())
+        except Exception as exc:  # noqa: BLE001
+            self.store.outbox_set(action_id, n, detail=f"sent; bookkeeping failed, will retry: {exc}"[:300])
+            return False
+        self.store.outbox_set(action_id, n, booked=1, detail="")
+        return True
+
+    def finish_bookkeeping(self) -> dict[str, Any]:
+        """Retry the CRM updates for messages that went out but whose bookkeeping failed."""
+        done, failed = 0, 0
+        for r in self.store.outbox(states=("sent",)):
+            if r["booked"]:
+                continue
+            action = self.store.get_action(r["action_id"])
+            m = json.loads(action["payload_json"])["messages"][r["n"] - 1]
+            try:
+                aff = self.affiliate(r["contact_id"])
+            except FamError:
+                failed += 1
+                continue
+            if self._bookkeep(r["action_id"], r["n"], aff, m):
+                done += 1
+            else:
+                failed += 1
+        return {"ok": True, "finished": done, "still_failing": failed}
+
+    def outbox_status(self, action_id: str = "") -> dict[str, Any]:
+        rows = self.store.outbox(action_id)
+        counts: dict[str, int] = {}
+        for r in rows:
+            counts[r["state"]] = counts.get(r["state"], 0) + 1
+        return {"counts": counts,
+                "unknown": [{k: r[k] for k in ("action_id", "n", "contact_id", "kind", "detail")}
+                            for r in rows if r["state"] == "unknown"],
+                "bookkeeping_pending": sum(1 for r in rows if r["state"] == "sent" and not r["booked"]),
+                "paused_actions": [a["action_id"] for a in self.store.list_actions("paused", limit=200)]}
+
+    def settle(self, action_id: str, n: int, outcome: str, actor: str) -> dict[str, Any]:
+        """A person decides what happened to a message whose send outcome is unknown (they check GoHighLevel's
+        conversation). "sent" books it; "not_sent" frees the partner for a later batch. Approvals surface only."""
+        if outcome not in {"sent", "not_sent"}:
+            raise FamError("outcome must be sent or not_sent")
+        if not actor.strip():
+            raise FamError("actor name is required")
+        rows = self.store.outbox(action_id, states=("unknown",))
+        r = next((x for x in rows if x["n"] == int(n)), None)
+        if not r:
+            raise FamError(f"message {n} of {action_id} isn't waiting to be settled")
+        self.store.outbox_set(action_id, int(n), state="sent" if outcome == "sent" else "failed",
+                              detail=f"settled {outcome} by {actor.strip()}")
+        if outcome == "sent":
+            m = json.loads(self.store.get_action(action_id)["payload_json"])["messages"][int(n) - 1]
+            self._bookkeep(action_id, int(n), self.affiliate(r["contact_id"]), m)
+        if not self.store.outbox(action_id, states=("unknown", "pending")):
+            failed = self.store.outbox(action_id, states=("failed",))
+            self.store.transition(action_id, ("needs_reconcile",), "executed_with_errors" if failed else "executed")
+        self.store.audit(actor=actor.strip(), action="outbox.settle", resource=f"{action_id}:{n}", decision="human",
+                         result=outcome, details={"contact_id": r["contact_id"]})
+        return {"ok": True, "action_id": action_id, "n": int(n), "outcome": outcome}
 
     def _after_send(self, aff: Affiliate, m: dict[str, Any], ref: str) -> None:
         """Kickoff tags move along, and every personal message becomes part of the partner's history."""
@@ -906,7 +1385,11 @@ class FamEngine:
         channel = "workflow"
         # one paged read instead of a GET per contact — keeps 10k-affiliate runs inside GHL rate limits
         amap = {a.id: a for a in self.affiliates()} if len(payload["contact_ids"]) > 25 else {}
-        for cid in payload["contact_ids"]:
+        stopped = 0
+        for i, cid in enumerate(payload["contact_ids"]):
+            if self.store.get_flag("external_writes_enabled", "true") != "true":  # the stop switch, per contact
+                stopped = len(payload["contact_ids"]) - i
+                break
             delivery = payload["deliveries"].get(cid, "simulated")
             try:
                 aff = amap.get(cid) or self.affiliate(cid)
@@ -929,9 +1412,10 @@ class FamEngine:
                         counts["live"] + counts["mock"] + counts["simulated"])
         self.vault.log("Workflow enrollment", f"- {key}: live {counts['live']}, mock {counts['mock']}, "
                        f"simulated {counts['simulated']}, failed {counts['failed']}"
+                       + (f", {stopped} not enrolled (stopped)" if stopped else "")
                        + (f" — {payload['purpose']}" if payload.get("purpose") else ""),
                        day=self.today().isoformat())
-        return {**counts, "per_contact": per_contact}
+        return {**counts, "stopped": stopped, "per_contact": per_contact}
 
     # ── standing approvals for recurring bulk cadence ─────────────────────────
     def activate_standing(self, workflow_key: str, max_per_day: int, days: int, approver: str) -> dict[str, Any]:
@@ -1030,6 +1514,36 @@ class FamEngine:
             "dnc": sum(1 for a in affs if a.is_dnc),
             "open_growth_services": sum(1 for a in affs if any(t.startswith("want:") for t in a.tags)),
         }
+
+    def read_file(self, path: str, offset: int = 0, max_chars: int = 20000) -> dict[str, Any]:
+        """Read-only access to the knowledge base and the Obsidian vault, the only files the agent needs.
+        (The agent has no shell, file or code tools: those could approve its own sends.) A directory lists its
+        markdown files. Paths start with knowledge/ or vault/; nothing outside those two folders can be read."""
+        roots = {"knowledge": (self.settings.config_dir.parent / "knowledge").resolve(),
+                 "vault": self.settings.vault_dir.resolve()}
+        head, _, rest = (path or "").strip().lstrip("/").partition("/")
+        if head not in roots:
+            raise FamError("path must start with knowledge/ or vault/")
+        target = (roots[head] / rest).resolve()
+        if not target.is_relative_to(roots[head]) or any(
+                part.startswith(".") for part in target.relative_to(roots[head]).parts):
+            raise FamError("that path is outside the knowledge base and the vault")
+        if target.is_dir():
+            files = sorted(str(f.relative_to(roots[head])) for f in target.rglob("*.md")
+                           if not any(p.startswith(".") for p in f.relative_to(roots[head]).parts))
+            return {"path": f"{head}/{rest}".rstrip("/"), "files": files[:500], "count": len(files)}
+        if not target.exists() or target.suffix not in {".md", ".json", ".txt", ".csv"}:
+            raise FamError(f"no readable file at {head}/{rest}")
+        text = target.read_text(errors="replace")
+        part = text[max(0, offset): max(0, offset) + max(1, min(max_chars, 50000))]
+        return {"path": f"{head}/{rest}", "chars": len(text), "offset": offset, "content": part,
+                "more": offset + len(part) < len(text)}
+
+    def daily_note(self, title: str, body: str) -> dict[str, Any]:
+        """Append to today's daily note in the vault (summaries, decisions, what went out)."""
+        self._lint(body)
+        path = self.vault.log(title.strip()[:80] or "Note", body, day=self.today().isoformat())
+        return {"ok": True, "path": str(path)}
 
     def save_campaign_note(self, title: str, body: str, kind: str = "campaign") -> dict[str, Any]:
         self._lint(body)

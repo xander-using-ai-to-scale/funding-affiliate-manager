@@ -3,7 +3,8 @@
   "source": ["src:skool", "src:linkedin", "src:referral", "src:webinar", "src:event", "src:facebook", "src:website", "src:legacy-import"],
   "lifecycle": ["aff:applied", "aff:onboarding", "aff:active", "aff:producing", "aff:quiet", "aff:dormant", "aff:dead", "aff:reactivated", "aff:dnc"],
   "interest": ["want:funnel", "want:reactivation", "want:email-campaigns", "want:social", "want:crm-help", "want:event", "deal:incoming"],
-  "system": ["fam:test-contact", "fam:synthetic"],
+  "system": ["fam:test-contact", "fam:synthetic", "fam:reply-personally"],
+  "contact_limits": ["aff:no-email", "aff:wrong-number", "aff:not-interested"],
   "tier": ["tier:ceo", "tier:executive", "tier:apprentice", "tier:free"],
   "kickoff": ["fam:kickoff-pending", "fam:kickoff-sent", "fam:kickoff-done"]
 }

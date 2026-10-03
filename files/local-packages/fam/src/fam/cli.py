@@ -1,10 +1,15 @@
 """`fam` — command line for the operator, cron, and the demo.
 
-    fam status | sweep [--apply] | queue | brief ID | inbox | scorecard | actions [--state S]
-    fam approve ACTION DIGEST --approver NAME [--except 4,17]   (a human at the terminal)
-    fam execute ACTION
+    fam status | sweep [--apply] | queue | brief ID | inbox [--ids] | scorecard | actions [--state S]
+    fam execute ACTION                            (send an approved batch, or resume a paused one)
+    fam cancel ACTION --reason R                  (withdraw a batch that hasn't started sending)
+    fam outbox [--action ID] | fam outbox finish  (per-message send states; retry failed bookkeeping)
+    fam outbox resume                             (cron: send what paused batches held for quiet hours)
     fam cadence run-standing                      (cron: bulk cadence under standing approvals)
-    fam stop "reason" | fam resume --actor NAME
+    fam stop "reason"
+
+  Approving a batch, settling an unknown send, and lifting a stop are human decisions made on the approvals
+  surface (Slack, through Hermes' approval prompt). There is deliberately no command for them here.
     fam ghl bootstrap [--apply]                   (live location setup; dry-run by default)
     fam sim seed [--count 250] [--live --test-email E --test-phone P --test-name N]
     fam sim run [--days 30] [--out sim-output]
@@ -49,15 +54,17 @@ def main(argv: list[str] | None = None) -> int:
     sub.add_parser("queue")
     sp = sub.add_parser("brief")
     sp.add_argument("contact_id")
-    sub.add_parser("inbox")
+    sp = sub.add_parser("inbox")
+    sp.add_argument("--ids", action="store_true", help="only the ids of untriaged texts (the cron monitor)")
     sub.add_parser("scorecard")
     sp = sub.add_parser("actions")
     sp.add_argument("--state", default="")
-    sp = sub.add_parser("approve")
+    sp = sub.add_parser("cancel")
     sp.add_argument("action_id")
-    sp.add_argument("digest")
-    sp.add_argument("--approver", required=True)
-    sp.add_argument("--except", dest="exclude", default="", help="message numbers to hold back, e.g. 4,17")
+    sp.add_argument("--reason", required=True)
+    sp = sub.add_parser("outbox")
+    sp.add_argument("what", nargs="?", choices=["status", "finish", "resume"], default="status")
+    sp.add_argument("--action", default="")
     sp = sub.add_parser("profile")
     sp.add_argument("contact_id")
     sp = sub.add_parser("graph")
@@ -98,8 +105,6 @@ def main(argv: list[str] | None = None) -> int:
     sp.add_argument("what", choices=["run-standing"])
     sp = sub.add_parser("stop")
     sp.add_argument("reason")
-    sp = sub.add_parser("resume")
-    sp.add_argument("--actor", required=True)
     sp = sub.add_parser("ghl")
     sp.add_argument("what", choices=["bootstrap"])
     sp.add_argument("--apply", action="store_true")
@@ -195,14 +200,26 @@ def main(argv: list[str] | None = None) -> int:
         elif args.cmd == "brief":
             _print(engine.affiliate_brief(args.contact_id))
         elif args.cmd == "inbox":
-            _print(engine.reply_inbox())
+            if args.ids:  # stable output for the cron monitor: same pending texts, same bytes
+                page = engine.reply_inbox_page(limit=10**6)
+                ids = sorted(i for r in page["rows"] for i in r["message_ids"])
+                if ids:  # the hour makes texts a failed triage run left behind wake the agent again, hourly
+                    print("\n".join(ids + [f"retry {engine.now():%Y-%m-%dT%H}"]))
+            else:
+                _print(engine.reply_inbox_page())
         elif args.cmd == "scorecard":
             _print(engine.scorecard())
         elif args.cmd == "actions":
             _print([engine._action_view(r) for r in engine.store.list_actions(args.state)])
-        elif args.cmd == "approve":
-            held = [int(x) for x in args.exclude.replace(" ", "").split(",") if x]
-            _print(engine.approve(args.action_id, args.digest, args.approver, held))
+        elif args.cmd == "cancel":
+            _print(engine.cancel_action(args.action_id, args.reason))
+        elif args.cmd == "outbox":
+            if args.what == "resume":  # cron, no model: finish approved batches as recipients' windows open
+                result = engine.resume_paused()
+                if result["resumed"]:  # silent when nothing happened, so the cron job only speaks up when it sent
+                    _print(result)
+            else:
+                _print(engine.finish_bookkeeping() if args.what == "finish" else engine.outbox_status(args.action))
         elif args.cmd == "profile":
             _print(engine.profile_get(args.contact_id))
         elif args.cmd == "graph":
@@ -256,8 +273,6 @@ def main(argv: list[str] | None = None) -> int:
             _print(engine.run_standing_cadence())
         elif args.cmd == "stop":
             _print(engine.emergency_stop(args.reason))
-        elif args.cmd == "resume":
-            _print(engine.resume(args.actor))
         return 0
     except FamError as exc:
         print(json.dumps({"ok": False, "error": str(exc)}), file=sys.stderr)

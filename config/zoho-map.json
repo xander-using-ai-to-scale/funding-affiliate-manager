@@ -1,5 +1,5 @@
 {
-  "_comment": "Read-only map of 7FF's Zoho CRM partner records (API v2). Field values are Zoho API names; blanks are custom fields to confirm with Brock (tier, plan, deals). Nothing is ever written to Zoho.",
+  "_comment": "Read-only map of 7FF's Zoho CRM partner records (API v2). Field values are Zoho API names; blanks are custom fields to confirm with Brock (tier, plan, deals, a real do-not-contact field). Email_Opt_Out blocks email only. Nothing is ever written to Zoho.",
   "module": "Contacts",
   "fields": {
     "first_name": "First_Name",
@@ -15,7 +15,8 @@
     "last_deal_date": "",
     "last_contact_date": "Last_Activity_Time",
     "assigned_manager": "",
-    "dnc": "Email_Opt_Out"
+    "dnc": "",
+    "no_email": "Email_Opt_Out"
   },
   "related": ["Notes", "Deals", "Calls"]
 }

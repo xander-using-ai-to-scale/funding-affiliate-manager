@@ -48,7 +48,7 @@ def bootstrap(settings: Settings, dry_run: bool = True) -> dict[str, Any]:
     # tags
     have_tags = {t.get("name") for t in ghl.list_tags()}
     taxonomy = _load(settings, "tag-taxonomy.json")
-    for group in ("source", "lifecycle", "interest", "system", "tier", "kickoff"):
+    for group in ("source", "lifecycle", "interest", "system", "tier", "kickoff", "contact_limits"):
         for tag in taxonomy.get(group, []):
             if tag in have_tags:
                 continue

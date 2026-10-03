@@ -52,8 +52,11 @@ when the agreement ends, as the agreement sets out. No graph database or outside
    out highest-value partners first, each as a review file listing every text in full; the manager approves the wave
    or holds some back. One gentle nudge after five days, then the normal cadence.
 3. **The conversation.** Every new text is read (several in a row count as one), its facts go into the profile, and
-   the reply asks the next thing the profile is missing. After a couple of replies it asks for a call; when they say
-   yes, it sends the manager's booking link and posts a pre-call brief.
+   the reply asks the next thing the profile is missing, never a question it just asked. After a couple of replies it
+   asks for a call, unless they've said texting is easier. When they name a time, the reply confirms it; when they say
+   yes without one, it sends the manager's booking link. Either way the manager gets a call task and a pre-call
+   brief. The person approving each reply sees what the partner wrote next to it, with a flag on any draft that
+   doesn't fit.
 4. **The call.** The recording's transcript comes in, its facts go into the profile, and the promises become open
    loops and tasks for the manager.
 5. **The revenue plan.** Who they serve, what their clients need, which 7FF programs fit, the next 30 days. The
@@ -91,8 +94,9 @@ only to be warm.
   wrote back and their profiles average 44.2% complete; 8 calls were held and read into the graph (half by phone, half
   by video recorder), and 8 revenue plans were written. 10 opt-outs were honored, and 5 asked "is this a bot?"; each
   went to the manager. Full report: `docs/relationship-simulation.md`.
-- Automated tests cover the note, the kickoff limits, every form of STOP, the identity rule, the inbox, the review
-  file and holding messages back, and call matching.
+- Automated tests cover the note, the kickoff limits, every form of STOP, HELP and wrong numbers, the identity rule,
+  the inbox, the review file and holding messages back, one kickoff per partner, quiet hours in each recipient's time
+  zone, the stop switch mid-wave, and call matching.
 
 The simulation's reply rates come from assumptions, not results; real replies will set them. In it, the reply
 doesn't depend on which opener was used, so it shows the tracking works, not which opener wins.

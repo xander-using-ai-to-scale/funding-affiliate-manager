@@ -48,9 +48,11 @@ a human/legal reviewer rather than answering definitively.
   (existing partner relationship, opt-in signup, etc.). This agent does not
   originate new phone numbers or scrape numbers for outreach.
 - **Quiet hours: no SMS or calls outside 8:00 AM–9:00 PM in the recipient's
-  local time zone.** If the recipient's time zone is unknown, default to the
-  more conservative of the affiliate's stated location or the sending
-  business's time zone, and flag the gap for a human to confirm.
+  local time zone.** The engine is stricter: it sends texts 9:00 AM–8:00 PM in
+  the recipient's time zone, taken from the area code. When an area code
+  spans two zones, or isn't known, a text only goes out when that window is
+  open in every zone the number could be in. Each text is checked at the
+  moment it is sent.
 - Every marketing/informational text should make clear who is texting and
   offer an opt-out (e.g., "Reply STOP to opt out").
 

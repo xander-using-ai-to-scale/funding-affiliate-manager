@@ -20,13 +20,15 @@ Layout (created automatically):
   the partner's profile is written.
 
 Rules
-- Read with `fam_profile_get` (or the note itself) before drafting to a partner. It tells you the next question to ask.
+- Read with `fam_profile_get` (or the note itself, via `fam_read("vault/Partners/...")`) before drafting to a
+  partner. It tells you the next question to ask. `fam_read("vault/Reviews")` lists review files.
 - Write through the tools: `fam_reply_record` (facts_json), `fam_facts_record`, `fam_call_ingest`,
   `fam_revenue_plan_save`, `fam_note_add`. They update the note, the index and the GoHighLevel fields together.
   Don't edit partner notes by hand; everything except `## Manager notes` and `## Timeline` is regenerated.
 - `## Manager notes` belongs to the manager. Read it; never write in it.
 - `fam_graph_query` segments the program ("Executive partners whose clients need equipment financing").
-  If the index ever looks wrong, `fam graph reindex` rebuilds it from the notes.
+  If the index ever looks wrong, ask the operator to run `fam graph reindex` (it rebuilds it from the notes).
+- Write the daily summary with `fam_daily_note`. You can't write files directly; that is deliberate.
 - Never store secrets, full contact lists, health details, religion, politics, account or ID numbers.
 - The vault is synced to a private git repo every 15 minutes so Justin can open it in Obsidian
   (`obsidian://open?vault=fam-vault`). Semantic search sits on top of these files later; the files stay the source of truth.

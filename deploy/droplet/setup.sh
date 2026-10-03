@@ -79,6 +79,19 @@ export PYTHONPATH="$REPO_DIR/files/local-packages/fam/src" FAM_CONFIG_DIR="$REPO
 exec "$HERMES_PY" -m fam.cli "\$@"
 SH
 chmod 755 "$HOME/.local/bin/fam"
+# Reply triage checks the inbox every 20 minutes but only wakes the model when an untriaged text shows up:
+# Hermes runs this cheap script first and skips the agent run while its output (the pending ids) is unchanged.
+cat > "$HERMES_HOME/scripts/fam-inbox-monitor.sh" <<SH
+#!/usr/bin/env bash
+exec "$HOME/.local/bin/fam" inbox --ids 2>/dev/null
+SH
+chmod 755 "$HERMES_HOME/scripts/fam-inbox-monitor.sh"
+# Texts held back for the recipient's quiet hours go out when their window opens (no model involved).
+cat > "$HERMES_HOME/scripts/fam-resume-paused.sh" <<SH
+#!/usr/bin/env bash
+exec "$HOME/.local/bin/fam" outbox resume
+SH
+chmod 755 "$HERMES_HOME/scripts/fam-resume-paused.sh"
 
 say "4/8 Rendering Hermes config, persona, and gateway env"
 [ -f "$HERMES_HOME/config.yaml" ] && [ ! -f "$HERMES_HOME/config.yaml.pre-fam" ] && cp "$HERMES_HOME/config.yaml" "$HERMES_HOME/config.yaml.pre-fam"
@@ -97,7 +110,7 @@ keys = ["PRIMARY_MODEL", "FALLBACK_MODEL", "REPO_DIR", "FAM_HOME", "VAULT_DIR", 
         "ORGO_COMPUTER_ID", "ORGO_EXCLUDED_TOOLS", "SUPER_BROWSER_URL", "SUPER_BROWSER_TOKEN", "BROWSER_BOX_URL",
         "BROWSER_BOX_TOKEN", "DATABOX_URL", "DATABOX_TOKEN",
         "SLACK_ENABLED", "TELEGRAM_ENABLED", "SLACK_HOME_CHANNEL", "TELEGRAM_HOME_CHANNEL", "OPENROUTER_API_KEY",
-        "FAM_DRAFT_MODEL", "FAM_FALLBACK_MODEL", "FAM_CALL_INBOX"]
+        "FAM_DRAFT_MODEL", "FAM_FALLBACK_MODEL", "FAM_CALL_INBOX", "FAM_IGNORE_SMS_WINDOW"]
 env = dict(os.environ, HERMES_PYTHON=os.environ["HERMES_PY"])
 for key in keys:
     value = env.get(key, "")
@@ -170,27 +183,39 @@ install -m 755 "$REPO_DIR/deploy/droplet/vault-sync.sh" "$FAM_HOME/vault-sync.sh
 
 say "6/8 Scheduling routines (Hermes cron)"
 existing="$(hermes cron list 2>/dev/null || true)"
-add_job() { # name schedule prompt-file skills...
+# The old reply-triage job ran hourly on weekdays only, so a Friday-evening reply waited until Monday. Replace it.
+legacy="$(awk '/^  [0-9a-f]+ \[/{id=$1} /Name: +FAM reply triage$/{print id}' <<<"$existing")"
+for id in $legacy; do hermes cron remove "$id" >/dev/null && echo "  - FAM reply triage (weekday-only schedule)"; done
+existing="$(hermes cron list 2>/dev/null || true)"
+add_job() { # name schedule prompt-file [--monitor script] skills...
   local name="$1" schedule="$2" file="$3"; shift 3
-  if grep -q "$name" <<<"$existing"; then echo "  = $name"; return; fi
-  local args=(); for s in "$@"; do args+=(--skill "$s"); done
+  if grep -qF "Name:      $name" <<<"$existing"; then echo "  = $name"; return; fi
+  local args=()
+  if [ "${1:-}" = "--monitor" ]; then args+=(--monitor-script "$2"); shift 2; fi
+  for s in "$@"; do args+=(--skill "$s"); done
   local deliver="local"; [ "$SLACK_ENABLED" = true ] && [ -n "${SLACK_HOME_CHANNEL:-}" ] && deliver="slack:$SLACK_HOME_CHANNEL"
   hermes cron create --name "$name" --deliver "$deliver" --workdir "$REPO_DIR" "${args[@]}" "$schedule" "$(cat "$REPO_DIR/routines/$file")" >/dev/null && echo "  + $name"
 }
 add_job "FAM daily tasks + sweep" "0 8 * * 1-5" daily-tasks-and-sweep.prompt affiliate-cadence ghl-affiliate-ops obsidian-memory
-add_job "FAM reply triage" "15 9-18 * * 1-5" reply-triage.prompt affiliate-reply-triage
+add_job "FAM reply triage every 20 min" "*/20 * * * *" reply-triage.prompt --monitor fam-inbox-monitor.sh affiliate-reply-triage
+if ! grep -qF "Name:      FAM resume paused sends" <<<"$existing"; then
+  hermes cron create --name "FAM resume paused sends" --deliver "$( [ "$SLACK_ENABLED" = true ] && [ -n "${SLACK_HOME_CHANNEL:-}" ] && echo "slack:$SLACK_HOME_CHANNEL" || echo local)" \
+    --script fam-resume-paused.sh --no-agent "*/20 * * * *" >/dev/null && echo "  + FAM resume paused sends"
+else
+  echo "  = FAM resume paused sends"
+fi
 add_job "FAM call ingest" "45 9-19 * * 1-5" call-ingest.prompt obsidian-memory
 add_job "FAM bi-weekly newsletter" "0 10 1,15 * *" biweekly-newsletter.prompt affiliate-newsletter
 add_job "FAM monthly offer" "30 9 3 * *" monthly-offer.prompt affiliate-offers
 add_job "FAM weekly scorecard" "0 16 * * 5" weekly-scorecard.prompt ghl-affiliate-ops
 
-say "7/8 Gateway"
-if [ "$SLACK_ENABLED" = true ] || [ "$TELEGRAM_ENABLED" = true ]; then
-  hermes gateway install >/dev/null 2>&1 || true
-  hermes gateway restart >/dev/null 2>&1 || hermes gateway start >/dev/null 2>&1 || true
-  hermes gateway status 2>&1 | head -5 || true
-else
-  echo "  no Slack/Telegram tokens yet — gateway not started (cron output stays local)"
+say "7/8 Gateway (it also runs the cron scheduler: without it no routine ever fires)"
+hermes gateway install >/dev/null 2>&1 || true
+hermes gateway restart >/dev/null 2>&1 || hermes gateway start >/dev/null 2>&1 || true
+hermes gateway status 2>&1 | head -5 || true
+hermes cron status 2>&1 | head -3 || true
+if [ "$SLACK_ENABLED" != true ] && [ "$TELEGRAM_ENABLED" != true ]; then
+  echo "  no Slack/Telegram tokens yet: routines run, and their output stays local (hermes cron runs)"
 fi
 
 say "8/8 Verifying"

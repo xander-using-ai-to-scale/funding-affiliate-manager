@@ -3,6 +3,15 @@
 # The brain runs on the DigitalOcean droplet; its hands are its own Orgo computer (orgo MCP).
 # Hermes' built-in computer_use/browser toolsets are deliberately NOT enabled: they would drive the
 # droplet itself, not the Orgo desktop.
+#
+# No shell, file, or code-execution tools either (agent.disabled_toolsets below). With a shell the agent could
+# run `fam`, with code execution it could import the engine, and with file writes it could edit the approval
+# ledger or this config: any of them would let it approve its own sends, and inbound texts reach its context.
+# Every platform bundle (hermes-slack, hermes-cli, hermes-cron) re-adds those core tools, so they are removed
+# with the global denylist, which Hermes applies last, to cron jobs and to delegated children too.
+# The agent reads knowledge/ and the vault through fam_read, and writes only through fam_* tools.
+
+timezone: America/New_York
 
 model:
   default: __PRIMARY_MODEL__
@@ -20,6 +29,7 @@ toolsets:
   - hermes-cli
 
 agent:
+  disabled_toolsets: [terminal, code_execution, file, browser, computer_use]
   max_turns: 80
   gateway_timeout: 1800
   restart_drain_timeout: 60
@@ -27,13 +37,6 @@ agent:
   tool_use_enforcement: auto
   reasoning_effort: medium
   verify_on_stop: true
-
-terminal:
-  backend: local
-  cwd: __REPO_DIR__
-  timeout: 300
-  persistent_shell: true
-  lifetime_seconds: 600
 
 checkpoints:
   enabled: true
@@ -114,11 +117,6 @@ kanban:
   dispatch_in_gateway: true
   dispatch_interval_seconds: 60
 
-code_execution:
-  mode: project
-  timeout: 300
-  max_tool_calls: 50
-
 sessions:
   auto_prune: false
   retention_days: 90
@@ -139,8 +137,8 @@ platforms:
 
 platform_toolsets:
   cli: [hermes-cli]
-  slack: [hermes-slack, clarify, code_execution, cronjob, delegation, file, kanban, memory, session_search, skills, terminal, todo, vision, web]
-  telegram: [hermes-telegram, clarify, code_execution, cronjob, delegation, file, kanban, memory, session_search, skills, terminal, todo, vision, web]
+  slack: [hermes-slack, clarify, cronjob, delegation, kanban, memory, session_search, skills, todo, vision, web]
+  telegram: [hermes-telegram, clarify, cronjob, delegation, kanban, memory, session_search, skills, todo, vision, web]
 
 SLACK_HOME_CHANNEL: '__SLACK_HOME_CHANNEL__'
 TELEGRAM_HOME_CHANNEL: '__TELEGRAM_HOME_CHANNEL__'
@@ -164,14 +162,15 @@ mcp_servers:
       FAM_DRAFT_MODEL: "__FAM_DRAFT_MODEL__"
       FAM_FALLBACK_MODEL: "__FAM_FALLBACK_MODEL__"
       FAM_CALL_INBOX: "__FAM_CALL_INBOX__"
+      FAM_IGNORE_SMS_WINDOW: "__FAM_IGNORE_SMS_WINDOW__"  # mock CRM only (odd-hour demos); ignored for real texts
     trust: full
     timeout: 900
     tools:
-      exclude: [fam_action_approve, fam_standing_activate, fam_resume_external_writes]
+      exclude: [fam_action_approve, fam_standing_activate, fam_resume_external_writes, fam_outbox_settle]
       resources: false
       prompts: false
 
-  # The model cannot create an approval through the core above. These three tools exist only on
+  # The model cannot create an approval through the core above. These four tools exist only on
   # this untrusted surface, so Hermes manual mode asks the human before the approval is written.
   fam-approvals:
     command: __HERMES_PYTHON__
@@ -189,7 +188,7 @@ mcp_servers:
     trust: untrusted
     timeout: 120
     tools:
-      include: [fam_action_approve, fam_standing_activate, fam_resume_external_writes]
+      include: [fam_action_approve, fam_standing_activate, fam_resume_external_writes, fam_outbox_settle]
       resources: false
       prompts: false
 

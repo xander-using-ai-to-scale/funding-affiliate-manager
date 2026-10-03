@@ -17,7 +17,7 @@ from datetime import date
 from typing import Any
 
 from . import cadence, drafting
-from .cadence import KICKOFF_DONE, KICKOFF_PENDING, KICKOFF_SENT, Affiliate
+from .cadence import KICKOFF_DONE, KICKOFF_PENDING, KICKOFF_SENT, NOT_INTERESTED_TAG, Affiliate
 
 TIER_RANK = {"CEO": 0, "Executive": 1, "Apprentice": 2, "Free": 3}
 
@@ -34,8 +34,10 @@ def enroll(engine: Any, min_silent_days: int | None = None) -> dict[str, Any]:
     """Tag quiet partners for the kickoff (partners imported through fam.sources are tagged on import)."""
     threshold = int(engine.settings.cadence["quiet_after_days"] if min_silent_days is None else min_silent_days)
     tagged = 0
+    done = engine.kicked_off_ids()
     for aff in engine.affiliates():
-        if aff.is_dnc or aff.is_test_contact or {KICKOFF_PENDING, KICKOFF_SENT, KICKOFF_DONE} & set(aff.tags):
+        if (aff.is_dnc or aff.is_test_contact or aff.id in done or NOT_INTERESTED_TAG in aff.tags
+                or {KICKOFF_PENDING, KICKOFF_SENT, KICKOFF_DONE} & set(aff.tags)):
             continue
         _, silent = cadence.target_lifecycle(aff, engine.today(), engine.settings.cadence)
         if silent is None or silent >= threshold:
@@ -52,16 +54,36 @@ def _wave_number(engine: Any) -> int:
                    and json.loads(r["payload_json"]).get("purpose", "").startswith("kickoff wave"))
 
 
+def channel_for(aff: Affiliate) -> str:
+    """Text if we can, email if we can't; "" when neither is allowed (wrong number and no email, or email opt-out)."""
+    if aff.phone and not aff.sms_blocked:
+        return "sms"
+    if aff.email and not aff.no_email:
+        return "email"
+    return ""
+
+
 def draft_wave(engine: Any, size: int = 0, drafter: Any = None, contact_ids: list[str] | None = None) -> dict[str, Any]:
-    """Draft, freeze and post one wave for review. Nothing is sent until a person approves it."""
+    """Draft, freeze and post one wave for review. Nothing is sent until a person approves it. Partners held by
+    another open wave, or who have already had a kickoff, are never drafted again."""
     cfg = engine.settings.kickoff
     size = int(size or cfg["wave_size"])
     drafter = drafter or drafting.open_drafter(cfg)
+    engine.expire_stale()
     pool = ([engine.affiliate(c) for c in contact_ids] if contact_ids
             else engine.affiliates(tags=[KICKOFF_PENDING]))
-    pool = sorted((a for a in pool if KICKOFF_PENDING in a.tags and not a.is_dnc and (a.phone or a.email)), key=rank)
+    held = engine.store.reserved([a.id for a in pool], kinds=("kickoff",))
+    claimed = engine.store.kickoff_claimed([a.id for a in pool])
+    pool = sorted((a for a in pool if KICKOFF_PENDING in a.tags and not a.is_dnc and channel_for(a)
+                   and NOT_INTERESTED_TAG not in a.tags and a.id not in held and a.id not in claimed), key=rank)
+    chosen = []
+    for a in pool:  # highest value first; the history check runs only until the wave is full
+        if len(chosen) >= size:
+            break
+        if not engine.graph.interactions(a.id, ["kickoff_sent"], limit=1):
+            chosen.append(a)
     messages, skipped, drafts = [], [], []
-    for aff in pool[:size]:
+    for aff in chosen:
         p = engine.profile_get(aff.id, aff=aff)
         sender = p["manager"] or cfg["default_sender"]
         variant = drafting.variant_for(aff.id, cfg.get("variants", ["A"]))
@@ -70,7 +92,7 @@ def draft_wave(engine: Any, size: int = 0, drafter: Any = None, contact_ids: lis
         if problems:
             skipped.append({"contact_id": aff.id, "name": aff.name, "problems": problems})
             continue
-        msg = {"contact_id": aff.id, "channel": "sms" if aff.phone else "email", "body": d["body"], "kind": "kickoff",
+        msg = {"contact_id": aff.id, "channel": channel_for(aff), "body": d["body"], "kind": "kickoff",
                "variant": variant}
         if msg["channel"] == "email":
             msg["subject"] = f"Your new partner manager at {cfg['company']}"
@@ -79,7 +101,7 @@ def draft_wave(engine: Any, size: int = 0, drafter: Any = None, contact_ids: lis
                        "drafter": d["drafter"], "segments": drafting.segments(d["body"]), "body": d["body"]})
     if not messages:
         return {"ok": False, "reason": "no partners waiting on a kickoff" if not skipped else "every draft failed checks",
-                "skipped": skipped}
+                "skipped": skipped, "held_by_open_waves": len(held)}
     wave = _wave_number(engine)
     action = engine.prepare_messages(messages, purpose=f"kickoff wave {wave}")
     card = engine.request_approval(action["action_id"])
@@ -87,15 +109,16 @@ def draft_wave(engine: Any, size: int = 0, drafter: Any = None, contact_ids: lis
                      f"{len(skipped)} held for a person · review: [[Reviews/{card.get('review_file', '').rsplit('/', 1)[-1].removesuffix('.md')}]]",
                      day=engine.today().isoformat())
     return {"ok": True, "wave": wave, "action": card, "drafts": drafts, "skipped": skipped,
-            "remaining_after_wave": max(0, len(pool) - size)}
+            "remaining_after_wave": max(0, len(pool) - len(chosen))}
 
 
 def nudge_due(engine: Any) -> list[Affiliate]:
     """Partners whose kickoff went out nudge_after_days ago (or more) and who haven't answered."""
     days = int(engine.settings.kickoff["nudge_after_days"])
     due = []
+    held = engine.store.reserved(kinds=("kickoff",))
     for aff in engine.affiliates(tags=[KICKOFF_SENT]):
-        if aff.is_dnc:
+        if aff.is_dnc or not channel_for(aff) or NOT_INTERESTED_TAG in aff.tags or aff.id in held:
             continue
         sent = engine.graph.interactions(aff.id, ["kickoff_sent"], limit=1)
         if not sent:
@@ -117,8 +140,9 @@ def draft_nudges(engine: Any, drafter: Any = None, limit: int = 0) -> dict[str, 
     for aff in affs:
         p = engine.profile_get(aff.id, aff=aff)
         body = drafter.nudge(p, p["manager"] or cfg["default_sender"])
-        messages.append({"contact_id": aff.id, "channel": "sms" if aff.phone else "email", "body": body,
-                         "kind": "kickoff_nudge", **({} if aff.phone else {"subject": "Following up"})})
+        channel = channel_for(aff)
+        messages.append({"contact_id": aff.id, "channel": channel, "body": body,
+                         "kind": "kickoff_nudge", **({"subject": "Following up"} if channel == "email" else {})})
     action = engine.prepare_messages(messages, purpose="kickoff nudges")
     return {"ok": True, "action": engine.request_approval(action["action_id"]), "nudges": len(messages)}
 

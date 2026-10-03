@@ -42,7 +42,8 @@ class SourceRecord:
     phone: str = ""
     fields: dict[str, Any] = field(default_factory=dict)  # RECORD_FIELDS plus last_contact_date
     history: list[dict[str, str]] = field(default_factory=list)  # id, date, kind, text
-    dnc: bool = False
+    dnc: bool = False  # do not contact at all
+    no_email: bool = False  # opted out of email only (Zoho Email_Opt_Out); texting is still allowed
 
 
 def _digits(phone: str) -> str:
@@ -57,7 +58,7 @@ def _tier(value: Any) -> str:
 # ── CSV ──────────────────────────────────────────────────────────────────────
 class CsvSource:
     """partners.csv: external_id, first_name, last_name, email, phone, tier, plan, join_date, source, niche,
-    deals_submitted, last_deal_date, last_contact_date, assigned_manager, dnc.
+    deals_submitted, last_deal_date, last_contact_date, assigned_manager, dnc, no_email.
     history.csv (optional): external_id or email, date, kind, text."""
 
     name = "csv"
@@ -80,7 +81,8 @@ class CsvSource:
                 yield SourceRecord("csv", ext, (row.get("first_name") or "").strip(), (row.get("last_name") or "").strip(),
                                    (row.get("email") or "").strip(), (row.get("phone") or "").strip(), fields,
                                    events.get(ext.lower(), []) + events.get((row.get("email") or "").strip().lower(), []),
-                                   str(row.get("dnc") or "").strip().lower() in {"1", "true", "yes"})
+                                   str(row.get("dnc") or "").strip().lower() in {"1", "true", "yes"},
+                                   str(row.get("no_email") or "").strip().lower() in {"1", "true", "yes"})
 
 
 # ── GoHighLevel history ──────────────────────────────────────────────────────
@@ -169,7 +171,8 @@ class ZohoSource:
                                    str(row.get(f.get("email", "Email")) or ""), str(row.get(f.get("phone", "Mobile"))
                                                                                      or row.get("Phone") or ""),
                                    fields, self._history(module, str(row.get("id", ""))),
-                                   bool(row.get(f.get("dnc", ""), False)) if f.get("dnc") else False)
+                                   bool(row.get(f.get("dnc", ""), False)) if f.get("dnc") else False,
+                                   bool(row.get(f.get("no_email", ""), False)) if f.get("no_email") else False)
                 count += 1
                 if limit and count >= limit:
                     return
@@ -222,6 +225,7 @@ def import_records(engine: Any, records: Any, *, mark_kickoff: bool = True, limi
     taxonomy = json.loads((settings.config_dir / "tag-taxonomy.json").read_text())
     known_sources = {t[4:] for t in taxonomy.get("source", [])}
     report = {"records": 0, "created": 0, "updated": 0, "kickoff_pending": 0, "with_history": 0, "facts": 0}
+    kicked_off = engine.kicked_off_ids()
     for rec in records:
         if limit and report["records"] >= limit:
             break
@@ -253,10 +257,12 @@ def import_records(engine: Any, records: Any, *, mark_kickoff: bool = True, limi
         if rec.dnc:
             engine.ghl.add_tags(contact_id, [cadence.DNC_TAG])
             engine.ghl.update_contact(contact_id, {"dnd": True})
+        elif rec.no_email:  # an email opt-out blocks email only; it never sets DND, which would also stop texts
+            engine.ghl.add_tags(contact_id, [cadence.NO_EMAIL_TAG])
         aff = engine.affiliate(contact_id)
         lifecycle, silent = cadence.target_lifecycle(aff, today, settings.cadence)
         quiet = silent is None or silent >= int(settings.cadence["quiet_after_days"])
-        if (mark_kickoff and quiet and not aff.is_dnc and not aff.is_test_contact
+        if (mark_kickoff and quiet and not aff.is_dnc and not aff.is_test_contact and aff.id not in kicked_off
                 and not {KICKOFF_PENDING, KICKOFF_SENT, KICKOFF_DONE} & set(aff.tags)):
             engine.ghl.add_tags(contact_id, [KICKOFF_PENDING])
             aff = engine.affiliate(contact_id)

@@ -390,12 +390,12 @@ class Sim:
                 continue
             move = draft["move"]
             moves[cid] = (move, (prof.get("next_question") or {}).get("slot", "") if move == "discover" else "")
-            replies.append({"contact_id": cid, "channel": "sms", "kind": "reply", "body": draft["body"]})
+            replies.append({"contact_id": cid, "channel": "sms", "kind": "reply", "body": draft["body"], "move": move})
             if len(self.samples["conversations"]) < 400:
                 self.samples["conversations"].append({"cid": cid, "day": iso, "in": row["last_message"],
                                                       "intent": intent, "facts": result["facts_added"],
                                                       "move": move, "out": draft["body"]})
-            if move == "book":
+            if move in {"book", "confirm_time"}:
                 p.call_on = (day + timedelta(days=self.rng.randint(1, 3))).isoformat()
                 self.totals["calls_booked"] += 1
                 brief = engine.pre_call_brief(cid, "first call since the kickoff")["brief"]

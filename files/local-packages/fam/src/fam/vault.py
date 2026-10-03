@@ -188,6 +188,23 @@ class Vault:
                 meta.append(f"variant {m['variant']}")
             who = self.partner_link(m.get("name", ""), m["contact_id"]) if m.get("name") else m["contact_id"]
             lines.append(f"### {i}. {who}\n_{' · '.join(x for x in meta if x)}_\n")
+            ctx = m.get("context") or {}
+            if ctx:  # what the approver has to see to judge a reply: their words, ours, and how we read them
+                said = ctx.get("their_last") or {}
+                if said:
+                    lines.append(f"**They wrote** ({said.get('at') or 'date unknown'}):\n> "
+                                 + (said.get("text") or "(no text)").replace("\n", "\n> ") + "\n")
+                ours = ctx.get("our_last") or {}
+                if ours:
+                    lines.append(f"**Our last message** ({ours.get('at', '')}):\n> "
+                                 + ours.get("text", "").replace("\n", "\n> ") + "\n")
+                read = f"**Read as:** {ctx.get('intent') or '—'}"
+                if ctx.get("move"):
+                    read += f" · **Planned move:** {ctx['move']}"
+                lines.append(read + "\n")
+                for flag in ctx.get("flags", []):
+                    lines.append(f"⚠️ {flag}\n")
+                lines.append("**Draft:**\n")
             if m.get("subject"):
                 lines.append(f"**Subject:** {m['subject']}\n")
             lines.append("> " + m.get("body", "").replace("\n", "\n> ") + "\n")

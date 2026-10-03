@@ -212,6 +212,13 @@ class Graph:
                                 f"({','.join('?' * len(ids))})", ids).fetchall()
         return {r["message_id"] for r in rows}
 
+    def last_processed_at(self, contact_id: str) -> str:
+        """When we last triaged a text from this partner (this server's clock)."""
+        with self.store.connection() as conn:
+            row = conn.execute("SELECT MAX(processed_at) at FROM processed_messages WHERE contact_id = ?",
+                               (contact_id,)).fetchone()
+        return (row["at"] if row else "") or ""
+
     def mark_seen(self, message_ids: Iterable[str], contact_id: str) -> None:
         with self.store.connection() as conn:
             for mid in message_ids:
@@ -224,6 +231,11 @@ class Graph:
         with self.store.connection() as conn:
             return conn.execute("SELECT 1 FROM interactions WHERE kind = ? AND ref = ?", (kind, ref)).fetchone() \
                 is not None
+
+    def contacts_with(self, kind: str) -> set[str]:
+        with self.store.connection() as conn:
+            return {r["contact_id"] for r in conn.execute("SELECT DISTINCT contact_id FROM interactions WHERE kind = ?",
+                                                          (kind,)).fetchall()}
 
     def interactions(self, contact_id: str, kinds: Iterable[str] = (), limit: int = 50) -> list[dict[str, Any]]:
         kinds = list(kinds)
@@ -288,6 +300,7 @@ class Graph:
             "completeness": completeness,
             "filled_slots": filled,
             "next_question": next_question,
+            "open_questions": [{"slot": a["key"], "question": a["question"]} for a in askable],
             "summary": self.summary(aff, values, loops),
             "revenue_plan": (row["revenue_plan"] if row else "") or "",
             "kickoff_variant": (row["kickoff_variant"] if row else "") or "",

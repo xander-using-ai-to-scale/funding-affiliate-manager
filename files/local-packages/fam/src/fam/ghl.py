@@ -24,7 +24,23 @@ from pathlib import Path
 from typing import Any, Protocol
 from urllib import error, parse, request
 
-from .errors import FamError
+from .errors import FamError, GHLError
+
+def iso_time(value: Any) -> str:
+    """GoHighLevel dates arrive as epoch milliseconds or ISO strings; compare them as UTC ISO strings."""
+    if value in (None, ""):
+        return ""
+    if isinstance(value, (int, float)) or str(value).isdigit():
+        return datetime.fromtimestamp(float(value) / 1000, UTC).replace(microsecond=0).isoformat()
+    text = str(value).replace("Z", "+00:00")
+    try:
+        moment = datetime.fromisoformat(text)
+    except ValueError:
+        return text
+    if moment.tzinfo is None:
+        moment = moment.replace(tzinfo=UTC)
+    return moment.astimezone(UTC).replace(microsecond=0).isoformat()
+
 
 BASE_URL = "https://services.leadconnectorhq.com"
 API_VERSION = "2021-07-28"
@@ -50,6 +66,7 @@ class GHLBackend(Protocol):
     def list_conversations(self, contact_id: str = "", unread_only: bool = False,
                            limit: int = 20) -> list[dict[str, Any]]: ...
     def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]: ...
+    def list_recent_conversations(self, since: str, max_pages: int = 50) -> list[dict[str, Any]]: ...
     def send_message(self, contact_id: str, channel: str, body: str, subject: str = "") -> dict[str, Any]: ...
     def enroll_workflow(self, contact_id: str, workflow_id: str) -> dict[str, Any]: ...
     def search_opportunities(self, pipeline_id: str = "", contact_id: str = "",
@@ -128,13 +145,16 @@ class LiveGHL:
                     detail = exc.read(400).decode(errors="replace")
                 except Exception:  # pragma: no cover - best effort
                     pass
-                raise FamError(f"GoHighLevel {method} {path} returned HTTP {exc.code} {detail}".strip()) from exc
+                raise GHLError(f"GoHighLevel {method} {path} returned HTTP {exc.code} {detail}".strip(),
+                               status=exc.code) from exc
             except error.URLError as exc:
-                raise FamError("GoHighLevel could not be reached") from exc
+                raise GHLError(f"GoHighLevel could not be reached ({method} {path})") from exc
+            except (TimeoutError, OSError) as exc:  # a read timeout escapes urllib as a bare TimeoutError
+                raise GHLError(f"GoHighLevel {method} {path} timed out or dropped: {exc}") from exc
         try:
             value = json.loads(raw or b"{}")
         except json.JSONDecodeError as exc:
-            raise FamError("GoHighLevel returned invalid JSON") from exc
+            raise GHLError("GoHighLevel returned invalid JSON") from exc
         return value if isinstance(value, dict) else {"data": value}
 
     # contacts
@@ -198,6 +218,28 @@ class LiveGHL:
             query["status"] = "unread"
         return self._call("GET", "/conversations/search", query=query,
                           version=CONVERSATIONS_VERSION).get("conversations", [])
+
+    def list_recent_conversations(self, since: str, max_pages: int = 50) -> list[dict[str, Any]]:
+        """Every conversation with a message since `since` (ISO), read or unread: a thread someone already
+        opened in the GoHighLevel app still has to be triaged. Pages newest-first with the startAfterDate cursor."""
+        cutoff = iso_time(since)
+        rows: list[dict[str, Any]] = []
+        cursor: Any = None
+        for _ in range(max_pages):
+            query: dict[str, Any] = {"locationId": self.location_id, "limit": 100, "sort": "desc",
+                                     "sortBy": "last_message_date", "startAfterDate": cursor}
+            page = self._call("GET", "/conversations/search", query=query,
+                              version=CONVERSATIONS_VERSION).get("conversations", [])
+            for conv in page:
+                if iso_time(conv.get("lastMessageDate")) < cutoff:
+                    return rows
+                rows.append(conv)
+            if len(page) < 100:
+                break
+            cursor = page[-1].get("lastMessageDate")
+            if cursor in (None, ""):
+                break
+        return rows
 
     def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]:
         value = self._call("GET", f"/conversations/{parse.quote(conversation_id)}/messages",
@@ -480,6 +522,10 @@ class MockGHL:
             rows = [c for c in rows if c["unreadCount"] > 0]
         rows.sort(key=lambda c: c["lastMessageDate"], reverse=True)
         return rows[:limit]
+
+    def list_recent_conversations(self, since: str, max_pages: int = 50) -> list[dict[str, Any]]:
+        cutoff = iso_time(since)
+        return [c for c in self.list_conversations(limit=10**6) if iso_time(c["lastMessageDate"]) >= cutoff]
 
     def list_messages(self, conversation_id: str, limit: int = 20) -> list[dict[str, Any]]:
         contact_id = conversation_id.removeprefix("conv_")

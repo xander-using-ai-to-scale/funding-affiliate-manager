@@ -40,7 +40,8 @@ Manager ⇄ Slack #funding-affiliates ⇄ Hermes brain on its own DigitalOcean d
 | [`docs/workflow-map.html`](docs/workflow-map.html) | The Funding Affiliate OS: lifecycle, cadence, daily loop, GHL build, guardrails |
 | [`docs/proposal-7ff.html`](docs/proposal-7ff.html) | Partnership proposal draft for 7 Figures Funding |
 | [`docs/DEMO-RUNBOOK.md`](docs/DEMO-RUNBOOK.md) | Step-by-step live demo, on the mock CRM today and on GoHighLevel later |
-| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Droplet, Orgo, GHL, and Slack setup |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Droplet, Orgo, GHL, and Slack setup; updating the droplet; what runs on a schedule |
+| [`docs/review/`](docs/review/2026-10-03-gap-review.md) | **Internal.** The 2026-10-03 gap review before the pilot (technical, sales, and program reviewers), the fix status, the message digest from the simulation, and the proof scripts. Never goes in the share pack or the demo pack |
 
 The 30-day simulation (253 synthetic affiliates, seed-reproducible, reply rates of 22% personal and 7% bulk):
 
@@ -81,16 +82,49 @@ The build stops if a cost figure quoted in the proposal or agreement no longer m
 | `hermes/config.template.yaml` | Hermes config, including the core/approvals MCP trust split |
 | `deploy/` | Droplet installer, vault sync |
 | `scripts/` | `build_demo_pack.py`: turns a simulation run into `docs/demo-pack.html` |
-| `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split; the relationship graph: notes, facts, kickoff limits, identity rule, inbox, review files, calls) |
+| `tests/` | Unit tests (cadence rules, approval flow, demo-mode routing, STOP/DNC, kill switch, config split; the relationship graph: notes, facts, kickoff limits, identity rule, inbox, review files, calls; `test_pilot_fixes.py`: the gap review's pilot blockers) |
 
 ## Safety model
 
 1. **Reads and CRM hygiene** (lifecycle tags, notes, follow-up tasks) are autonomous and audited.
-2. **Outbound** (messages, workflow enrollments, broadcasts) is *prepare → approval card → a human approves on the untrusted `fam-approvals` MCP → execute once*. The model cannot approve its own sends. Recurring cadence can run under a bounded, expiring standing approval.
+2. **Outbound** (messages, workflow enrollments, broadcasts) is *prepare → approval card → a human approves on the untrusted `fam-approvals` MCP → execute once*. The model cannot approve its own sends: it has no shell, file or code-execution tools (`agent.disabled_toolsets`), and the CLI has no approve or resume command. Recurring cadence can run under a bounded, expiring standing approval.
+   - Every message gets an outbox row before it is sent. A send whose outcome is unknown (a timeout) is held for a person to settle and never resent. A partner gets one kickoff, ever.
+   - A batch holds its partners while it is open, and unapproved batches expire after 48 hours, so waves can't overlap. At send time a message is skipped if it no longer fits (the partner replied, opted out, or wrote again after the draft).
+   - The approval card and review file show what the partner wrote, how it was read, and flags where the draft doesn't fit.
 3. **Demo mode** (`FAM_DEMO_MODE=1`): only contacts tagged `fam:test-contact` get real messages. Everyone else is a simulated send, written to the contact as a GHL note.
 4. The GHL client refuses any location other than the one in `config/ghl-map.json`. The droplet only holds the demo location's token.
-5. A compliance lint blocks "guaranteed", "no credit check", specific rates, and similar claims. SMS gets opt-out language and a send window. STOP means DNC forever.
-6. Kill switch: `fam_emergency_stop`. Only a human can resume.
+5. A compliance lint blocks "guaranteed", "no credit check", specific rates, and similar claims. SMS gets opt-out language and goes out only 9:00–20:00 in each recipient's own time zone, checked per text. Email carries the postal address and an unsubscribe line. STOP means DNC forever; HELP and "wrong number" go to a person and never count as replies.
+6. Kill switch: `fam_emergency_stop`, checked before every single message. A stopped batch pauses and resumes without resending. Only a human can lift the stop.
+
+## Pilot readiness
+
+A three-reviewer gap review (2026-10-03, [`docs/review/2026-10-03-gap-review.md`](docs/review/2026-10-03-gap-review.md))
+found 18 items that block the pilot. The first fix batch closed items 2–7 and most of 1 and 8; the table at the top of
+the review has the details. Each proof script that showed a bug is now a test in `tests/test_pilot_fixes.py`.
+
+Still open before real partners hear from the agent:
+- approvals signed with a key the agent can't read, run as a separate user, recording the approver's Slack id;
+- consent fields and the postal address for email (7FF's records);
+- the rest of the review: 7FF's systems and suppression, who gets a kickoff, referral links, attribution and
+  commercials, live GoHighLevel, and the droplet running the program end to end.
+
+The relationship simulation in `docs/` predates this batch. Re-run on the new code it gives 57 partners talking,
+5 calls, 5 plans and 5 deals (the published run says 48, 8, 8 and 8); it hasn't been regenerated.
+
+## Operating commands
+
+```bash
+fam status                      # health, pending approvals, paused batches, sends to settle
+fam inbox                       # texts not yet triaged, oldest first (read or unread in GoHighLevel)
+fam execute <action_id>         # send an approved batch, or resume one paused by quiet hours or a stop
+fam cancel <action_id> --reason "redraft"
+fam outbox [--action <id>]      # every message's state: sent, skipped, held back, waiting, unknown
+fam outbox finish               # retry CRM bookkeeping for texts that went out
+fam stop "reason"               # freeze every send now; only a person lifts it (Hermes approval prompt)
+```
+
+Approving a batch, settling an unknown send, and lifting a stop are human decisions on the approvals surface;
+there is no command line for them.
 
 ## Run the demo simulation (no credentials needed)
 
@@ -129,9 +163,12 @@ The kickoff framework is `knowledge/funding/08-kickoff-framework.md`; the spec i
 PYTHONPATH=files/local-packages/fam/src python3 -m unittest discover -s tests -v
 ```
 
+76 tests, standard library only, no network: the cadence engine and approvals (`test_fam.py`), the relationship
+graph (`test_relationships.py`), and the gap review's pilot blockers (`test_pilot_fixes.py`).
+
 ## Deploy
 
-See [docs/DEPLOY.md](docs/DEPLOY.md). Short version: a pinned Hermes v2026.8.31 on the droplet, `~/.fam/agent.env`, then `./deploy/droplet/setup.sh`.
+See [docs/DEPLOY.md](docs/DEPLOY.md). Short version: a pinned Hermes v2026.8.31 on the droplet, `~/.fam/agent.env`, then `./deploy/droplet/setup.sh`. Re-run `setup.sh` after every update: it re-renders the locked-down Hermes config, refreshes the cron jobs, and starts the gateway that runs them.
 
 ## Related templates
 

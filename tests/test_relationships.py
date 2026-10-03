@@ -177,7 +177,10 @@ class Relationships(unittest.TestCase):
         p = {"history": history, "next_question": {"slot": "goals", "question": "What are you working toward?"}}
         self.assertEqual(d.next_move(p, "general_reply", "Texting is easier for me right now")["move"], "discover")
         p["history"] = history[1:]
-        self.assertEqual(d.next_move(p, "general_reply", "Sure, Thursday works")["move"], "book")
+        self.assertEqual(d.next_move(p, "general_reply", "Sure, sounds good")["move"], "book")
+        # they named a time: confirm it, never send them off to pick a time again
+        move = d.next_move(p, "general_reply", "Sure, Thursday works")
+        self.assertEqual((move["move"], move["time"]), ("confirm_time", "Thursday"))
 
     # ── the kickoff ──────────────────────────────────────────────────────────
     def test_kickoff_drafts_fit_two_segments_and_three_are_refused(self):

@@ -9,5 +9,7 @@
   "nudge_after_days": 5,
   "variants": ["A", "B", "C"],
   "calendar_link": "",
+  "_mailing_address": "The company's postal address, printed in the footer of every email (CAN-SPAM). Live email is refused until it is set; texts don't need it.",
+  "mailing_address": "",
   "send_pause_seconds": 1.0
 }
